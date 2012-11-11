@@ -7,7 +7,7 @@ import java.text.DecimalFormat;
 import java.util.Calendar;
 
 /**
- * @author Jaroslaw Pawlak
+ * @author Jaroslaw Pawlak 
  */
 public class Tester {
     
