@@ -9,7 +9,7 @@ public class Main {
         
         int agents = 20;
         int visibility = 1;
-
+//test
         new SimulationGUI(new CircleSimulation(agents, visibility));
     }
 
