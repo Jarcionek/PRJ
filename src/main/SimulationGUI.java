@@ -103,7 +103,7 @@ public class SimulationGUI extends JFrame {
                         menuItem.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
-                                sim.getAgentInfo(fi).setFlag(fj);
+                                sim.getAgentInfo(fi).agent.setFlag(fj);
                                 drawablePanel.repaint();
                             }
                         });
@@ -132,7 +132,7 @@ public class SimulationGUI extends JFrame {
                     public void run() {
                         while (!sim.isConsensus()) {
                             sim.nextRound();
-                            roundCounterLabel.setText(DF.format(sim.getRound()));
+                            roundCounterLabel.setText(DF.format(sim.getRoundNumber()));
                         }
                         drawablePanel.repaint();
                         Toolkit.getDefaultToolkit().beep();
@@ -151,7 +151,7 @@ public class SimulationGUI extends JFrame {
                 if (!sim.isConsensus()) {
                     sim.nextRound();
                     drawablePanel.repaint();
-                    roundCounterLabel.setText(DF.format(sim.getRound()));
+                    roundCounterLabel.setText(DF.format(sim.getRoundNumber()));
                 }
                 if (sim.isConsensus()) {
                     Toolkit.getDefaultToolkit().beep();
@@ -165,7 +165,7 @@ public class SimulationGUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 sim = sim.getNew();
                 drawablePanel.repaint();
-                roundCounterLabel.setText(DF.format(sim.getRound()));
+                roundCounterLabel.setText(DF.format(sim.getRoundNumber()));
             }
         });
         
@@ -227,7 +227,7 @@ public class SimulationGUI extends JFrame {
             int x = (int) (centre.x - radius * Math.cos(i * alpha));
             int y = (int) (centre.y - radius * Math.sin(i * alpha));
             
-            agentLabels[i].setFlag(sim.getAgentInfo(i).getFlag());
+            agentLabels[i].setFlag(sim.getAgentInfo(i).agent.getFlag());
             agentLabels[i].setSize(size);
             agentLabels[i].setPosition(x - size / 2, y - size / 2);
             agentLabels[i].setIdVisible(idsCheckBox.isSelected());
@@ -261,7 +261,7 @@ public class SimulationGUI extends JFrame {
             Graphics2D g2d = (Graphics2D) g;
             for (int i = 0; i < sim.getNumberOfAgents(); i++) {
                 AgentInfo agentInfo = sim.getAgentInfo(i);
-                if ((i + agentInfo.getFlag()) % 2 == 0) {
+                if ((i + agentInfo.agent.getFlag()) % 2 == 0) {
                     g2d.setColor(Color.green);
                 } else {
                     g2d.setColor(Color.yellow);

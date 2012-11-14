@@ -1,19 +1,37 @@
 package main;
 
+import agents.AbstractAgent;
 import agents.AgentInfo;
-import agents.ThirdAgent;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author Jaroslaw Pawlak
  */
 public class CircleSimulation {
     
+    private final Class agentClass;
     private final int visibility;
     private final AgentInfo[] agents;
     private int round = 0;
     
-    public CircleSimulation(int numberOfAgents, int visibility) {
+    public CircleSimulation(int numberOfAgents, int visibility, Class agentClass) {
+        boolean ok = false;
+        Class superClass = agentClass.getSuperclass();
+        while (superClass != null) {
+            if (superClass == AbstractAgent.class) {
+                ok = true;
+                break;
+            }
+            superClass = superClass.getSuperclass();
+        }
+        if (!ok) {
+            throw new IllegalArgumentException(agentClass + " is not a descended "
+                    + "of " + AbstractAgent.class);
+        }
+        this.agentClass = agentClass;
+        
         if (numberOfAgents < Flag.COUNT) {
             throw new IllegalArgumentException("There should be at least "
                     + "as many agents as flags: agents = " + numberOfAgents
@@ -39,7 +57,14 @@ public class CircleSimulation {
         
         // create agents
         for (int i = 0; i < agents.length; i++) {
-            agents[i] = new AgentInfo(new ThirdAgent(), i);
+            AbstractAgent agent;
+            try {
+                agent = (AbstractAgent) agentClass.getConstructor().newInstance();
+            } catch (Exception ex) {
+                throw new IllegalArgumentException("Could not create an agent "
+                        + "of " + agentClass + ": " + ex);
+            }
+            agents[i] = new AgentInfo(agent, i);
         }
         
         // connect agents
@@ -54,7 +79,10 @@ public class CircleSimulation {
         firstRound();
     }
     
-    public final void firstRound() {
+    /**
+     * Called in the constructor.
+     */
+    private void firstRound() {
         if (round != 0) {
             throw new RuntimeException("firstRound() call during round " + round);
         }
@@ -89,6 +117,10 @@ public class CircleSimulation {
         round++;
     }
 
+    /**
+     * Override it to define flags raised in the first round. This will override
+     * agents' behaviour for the first round that is usually random choice.
+     */
     protected int[] getFirstRoundFlags() {
         return null;
     }
@@ -98,13 +130,14 @@ public class CircleSimulation {
         for (int i = 0; i < agents.length; i++) {
             newFlags[i] = agents[i].agent.getNewFlag(round);
         }
+        
         for (int i = 0; i < agents.length; i++) {
             agents[i].agent.setFlag(newFlags[i]);
         }
         round++;
     }
     
-    public final int getRound() {
+    public final int getRoundNumber() {
         return round;
     }
     
@@ -122,7 +155,7 @@ public class CircleSimulation {
     }
     
     public CircleSimulation getNew() {
-        return new CircleSimulation(agents.length, visibility);
+        return new CircleSimulation(agents.length, visibility, agentClass);
     }
     
     public int getNumberOfAgents() {

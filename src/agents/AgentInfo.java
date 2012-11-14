@@ -5,6 +5,10 @@ package agents;
  * 
  * This class contains all information about the agent that agent should not
  * have access to.
+ * 
+ * This class should contain only methods that access/modify its fields
+ * and not the agent. Agent should be accessed only by using
+ * agentInfoObject.agent
  */
 public class AgentInfo {
     
@@ -12,7 +16,12 @@ public class AgentInfo {
     public final int id;
 
     private AgentInfo[] visibleAgents;
-
+    
+    public AgentInfo(AbstractAgent agent, int id) {
+        this.agent = agent;
+        this.id = id;
+    }
+    
     public void setVisibleAgents(AgentInfo[] visibleAgents) {
         this.visibleAgents = visibleAgents;
         AgentDelegate[] ad = new AgentDelegate[visibleAgents.length];
@@ -21,22 +30,9 @@ public class AgentInfo {
         }
         this.agent.setVisibleAgents(ad);
     }
-    
-    public AgentInfo(AbstractAgent agent, int id) {
-        this.agent = agent;
-        this.id = id;
-    }
 
     public AgentInfo[] getVisibleAgents() {
         return visibleAgents;
-    }
-    
-    public void setFlag(int flag) {
-        agent.setFlag(flag);
-    }
-    
-    public int getFlag() {
-        return agent.getFlag();
     }
     
 }

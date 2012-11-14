@@ -1,5 +1,7 @@
 package main;
 
+import agents.RandomAgent;
+import agents.ThirdAgent;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -16,10 +18,11 @@ public class Tester {
     private Tester() {}
     
     public static void main(String[] args) throws IOException {
-        testVisibility(10000, 100, 1, 50);
+        testVisibility(10000, 100, 1, 50, RandomAgent.class);
     }
     
-    public static void testAgents(int tests, int minAgents, int maxAgents, int visibility)
+    public static void testAgents(int tests, int minAgents, int maxAgents,
+            int visibility, Class agentClass)
             throws IOException {
         
         System.out.println("TESTING IN PROGRESS...");
@@ -30,7 +33,7 @@ public class Tester {
         }          
 
         PrintWriter pw = new PrintWriter(f);
-        pw.println("Agents: " + new CircleSimulation(10, 1)
+        pw.println("Agents: " + new CircleSimulation(10, 1, agentClass)
                 .getAgentsType().replaceAll("=\\d*", ""));
         pw.println("Visibility: " + visibility);
         pw.println("Tests: " + tests);
@@ -46,12 +49,12 @@ public class Tester {
             CircleSimulation sim;
             long sum = 0;
             for (int i = 0; i < tests; i++) {
-                sim = new CircleSimulation(agents, visibility);
+                sim = new CircleSimulation(agents, visibility, agentClass);
                 while (!sim.isConsensus()) {
                     sim.nextRound();
                 }
-                sum += sim.getRound();
-                pwTemp.println(i + ": " + DF.format(sim.getRound()));
+                sum += sim.getRoundNumber();
+                pwTemp.println(i + ": " + DF.format(sim.getRoundNumber()));
                 
             }
             pwTemp.close();
@@ -65,7 +68,7 @@ public class Tester {
     }
     
     public static void testVisibility(int tests, int agents, int minVisibility,
-            int maxVisibility)
+            int maxVisibility, Class agentClass)
             throws IOException {
         
         System.out.println("TESTING IN PROGRESS...");
@@ -76,7 +79,7 @@ public class Tester {
         }          
 
         PrintWriter pw = new PrintWriter(f);
-        pw.println("Agents: " + new CircleSimulation(10, 1)
+        pw.println("Agents: " + new CircleSimulation(10, 1, agentClass)
                 .getAgentsType().replaceAll("=\\d*", ""));
         pw.println("Agents: " + agents);
         pw.println("Tests: " + tests);
@@ -92,12 +95,12 @@ public class Tester {
             CircleSimulation sim;
             long sum = 0;
             for (int i = 0; i < tests; i++) {
-                sim = new CircleSimulation(agents, visibility);
+                sim = new CircleSimulation(agents, visibility, agentClass);
                 while (!sim.isConsensus()) {
                     sim.nextRound();
                 }
-                sum += sim.getRound();
-                pwTemp.println(i + ": " + DF.format(sim.getRound()));
+                sum += sim.getRoundNumber();
+                pwTemp.println(i + ": " + DF.format(sim.getRoundNumber()));
                 
             }
             pwTemp.close();

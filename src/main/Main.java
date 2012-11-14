@@ -1,5 +1,8 @@
 package main;
 
+import agents.RandomAgent;
+import agents.ThirdAgent;
+
 /**
  * @author Jaroslaw Pawlak
  */
@@ -9,8 +12,10 @@ public class Main {
         
         int agents = 20;
         int visibility = 1;
-//test
-        new SimulationGUI(new CircleSimulation(agents, visibility));
+
+        CircleSimulation simulation
+                = new CircleSimulation(agents, visibility, ThirdAgent.class);
+        new SimulationGUI(simulation);
     }
 
 }
