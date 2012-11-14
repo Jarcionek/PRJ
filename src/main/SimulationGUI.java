@@ -8,6 +8,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.DecimalFormat;
 import javax.swing.*;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
@@ -18,11 +20,14 @@ public class SimulationGUI extends JFrame {
     
     private static final DecimalFormat DF = new DecimalFormat("#,###");
 
-    private static int counter = 1;
+    private static int GUIcounter = 1;
     
     private CircleSimulation sim;
     
     private JPanel drawablePanel;
+    /**
+     * This should show a round number as the position in the history.
+     */
     private JLabel roundCounterLabel;
     private JButton startButton;
     private JButton nextRoundButton;
@@ -30,11 +35,12 @@ public class SimulationGUI extends JFrame {
     private JCheckBox visibilityCheckBox;
     private JCheckBox idsCheckBox;
     private JCheckBox stateCheckBox;
+    private HistoryPanel historyPanel;
     
     private AgentLabel[] agentLabels;
     
     public SimulationGUI(CircleSimulation sim) {
-        super("SimulationGUI " + counter++);
+        super("SimulationGUI " + GUIcounter++);
         
         this.sim = sim;
         
@@ -118,7 +124,7 @@ public class SimulationGUI extends JFrame {
             drawablePanel.add(agentLabels[i]);
         }
         
-        roundCounterLabel = new JLabel("1");
+        roundCounterLabel = new JLabel("0");
         
         startButton = new JButton("Start");
         startButton.addActionListener(new ActionListener() {
@@ -132,7 +138,7 @@ public class SimulationGUI extends JFrame {
                     public void run() {
                         while (!sim.isConsensus()) {
                             sim.nextRound();
-                            roundCounterLabel.setText(DF.format(sim.getRoundNumber()));
+                            roundCounterLabel.setText(DF.format(sim.getRoundNumber() - 1));
                         }
                         drawablePanel.repaint();
                         Toolkit.getDefaultToolkit().beep();
@@ -151,7 +157,7 @@ public class SimulationGUI extends JFrame {
                 if (!sim.isConsensus()) {
                     sim.nextRound();
                     drawablePanel.repaint();
-                    roundCounterLabel.setText(DF.format(sim.getRoundNumber()));
+                    roundCounterLabel.setText(DF.format(sim.getRoundNumber() - 1));
                 }
                 if (sim.isConsensus()) {
                     Toolkit.getDefaultToolkit().beep();
@@ -164,8 +170,9 @@ public class SimulationGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 sim = sim.getNew();
+                historyPanel.reset();
                 drawablePanel.repaint();
-                roundCounterLabel.setText(DF.format(sim.getRoundNumber()));
+                roundCounterLabel.setText(DF.format(sim.getRoundNumber() - 1));
             }
         });
         
@@ -192,6 +199,8 @@ public class SimulationGUI extends JFrame {
                 drawablePanel.repaint();
             }
         });
+        
+        historyPanel = new HistoryPanel();
     }
     
     private void createLayout() {
@@ -209,6 +218,7 @@ public class SimulationGUI extends JFrame {
         buttonsPanel.add(visibilityCheckBox, c);
         buttonsPanel.add(idsCheckBox, c);
         buttonsPanel.add(stateCheckBox, c);
+        buttonsPanel.add(historyPanel, c);
         contentPane.add(drawablePanel, BorderLayout.CENTER);
         contentPane.add(buttonsPanel, BorderLayout.EAST);
         
@@ -223,11 +233,20 @@ public class SimulationGUI extends JFrame {
         double alpha = Math.PI * 2 / sim.getNumberOfAgents();
         int size = (int) (radius * Math.sin(alpha / 2));
         
+        int[] flags = null;
+        if (historyPanel.isHistoryEnabled()) {
+            flags = sim.getRoundFlags(historyPanel.getRound());
+        }
+        
         for (int i = 0; i < sim.getNumberOfAgents(); i++) {
             int x = (int) (centre.x - radius * Math.cos(i * alpha));
             int y = (int) (centre.y - radius * Math.sin(i * alpha));
             
-            agentLabels[i].setFlag(sim.getAgentInfo(i).agent.getFlag());
+            if (historyPanel.isHistoryEnabled()) {
+                agentLabels[i].setFlag(flags[i]);
+            } else {
+                agentLabels[i].setFlag(sim.getAgentInfo(i).agent.getFlag());
+            }
             agentLabels[i].setSize(size);
             agentLabels[i].setPosition(x - size / 2, y - size / 2);
             agentLabels[i].setIdVisible(idsCheckBox.isSelected());
@@ -260,8 +279,10 @@ public class SimulationGUI extends JFrame {
         if (stateCheckBox.isSelected()) {
             Graphics2D g2d = (Graphics2D) g;
             for (int i = 0; i < sim.getNumberOfAgents(); i++) {
-                AgentInfo agentInfo = sim.getAgentInfo(i);
-                if ((i + agentInfo.agent.getFlag()) % 2 == 0) {
+                int flag = historyPanel.isHistoryEnabled()? 
+                        sim.getRoundFlags(historyPanel.getRound())[i]
+                        : sim.getAgentInfo(i).agent.getFlag();
+                if ((i + flag) % 2 == 0) {
                     g2d.setColor(Color.green);
                 } else {
                     g2d.setColor(Color.yellow);
@@ -278,4 +299,143 @@ public class SimulationGUI extends JFrame {
         }
     }
 
+    public class HistoryPanel extends JPanel {
+
+        private JCheckBox enabled;
+        private JLabel roundLabel;
+        private JLabel roundNumber;
+        private JButton previous;
+        private JButton next;
+        private JButton first;
+        private JButton last;
+
+        public HistoryPanel() {
+            super(new GridBagLayout());
+
+            setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.RAISED),
+                    "History", TitledBorder.CENTER, TitledBorder.TOP));
+
+            enabled = new JCheckBox("Enabled:", false);
+            enabled.setHorizontalTextPosition(JCheckBox.LEFT);
+            enabled.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    roundLabel.setEnabled(enabled.isSelected());
+                    roundNumber.setEnabled(enabled.isSelected());
+                    previous.setEnabled(enabled.isSelected());
+                    next.setEnabled(enabled.isSelected());
+                    first.setEnabled(enabled.isSelected());
+                    last.setEnabled(enabled.isSelected());
+                    repositionAgentLabels();
+                    drawablePanel.repaint();
+                }
+            });
+
+            roundLabel = new JLabel("Round: ");
+            roundLabel.setEnabled(false);
+            roundLabel.setHorizontalAlignment(JLabel.RIGHT);
+
+            roundNumber = new JLabel("0");
+            roundNumber.setEnabled(false);
+
+            previous = new JButton("Previous");
+            previous.setEnabled(false);
+            previous.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    int i = Integer.parseInt(roundNumber.getText());
+                    if (i <= 0) {
+                        Toolkit.getDefaultToolkit().beep();
+                        roundNumber.setText("0");
+                    } else {
+                        roundNumber.setText("" + (i - 1));
+                        repositionAgentLabels();
+                        drawablePanel.repaint();
+                    }
+                }
+            });
+
+            next = new JButton("Next");
+            next.setEnabled(false);
+            next.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    int i = Integer.parseInt(roundNumber.getText());
+                    if (i >= sim.getRoundNumber() - 1) {
+                        Toolkit.getDefaultToolkit().beep();
+                        roundNumber.setText("" + (sim.getRoundNumber() - 1));
+                    } else {
+                        roundNumber.setText("" + (i + 1));
+                        repositionAgentLabels();
+                        drawablePanel.repaint();
+                    }
+                }
+            });
+            
+            first = new JButton("First");
+            first.setEnabled(false);
+            first.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    roundNumber.setText("0");
+                    repositionAgentLabels();
+                    drawablePanel.repaint();
+                }
+            });
+            
+            last = new JButton("Last");
+            last.setEnabled(false);
+            last.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    roundNumber.setText("" + (sim.getRoundNumber() - 1));
+                    repositionAgentLabels();
+                    drawablePanel.repaint();
+                }
+            });
+
+            createLayout();
+        }
+
+        private void createLayout() {
+            GridBagConstraints c = new GridBagConstraints();
+            c.gridy = GridBagConstraints.RELATIVE;
+
+            c.gridx = 0;
+            c.gridwidth = 2;
+            add(enabled, c);
+
+            c.fill = GridBagConstraints.BOTH;
+            c.gridwidth = 1;
+            add(roundLabel, c);
+            c.gridx = 1;
+            add(roundNumber, c);
+
+            c.insets = new Insets(3, 0, 0, 0);
+            c.gridx = 0;
+            add(previous, c);
+            c.gridx = 1;
+            add(next, c);
+            
+            c.insets = new Insets(0, 0, 0, 0);
+            c.gridx = 0;
+            add(first, c);
+            c.gridx = 1;
+            add(last, c);
+        }
+
+        public boolean isHistoryEnabled() {
+            return enabled.isSelected();
+        }
+
+        public int getRound() {
+            return Integer.parseInt(roundNumber.getText());
+        }
+
+        private void reset() {
+            roundNumber.setText("0");
+        }
+
+    }
+    
 }

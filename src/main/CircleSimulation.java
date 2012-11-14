@@ -11,10 +11,18 @@ import java.util.List;
  */
 public class CircleSimulation {
     
+    public static final boolean HISTORY_ENABLED = true;
+    
     private final Class agentClass;
     private final int visibility;
     private final AgentInfo[] agents;
+    
+    /**
+     * This should be equal to the number of rounds.
+     */
     private int round = 0;
+    
+    private List<int[]> history;
     
     public CircleSimulation(int numberOfAgents, int visibility, Class agentClass) {
         boolean ok = false;
@@ -76,6 +84,10 @@ public class CircleSimulation {
             agents[i].setVisibleAgents(visibleAgents);
         }
         
+        if (HISTORY_ENABLED) {
+            history = new LinkedList<int[]>();
+        }
+        
         firstRound();
     }
     
@@ -93,6 +105,10 @@ public class CircleSimulation {
         if (flags == null) {
             nextRound();
             return;
+        }
+        
+        if (HISTORY_ENABLED) {
+            history.add(flags);
         }
         
         // check length
@@ -135,6 +151,10 @@ public class CircleSimulation {
             agents[i].agent.setFlag(newFlags[i]);
         }
         round++;
+        
+        if (HISTORY_ENABLED) {
+            history.add(newFlags);
+        }
     }
     
     public final int getRoundNumber() {
@@ -179,5 +199,23 @@ public class CircleSimulation {
         }
         
         return map.toString();
+    }
+    
+    /**
+     * Returns the flags raised in given round.
+     */
+    public int[] getRoundFlags(int round) {
+        if (!HISTORY_ENABLED) {
+            throw new FeatureDisabledException("Cannot access the history");
+        }
+        
+        if (round < 0 || round > history.size()) {
+            throw new IllegalArgumentException("No such round in the history: "
+                    + "round = " + round + ", history size = " + history.size());
+        }
+        
+        int[] copy = new int[agents.length];
+        System.arraycopy(history.get(round), 0, copy, 0, agents.length);
+        return copy;
     }
 }
