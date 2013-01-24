@@ -203,7 +203,7 @@ public class CircleSimulation {
     }
     
     /**
-     * Returns the flags raised in given round.
+     * Returns the flags raised in given round (as a copy).
      */
     public int[] getRoundFlags(int round) {
         if (!HISTORY_ENABLED) {
@@ -218,5 +218,17 @@ public class CircleSimulation {
         int[] copy = new int[agents.length];
         System.arraycopy(history.get(round), 0, copy, 0, agents.length);
         return copy;
+    }
+    
+    public void historyModifyLastRound(int agent, int flag) {
+        if (!HISTORY_ENABLED) {
+            return;
+        }
+        
+        if (flag < 0 || flag >= Flag.COUNT) {
+            throw new IllegalArgumentException("No such flag");
+        }
+        
+        history.get(history.size() - 1)[agent] = flag;
     }
 }

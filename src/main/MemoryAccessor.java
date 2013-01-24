@@ -2,6 +2,7 @@ package main;
 
 import agents.AbstractAgent;
 import agents.AgentInfo;
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -25,16 +26,10 @@ public final class MemoryAccessor extends JPanel {
 
     private JComponent[][] component;
 
-    /**
-     * Agent's ID
-     */
-    private int number = 0;
+    private AgentInfo agentInfo;
 
     public MemoryAccessor(AgentInfo ai) {
         super(new GridBagLayout());
-        setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.RAISED),
-                "", TitledBorder.CENTER, TitledBorder.TOP));
-
         setAgent(ai);
         createLayout();
     }
@@ -52,15 +47,23 @@ public final class MemoryAccessor extends JPanel {
                 add(component[i][j], c);
             }
         }
+        
+        if (!isEnabled()) {
+            for (Component comp : getComponents()) {
+                comp.setEnabled(false);
+            }
+        }
     }
 
     public void setAgent(AgentInfo ai) {
 
+        agentInfo = ai;
         AbstractAgent a = ai.agent;
-        number = ai.id;
         
-        ((TitledBorder) getBorder()).setTitle("Agent " + number
-                + " memory (" + a.getClass().getSimpleName() + ")");
+        setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.RAISED),
+                "Agent " + ai.id + " memory "
+                + "(" + a.getClass().getSimpleName() + ")",
+                TitledBorder.CENTER, TitledBorder.TOP));
 
         Field[] fields = a.getClass().getDeclaredFields();
         component = new JComponent[fields.length][];
@@ -192,7 +195,7 @@ public final class MemoryAccessor extends JPanel {
                         String value = JOptionPane.showInputDialog(null);
                         boolean ok = true;
                         try {
-                            setArrayValue(field.get(a), fi, value);
+                            setArrayValue(field.get(a), fi - 3, value);
                         } catch (Exception ex) {
                             ok = false;
                             JOptionPane.showMessageDialog(null, ex, null,
@@ -366,7 +369,19 @@ public final class MemoryAccessor extends JPanel {
     }
 
     public int getAgentID() {
-        //TODO if this method is never used, then "number" field is redundant
-        return number;
+        return agentInfo.id;
     }
+    
+    public void update() {
+        setAgent(agentInfo);
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        for (Component c : getComponents()) {
+            c.setEnabled(enabled);
+        }
+        super.setEnabled(enabled);
+    }
+    
 }

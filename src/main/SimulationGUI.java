@@ -102,6 +102,16 @@ public class SimulationGUI extends JFrame {
                     };
                     
                     JPopupMenu menu = new JPopupMenu();
+                    
+                    JMenuItem memory = new JMenuItem("access memory");
+                    memory.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            memoryAccessor.setAgent(sim.getAgentInfo(fi));
+                        }
+                    });
+                    menu.add(memory);
+                    
                     JMenu setFlagMenu = new JMenu("set flag");
                     setFlagMenu.addMenuListener(ml);
                     for (int j = 0; j < Flag.COUNT; j++) {
@@ -111,6 +121,7 @@ public class SimulationGUI extends JFrame {
                             @Override
                             public void actionPerformed(ActionEvent e) {
                                 sim.getAgentInfo(fi).agent.setFlag(fj);
+                                sim.historyModifyLastRound(fi, fj);
                                 drawablePanel.repaint();
                             }
                         });
@@ -153,6 +164,9 @@ public class SimulationGUI extends JFrame {
                         startButton.setEnabled(true);
                         nextRoundButton.setEnabled(true);
                         resetButton.setEnabled(true);
+                        if (Main.MEMORY_ACCESSOR_ENABLED) {
+                            memoryAccessor.update();
+                        }
                     }
                 }.start();
             }
@@ -167,6 +181,9 @@ public class SimulationGUI extends JFrame {
                     sim.nextRound();
                     drawablePanel.repaint();
                     roundCounterLabel.setText(DF.format(sim.getRoundNumber() - 1));
+                    if (Main.MEMORY_ACCESSOR_ENABLED) {
+                        memoryAccessor.update();
+                    }
                 } else {
                     Toolkit.getDefaultToolkit().beep();
                 }
@@ -181,6 +198,9 @@ public class SimulationGUI extends JFrame {
                 historyPanel.reset();
                 drawablePanel.repaint();
                 roundCounterLabel.setText(DF.format(sim.getRoundNumber() - 1));
+                if (Main.MEMORY_ACCESSOR_ENABLED) {
+                    memoryAccessor.update();
+                }
             }
         });
         
@@ -355,6 +375,9 @@ public class SimulationGUI extends JFrame {
                     last.setEnabled(enabled.isSelected());
                     repositionAgentLabels();
                     drawablePanel.repaint();
+                    if (Main.MEMORY_ACCESSOR_ENABLED) {
+                        memoryAccessor.setEnabled(!enabled.isSelected());
+                    }
                 }
             });
 

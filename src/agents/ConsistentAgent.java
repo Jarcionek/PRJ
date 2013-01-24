@@ -4,18 +4,21 @@ import java.util.Random;
 import main.Flag;
 
 /**
- * @author Jaroslaw Pawlak
- * 
  * Agent number four.
  * 
  * This agent remembers flags raised in one previous round by all its neighbours
  * at calculates their consistency. Then it should try to adjust to whatever
- * state is larger and more consistent - however it doesn't work as expected yet.
+ * state is larger and more consistent. It also prefers to keep raising the
+ * same flag every round.
+ * 
+ * @author Jaroslaw Pawlak
  */
 public class ConsistentAgent extends AbstractAgent {
 
-    private int[] consistency;
-    private int[] previousFlag;
+    public static final int MAX = 20;
+    
+    public int[] consistency;
+    public int[] previousFlag;
     
     private void init() {
         consistency = new int[visibleAgents.length];
@@ -37,8 +40,8 @@ public class ConsistentAgent extends AbstractAgent {
         for (int i = 0; i < visibleAgents.length; i++) {
             if (visibleAgents[i].getFlag() == previousFlag[i]) {
                 consistency[i]++;
-                if (consistency[i] > 20) {
-                    consistency[i] = 20;
+                if (consistency[i] > MAX) {
+                    consistency[i] = MAX;
                 }
             } else {
                 consistency[i]--;
@@ -48,11 +51,16 @@ public class ConsistentAgent extends AbstractAgent {
             }
         }
         
+        // remember flags
+        for (int i = 0; i < visibleAgents.length; i++) {
+            previousFlag[i] = visibleAgents[i].getFlag();
+        }
+        
         int myIndex = (visibleAgents.length - 1) / 2;
         
-        if (consistency[myIndex] == 0) {
-            return getFlag(); // raise the same flag as previously
-        }
+//        if (consistency[myIndex] == 0) {
+//            return getFlag(); // raise the same flag as previously
+//        }
         
         int result;
         
@@ -87,6 +95,14 @@ public class ConsistentAgent extends AbstractAgent {
             }
         }
 
+        if (new Random().nextInt(MAX) > consistency[myIndex]) {
+            if (result == 0) {
+                result = 1;
+            } else if (result == 1) {
+                return 0;
+            }
+        }
+        
         return result;
     }
 
