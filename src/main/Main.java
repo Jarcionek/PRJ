@@ -1,21 +1,21 @@
 package main;
 
-import agents.RandomAgent;
-import agents.ThirdAgent;
+import agents.*;
 
 /**
  * @author Jaroslaw Pawlak
  */
 public class Main {
     
+    public static final boolean MEMORY_ACCESSOR_ENABLED = true;
+            
+    private static final int AGENTS = 20;
+    private static final int VISIBILITY = 1;
+    private static final Class AGENT = ThirdAgent.class;
+    
     public static void main(String[] args) {
-        
-        int agents = 20;
-        int visibility = 1;
-
-        CircleSimulation simulation
-                = new CircleSimulation(agents, visibility, ThirdAgent.class);
-        new SimulationGUI(simulation);
+        CircleSimulation sim = new CircleSimulation(AGENTS, VISIBILITY, AGENT);
+        new SimulationGUI(sim);
     }
 
 }

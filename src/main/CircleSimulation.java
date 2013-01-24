@@ -11,6 +11,7 @@ import java.util.List;
  */
 public class CircleSimulation {
     
+    //TODO move it to main, or maybe to the constructor?
     public static final boolean HISTORY_ENABLED = true;
     
     private final Class agentClass;

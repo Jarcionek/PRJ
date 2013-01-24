@@ -36,6 +36,7 @@ public class SimulationGUI extends JFrame {
     private JCheckBox idsCheckBox;
     private JCheckBox stateCheckBox;
     private HistoryPanel historyPanel;
+    private MemoryAccessor memoryAccessor;
     
     private AgentLabel[] agentLabels;
     
@@ -138,6 +139,13 @@ public class SimulationGUI extends JFrame {
                     public void run() {
                         while (!sim.isConsensus()) {
                             sim.nextRound();
+                            /* //TODO why is there minus one? uniform it!
+                             * after initialisation round, simulation round counter should be 0
+                             * in other words, init. round should not be counted:
+                             * after init. round the counter will show 0, this is:
+                             * - the number of last round
+                             * - the total number of normal rounds played
+                             */
                             roundCounterLabel.setText(DF.format(sim.getRoundNumber() - 1));
                         }
                         drawablePanel.repaint();
@@ -150,6 +158,7 @@ public class SimulationGUI extends JFrame {
             }
         });
         
+        //TODO uniform updating - create method update that will update everything that is neccessary
         nextRoundButton = new JButton("Next round");
         nextRoundButton.addActionListener(new ActionListener() {
             @Override
@@ -158,8 +167,7 @@ public class SimulationGUI extends JFrame {
                     sim.nextRound();
                     drawablePanel.repaint();
                     roundCounterLabel.setText(DF.format(sim.getRoundNumber() - 1));
-                }
-                if (sim.isConsensus()) {
+                } else {
                     Toolkit.getDefaultToolkit().beep();
                 }
             }
@@ -201,6 +209,10 @@ public class SimulationGUI extends JFrame {
         });
         
         historyPanel = new HistoryPanel();
+        
+        if (Main.MEMORY_ACCESSOR_ENABLED) {
+            memoryAccessor = new MemoryAccessor(sim.getAgentInfo(0));
+        }
     }
     
     private void createLayout() {
@@ -221,10 +233,16 @@ public class SimulationGUI extends JFrame {
         buttonsPanel.add(historyPanel, c);
         contentPane.add(drawablePanel, BorderLayout.CENTER);
         contentPane.add(buttonsPanel, BorderLayout.EAST);
+        if (Main.MEMORY_ACCESSOR_ENABLED) {
+            contentPane.add(memoryAccessor, BorderLayout.SOUTH);
+        }
         
         setContentPane(contentPane);
     }
     
+    /**
+     * Updates the positions of Agent JLabels
+     */
     private void repositionAgentLabels() {
         Dimension d = drawablePanel.getSize();
         
@@ -253,6 +271,9 @@ public class SimulationGUI extends JFrame {
         }
     }
     
+    /**
+     * Draws connections between agents, their states, etc.
+     */
     private void draw(Graphics g) {
         Rectangle rect = g.getClipBounds();
         
@@ -299,7 +320,13 @@ public class SimulationGUI extends JFrame {
         }
     }
 
-    public class HistoryPanel extends JPanel {
+    /* //TODO separate history panel
+     * - as separate class
+     * - as separate window/draw panel (copy/reuse code)
+     * - only read from simulation, does not influence original draw panel
+     * - gets update from main window if simulation changes (proceeds to next round)
+     */
+    private class HistoryPanel extends JPanel {
 
         private JCheckBox enabled;
         private JLabel roundLabel;
