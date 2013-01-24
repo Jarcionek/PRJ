@@ -1,7 +1,7 @@
-package agents;
+package circle.agents;
 
 import java.util.Random;
-import main.Flag;
+import circle.main.Flag;
 
 /**
  * @author Jaroslaw Pawlak

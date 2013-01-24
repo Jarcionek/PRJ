@@ -1,7 +1,7 @@
-package main;
+package circle.main;
 
-import agents.RandomAgent;
-import agents.ThirdAgent;
+import circle.agents.RandomAgent;
+import circle.agents.ThirdAgent;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;

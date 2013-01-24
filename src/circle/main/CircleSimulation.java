@@ -1,7 +1,7 @@
-package main;
+package circle.main;
 
-import agents.AbstractAgent;
-import agents.AgentInfo;
+import circle.agents.AbstractAgent;
+import circle.agents.AgentInfo;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;

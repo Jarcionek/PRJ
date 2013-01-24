@@ -1,6 +1,6 @@
-package main;
+package circle.main;
 
-import agents.*;
+import circle.agents.*;
 
 /**
  * @author Jaroslaw Pawlak

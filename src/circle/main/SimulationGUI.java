@@ -1,6 +1,6 @@
-package main;
+package circle.main;
 
-import agents.AgentInfo;
+import circle.agents.AgentInfo;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

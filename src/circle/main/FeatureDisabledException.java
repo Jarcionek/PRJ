@@ -1,4 +1,4 @@
-package main;
+package circle.main;
 
 /**
  * @author Jaroslaw Pawlak

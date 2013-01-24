@@ -1,4 +1,4 @@
-package main;
+package circle.main;
 
 import java.awt.Color;
 import java.awt.Dimension;

@@ -1,4 +1,4 @@
-package agents;
+package circle.agents;
 
 /**
  * @author Jaroslaw Pawlak

@@ -1,7 +1,7 @@
-package main;
+package circle.main;
 
-import agents.AbstractAgent;
-import agents.AgentInfo;
+import circle.agents.AbstractAgent;
+import circle.agents.AgentInfo;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
