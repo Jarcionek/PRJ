@@ -1,11 +1,13 @@
 package network.creator;
 
 import java.awt.*;
-import java.awt.event.*;
-import javax.swing.JFrame;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import javax.swing.*;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
@@ -15,10 +17,10 @@ import javax.swing.event.PopupMenuListener;
 public class GUI extends JFrame {
         
     private static final int S = 20; // oval sizes
-    private static final int X_CHANGE = -8;
-    private static final int Y_CHANGE = -28;
+    private final int x_change;
+    private final int y_change;
 
-    private final Network network;
+    private Network network;
     
     private Node selectedNode = null;
     
@@ -31,10 +33,17 @@ public class GUI extends JFrame {
         MListener mlistener = new MListener();
         this.addMouseListener(mlistener);
         
+        this.setJMenuBar(createMenuBar());
+        
         drawPane = new DrawablePanel();
         this.setContentPane(drawPane);
         this.setSize(800, 600);
         this.setVisible(true);
+        
+        Point p1 = getContentPane().getLocationOnScreen();
+        Point p2 = this.getLocationOnScreen();
+        x_change = -(p1.x - p2.x);
+        y_change = -(p1.y - p2.y);
         
         //TODO replace with window listener? what to do on close? ask to save?
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -61,6 +70,281 @@ public class GUI extends JFrame {
         return best;
     }
     
+    private JMenuBar createMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
+            JMenu menuNetwork = new JMenu("Network");
+                JMenu menuGenerate = new JMenu("Generate");
+                    JMenuItem menuItemRing = new JMenuItem("Ring");
+                    JMenuItem menuItemGrid = new JMenuItem("Grid");
+                    JMenuItem menuItemHex = new JMenuItem("Hex");
+                    JMenuItem menuItemTree = new JMenuItem("Tree");
+                    JMenuItem menuItemAllToAll = new JMenuItem("All-to-all");
+                JMenuItem menuItemPrint = new JMenuItem("Print to console");
+//TODO add mouse behaviour (what do double clicks do?) + extra deleteNode operation that keeps connections
+//            JMenu menuOptions = new JMenu("Options");
+//                JMenu menuMouseBehaviour = new JMenu("Mouse behaviour");
+            JMenu menuAbout = new JMenu("About");
+                JMenuItem menuItemHelp = new JMenuItem("Help");
+        
+        MenuListener menuListener = new MenuListener() {
+            @Override
+            public void menuSelected(MenuEvent e) {
+                GUI.this.repaint();
+            }
+            @Override
+            public void menuDeselected(MenuEvent e) {
+                GUI.this.repaint();
+            }
+            @Override
+            public void menuCanceled(MenuEvent e) {
+                GUI.this.repaint();
+            }
+        };
+                
+        menuNetwork.addMenuListener(menuListener);
+            menuGenerate.addMenuListener(menuListener);
+        menuAbout.addMenuListener(menuListener);
+
+        menuItemRing.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String v = JOptionPane.showInputDialog(GUI.this, "Nodes number:",
+                        "Create Ring Network", JOptionPane.PLAIN_MESSAGE);
+                
+                int v1;
+                try {
+                    v1 = Integer.parseInt(v);
+                    if (v1 < 3) {
+                        JOptionPane.showMessageDialog(GUI.this,
+                                "There have to be at least two nodes", 
+                                "Create Ring Network - Error",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(GUI.this, "Not a number", 
+                            "Create Ring Network - Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                network = Network.generateRing(v1);
+                GUI.this.repaint();
+            }
+        });
+        
+        menuItemGrid.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String s1 = JOptionPane.showInputDialog(GUI.this, "Width:",
+                        "Create Grid Network", JOptionPane.PLAIN_MESSAGE);
+                int v1;
+                try {
+                    v1 = Integer.parseInt(s1);
+                    if (v1 < 1) {
+                        JOptionPane.showMessageDialog(GUI.this,
+                                "Width has to be positive", 
+                                "Create Grid Network - Error",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(GUI.this, "Not a number", 
+                            "Create Grid Network - Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                String s2 = JOptionPane.showInputDialog(GUI.this, "Height:",
+                        "Create Grid Network", JOptionPane.PLAIN_MESSAGE);
+                int v2;
+                try {
+                    v2 = Integer.parseInt(s2);
+                    if (v2 < 1) {
+                        JOptionPane.showMessageDialog(GUI.this,
+                                "Height has to be positive", 
+                                "Create Grid Network - Error",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(GUI.this, "Not a number", 
+                            "Create Grid Network - Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                network = Network.generateGrid(v1, v2);
+                GUI.this.repaint();
+            }
+        });
+        
+        menuItemHex.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String s1 = JOptionPane.showInputDialog(GUI.this, "Width:",
+                        "Create Hex Network", JOptionPane.PLAIN_MESSAGE);
+                int v1;
+                try {
+                    v1 = Integer.parseInt(s1);
+                    if (v1 < 1) {
+                        JOptionPane.showMessageDialog(GUI.this,
+                                "Width has to be positive", 
+                                "Create Hex Network - Error",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(GUI.this, "Not a number", 
+                            "Create Hex Network - Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                String s2 = JOptionPane.showInputDialog(GUI.this,
+                        "Height (odd recommended):",
+                        "Create Hex Network", JOptionPane.PLAIN_MESSAGE);
+                int v2;
+                try {
+                    v2 = Integer.parseInt(s2);
+                    if (v2 < 1) {
+                        JOptionPane.showMessageDialog(GUI.this,
+                                "Height has to be positive", 
+                                "Create Hex Network - Error",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(GUI.this, "Not a number", 
+                            "Create Hex Network - Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                int c = JOptionPane.showConfirmDialog(GUI.this,
+                        "Extra connections on sides?",
+                        "Create Hex Network", JOptionPane.YES_NO_OPTION,
+                        JOptionPane.PLAIN_MESSAGE);
+                
+                boolean more;
+                if (c == JOptionPane.YES_OPTION) {
+                    more = true;
+                } else if (c == JOptionPane.NO_OPTION) {
+                    more = false;
+                } else {
+                    return;
+                }
+                
+                network = Network.generateHex(v1, v2, more);
+                GUI.this.repaint();
+            }
+        });
+        
+        menuItemTree.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String s1 = JOptionPane.showInputDialog(GUI.this, "Children:",
+                        "Create Tree Network", JOptionPane.PLAIN_MESSAGE);
+                int v1;
+                try {
+                    v1 = Integer.parseInt(s1);
+                    if (v1 < 1) {
+                        JOptionPane.showMessageDialog(GUI.this,
+                                "Children has to be positive", 
+                                "Create Tree Network - Error",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(GUI.this, "Not a number", 
+                            "Create Tree Network - Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                String s2 = JOptionPane.showInputDialog(GUI.this,
+                        "Levels:",
+                        "Create Tree Network", JOptionPane.PLAIN_MESSAGE);
+                int v2;
+                try {
+                    v2 = Integer.parseInt(s2);
+                    if (v2 < 1) {
+                        JOptionPane.showMessageDialog(GUI.this,
+                                "Levels has to be positive", 
+                                "Create Tree Network - Error",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(GUI.this, "Not a number", 
+                            "Create Tree Network - Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                network = Network.generateFullTree(v1, v2);
+                GUI.this.repaint();
+            }
+        });
+        
+        menuItemAllToAll.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String v = JOptionPane.showInputDialog(GUI.this, "Nodes number:",
+                        "Create All-to-all Network", JOptionPane.PLAIN_MESSAGE);
+                
+                int v1;
+                try {
+                    v1 = Integer.parseInt(v);
+                    if (v1 < 2) {
+                        JOptionPane.showMessageDialog(GUI.this,
+                                "There have to be at least two nodes", 
+                                "Create All-to-all Network - Error",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(GUI.this, "Not a number", 
+                            "Create All-to-all Network - Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    //TODO JOptionPanes do weird things with drawPanel, should repaint here? (and all other places like this one)
+                    return;
+                }
+                
+                network = Network.generateFullyConnectedMesh(v1);
+                GUI.this.repaint();
+            }
+        });
+        
+        menuItemPrint.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println(network.toStringAdjacencyOnly());
+            }
+        });
+        
+        menuItemHelp.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //TODO about/help - remove what is printed on graphics
+            }
+        });
+        menuItemHelp.setEnabled(false); //TODO temporary until behaviour is implemented
+        
+        menuBar.add(menuNetwork);
+            menuNetwork.add(menuGenerate);
+                menuGenerate.add(menuItemRing);
+                menuGenerate.add(menuItemGrid);
+                menuGenerate.add(menuItemHex);
+                menuGenerate.add(menuItemTree);
+                menuGenerate.add(menuItemAllToAll);
+            menuNetwork.add(menuItemPrint);
+        menuAbout.add(menuItemHelp);
+            menuBar.add(menuAbout);
+        
+        return menuBar;
+    }
+    
     
     
     private class MListener implements MouseListener {
@@ -69,8 +353,8 @@ public class GUI extends JFrame {
         public void mouseClicked(MouseEvent e) {
             if (e.getClickCount() >= 2) {
                 Dimension size = drawPane.getSize();
-                int x = e.getX() + X_CHANGE;
-                int y = e.getY() + Y_CHANGE;
+                int x = e.getX() + x_change;
+                int y = e.getY() + y_change;
                 
                 Node n = findClosestNode(x, y);
                 
@@ -101,8 +385,8 @@ public class GUI extends JFrame {
 
         @Override
         public void mousePressed(MouseEvent e) {
-            final int x = e.getX() + X_CHANGE;
-            final int y = e.getY() + Y_CHANGE;
+            final int x = e.getX() + x_change;
+            final int y = e.getY() + y_change;
                 
             if (e.getButton() == MouseEvent.BUTTON1) {
 
@@ -131,7 +415,6 @@ public class GUI extends JFrame {
                         public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                             GUI.this.repaint();
                         }
-
                         @Override
                         public void popupMenuCanceled(PopupMenuEvent e) {}
                     });
@@ -150,7 +433,7 @@ public class GUI extends JFrame {
                     });
                     menu.add(moveMI);
 
-                    menu.show(drawPane, x, y);
+                    menu.show(drawPane, x + 1, y + 1); //a small fix that will be removed
                 }
             }
             
@@ -158,8 +441,8 @@ public class GUI extends JFrame {
 
         @Override
         public void mouseReleased(MouseEvent e) {
-            int x = e.getX() + X_CHANGE;
-            int y = e.getY() + Y_CHANGE;
+            int x = e.getX() + x_change;
+            int y = e.getY() + y_change;
             Node n = findClosestNode(x, y);
             if (n != null && !n.equals(selectedNode) && selectedNode != null) {
                 if (network.isConnected(n.id, selectedNode.id)) {

@@ -71,6 +71,10 @@ public class Network implements Iterable<Node> {
             throw new IllegalArgumentException("Cannot connect a node "
                     + "to itself! id = " + id1);
         }
+        if (adjacencyList.get(id1).contains(id2)) {
+            throw new IllegalArgumentException("Nodes already connected! "
+                    + "id1 = " + id1 + ", id2 = " + id2);
+        }
         
         insertSorted(adjacencyList.get(id1), id2);
         insertSorted(adjacencyList.get(id2), id1);
@@ -126,6 +130,10 @@ public class Network implements Iterable<Node> {
         }
         
         return result;
+    }
+    
+    public String toStringAdjacencyOnly() {
+        return this.toString().replaceAll("\\(.*\\)", "");
     }
 
     @Override
@@ -193,7 +201,7 @@ public class Network implements Iterable<Node> {
     /**
      * Odd height recommended.
      */
-    public static Network generateHex(int width, int height) {
+    public static Network generateHex(int width, int height, boolean more) {
         if (width <= 0 || height <= 0) {
             throw new IllegalArgumentException("Values must be positive");
         }
@@ -206,15 +214,19 @@ public class Network implements Iterable<Node> {
                 if ((j & 1) == 0 && i == 0) {
                     continue;
                 }
+                
                 if ((j & 1) == 0) {
                     n.addNode((i + 0.375d) / (width + 1), (j + 1.0d) / (height + 1));
                 } else {
                     n.addNode((i + 0.875d) / (width + 1), (j + 1.0d) / (height + 1));
                 }
 
+                //horizontal
                 if (((j & 1) == 1 && i > 0) || i > 1) {
                     n.connectNodes(current, current - 1);
                 }
+                
+                //vertical
                 if (j > 0) {
                     if ((j & 1) == 0) {
                         n.connectNodes(current, current - width);
@@ -229,6 +241,11 @@ public class Network implements Iterable<Node> {
                     }
                 }
                 
+                //extra vertical
+                if (more && (i == 0 || i == width - 1) && j > 1 && (j & 1) == 1) {
+                    n.connectNodes(current, current - 2 * width + 1);
+                }
+                
                 current++;
             }
         }
@@ -237,8 +254,8 @@ public class Network implements Iterable<Node> {
     }
     
     public static Network generateRing(int nodes) {
-        if (nodes <= 0) {
-            throw new IllegalArgumentException("Value must be positive");
+        if (nodes < 3) {
+            throw new IllegalArgumentException("Value must be no smaller than 3");
         }
         
         double radius = 0.4d;
@@ -281,6 +298,8 @@ public class Network implements Iterable<Node> {
         
         return n;
     }
+    
+    //TODO add star
     
     public static Network generateFullTree(int children, int levels) {
         if (children <= 0 || levels <= 0) {
