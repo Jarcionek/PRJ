@@ -1,9 +1,11 @@
 package network.creator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import sun.security.provider.certpath.AdjacencyList;
 
 /**
  * @author Jaroslaw Pawlak
@@ -56,6 +58,20 @@ public class Network implements Iterable<Node> {
             }
         }
         
+    }
+    
+    public void removeNodeKeepConnections(int id) {
+        Integer[] nodes = adjacencyList.get(id).toArray(new Integer[] {});
+        
+        for (int i = 0; i < nodes.length; i++) {
+            for (int j = 0; j < i; j++) {
+                if (!isConnected(nodes[i], nodes[j])) {
+                    connectNodes(nodes[i], nodes[j]);
+                }
+            }
+        }
+        
+        removeNode(id);
     }
     
     public void connectNodes(int id1, int id2) {
@@ -165,9 +181,17 @@ public class Network implements Iterable<Node> {
         if (id < 0 || id > nodeList.size()) {
             throw new IllegalArgumentException("Invalid ID!");
         }
+        if (x < 0 || x > 1 || y < 0 || y > 1) {
+            throw new IllegalArgumentException("New coordinates invalid: "
+                    + "x = " + x + ", y = " + y);
+        }
         
         nodeList.get(id).x = x;
-        nodeList.get(id).x = y;
+        nodeList.get(id).y = y;
+    }
+    
+    public NetworkStats getStatistics() {
+        return generateStatistics(this);
     }
     
     
@@ -299,7 +323,25 @@ public class Network implements Iterable<Node> {
         return n;
     }
     
-    //TODO add star
+    public static Network generateStar(int nodes) {
+        if (nodes < 1) {
+            throw new IllegalArgumentException("Value must be positive");
+        }
+        
+        double radius = 0.4d;
+        double alpha = Math.PI * 2 / (nodes - 1);
+        
+        Network n = new Network();
+        n.addNode(0.5d, 0.5d);
+        
+        for (int i = 0; i < nodes - 1; i++) {
+            n.addNode(0.5d - radius * Math.cos(i * alpha),
+                      0.5d - radius * Math.sin(i * alpha));
+            n.connectNodes(i + 1, 0);
+        }
+        
+        return n;
+    }
     
     public static Network generateFullTree(int children, int levels) {
         if (children <= 0 || levels <= 0) {
@@ -339,5 +381,58 @@ public class Network implements Iterable<Node> {
             return ((exponent & 1) == 0? 1 : base)
                     * pow(base * base, exponent / 2);
         }
+    }
+
+    public static NetworkStats generateStatistics(Network n) {
+        if (n.nodeList.size() != n.adjacencyList.size()) {
+            throw new RuntimeException("Ups! It should never happen!");
+        }
+        
+        int[] neighbours = new int[n.adjacencyList.size()];
+        {
+            int index = 0;
+            for (List list : n.adjacencyList) {
+                neighbours[index++] = list.size();
+            }
+        }
+        Arrays.sort(neighbours);
+        
+        int nodes = neighbours.length;
+        
+        int edges = 0;
+        for (int i : neighbours) {
+            edges += i;
+        }
+        edges >>= 1;
+        
+        int degreeMin = neighbours[0];
+        
+        int degreeMax = neighbours[neighbours.length - 1];
+        
+        double degreeMean = (double) (edges << 1) / nodes;
+        
+        int degreeMedian = neighbours[neighbours.length / 2];
+        
+        int degreeMode = 0; // best value
+        int bestLength = 0;
+        int currentLength = 1;
+        for (int i = 1; i < neighbours.length; i++) {
+            if (neighbours[i] == neighbours[i-1]) {
+                currentLength++;
+            } else {
+                if (currentLength > bestLength) {
+                    bestLength = currentLength;
+                    degreeMode = neighbours[i - 1];
+                }
+                currentLength = 1;
+            }
+        }
+        if (currentLength > bestLength) {
+            degreeMode = neighbours[neighbours.length - 1];
+        }
+        
+        return new NetworkStats(nodes, edges, degreeMin, degreeMax,
+                                degreeMean, degreeMedian, degreeMode);
+        
     }
 }

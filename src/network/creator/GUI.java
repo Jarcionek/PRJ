@@ -1,22 +1,17 @@
 package network.creator;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
 
 /**
  * @author Jaroslaw Pawlak
  */
 public class GUI extends JFrame {
-        
-    private static final int S = 20; // oval sizes
+    
+    private final int S = 20; // oval sizes
     private final int x_change;
     private final int y_change;
 
@@ -32,6 +27,7 @@ public class GUI extends JFrame {
         
         MListener mlistener = new MListener();
         this.addMouseListener(mlistener);
+        this.addMouseMotionListener(mlistener);
         
         this.setJMenuBar(createMenuBar());
         
@@ -73,16 +69,16 @@ public class GUI extends JFrame {
     private JMenuBar createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
             JMenu menuNetwork = new JMenu("Network");
+                JMenuItem menuItemNew = new JMenuItem("New");
                 JMenu menuGenerate = new JMenu("Generate");
                     JMenuItem menuItemRing = new JMenuItem("Ring");
+                    JMenuItem menuItemStar = new JMenuItem("Star");
                     JMenuItem menuItemGrid = new JMenuItem("Grid");
                     JMenuItem menuItemHex = new JMenuItem("Hex");
                     JMenuItem menuItemTree = new JMenuItem("Tree");
                     JMenuItem menuItemAllToAll = new JMenuItem("All-to-all");
+                JMenuItem menuItemStats = new JMenuItem("Show statistics");
                 JMenuItem menuItemPrint = new JMenuItem("Print to console");
-//TODO add mouse behaviour (what do double clicks do?) + extra deleteNode operation that keeps connections
-//            JMenu menuOptions = new JMenu("Options");
-//                JMenu menuMouseBehaviour = new JMenu("Mouse behaviour");
             JMenu menuAbout = new JMenu("About");
                 JMenuItem menuItemHelp = new JMenuItem("Help");
         
@@ -100,11 +96,19 @@ public class GUI extends JFrame {
                 GUI.this.repaint();
             }
         };
-                
         menuNetwork.addMenuListener(menuListener);
-            menuGenerate.addMenuListener(menuListener);
+        menuGenerate.addMenuListener(menuListener);
         menuAbout.addMenuListener(menuListener);
 
+        menuItemNew.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                network = new Network();
+                selectedNode = null;
+                GUI.this.repaint();
+            }
+        });
+        
         menuItemRing.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -116,19 +120,58 @@ public class GUI extends JFrame {
                     v1 = Integer.parseInt(v);
                     if (v1 < 3) {
                         JOptionPane.showMessageDialog(GUI.this,
-                                "There have to be at least two nodes", 
+                                "There have to be at least three nodes", 
                                 "Create Ring Network - Error",
                                 JOptionPane.ERROR_MESSAGE);
+                        GUI.this.repaint();
                         return;
                     }
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(GUI.this, "Not a number", 
                             "Create Ring Network - Error",
                             JOptionPane.ERROR_MESSAGE);
+                    GUI.this.repaint();
                     return;
                 }
                 
                 network = Network.generateRing(v1);
+                selectedNode = null;
+                GUI.this.repaint();
+            }
+        });
+
+        menuItemStar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String s = JOptionPane.showInputDialog(GUI.this, "Nodes number:",
+                        "Create Star Network", JOptionPane.PLAIN_MESSAGE);
+                
+                if (s == null) {
+                    GUI.this.repaint();
+                    return;
+                }
+                
+                int v1;
+                try {
+                    v1 = Integer.parseInt(s);
+                    if (v1 < 1) {
+                        JOptionPane.showMessageDialog(GUI.this,
+                                "There have to be at least one node", 
+                                "Create Star Network - Error",
+                                JOptionPane.ERROR_MESSAGE);
+                        GUI.this.repaint();
+                        return;
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(GUI.this, "Not a number", 
+                            "Create Star Network - Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    GUI.this.repaint();
+                    return;
+                }
+                
+                network = Network.generateStar(v1);
+                selectedNode = null;
                 GUI.this.repaint();
             }
         });
@@ -138,6 +181,12 @@ public class GUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 String s1 = JOptionPane.showInputDialog(GUI.this, "Width:",
                         "Create Grid Network", JOptionPane.PLAIN_MESSAGE);
+                
+                if (s1 == null) {
+                    GUI.this.repaint();
+                    return;
+                }
+                
                 int v1;
                 try {
                     v1 = Integer.parseInt(s1);
@@ -146,17 +195,25 @@ public class GUI extends JFrame {
                                 "Width has to be positive", 
                                 "Create Grid Network - Error",
                                 JOptionPane.ERROR_MESSAGE);
+                        GUI.this.repaint();
                         return;
                     }
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(GUI.this, "Not a number", 
                             "Create Grid Network - Error",
                             JOptionPane.ERROR_MESSAGE);
+                    GUI.this.repaint();
                     return;
                 }
                 
                 String s2 = JOptionPane.showInputDialog(GUI.this, "Height:",
                         "Create Grid Network", JOptionPane.PLAIN_MESSAGE);
+                
+                if (s2 == null) {
+                    GUI.this.repaint();
+                    return;
+                }
+                
                 int v2;
                 try {
                     v2 = Integer.parseInt(s2);
@@ -165,16 +222,19 @@ public class GUI extends JFrame {
                                 "Height has to be positive", 
                                 "Create Grid Network - Error",
                                 JOptionPane.ERROR_MESSAGE);
+                        GUI.this.repaint();
                         return;
                     }
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(GUI.this, "Not a number", 
                             "Create Grid Network - Error",
                             JOptionPane.ERROR_MESSAGE);
+                    GUI.this.repaint();
                     return;
                 }
                 
                 network = Network.generateGrid(v1, v2);
+                selectedNode = null;
                 GUI.this.repaint();
             }
         });
@@ -184,6 +244,12 @@ public class GUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 String s1 = JOptionPane.showInputDialog(GUI.this, "Width:",
                         "Create Hex Network", JOptionPane.PLAIN_MESSAGE);
+                
+                if (s1 == null) {
+                    GUI.this.repaint();
+                    return;
+                }
+                
                 int v1;
                 try {
                     v1 = Integer.parseInt(s1);
@@ -192,18 +258,26 @@ public class GUI extends JFrame {
                                 "Width has to be positive", 
                                 "Create Hex Network - Error",
                                 JOptionPane.ERROR_MESSAGE);
+                        GUI.this.repaint();
                         return;
                     }
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(GUI.this, "Not a number", 
                             "Create Hex Network - Error",
                             JOptionPane.ERROR_MESSAGE);
+                    GUI.this.repaint();
                     return;
                 }
                 
                 String s2 = JOptionPane.showInputDialog(GUI.this,
                         "Height (odd recommended):",
                         "Create Hex Network", JOptionPane.PLAIN_MESSAGE);
+                
+                if (s2 == null) {
+                    GUI.this.repaint();
+                    return;
+                }
+                
                 int v2;
                 try {
                     v2 = Integer.parseInt(s2);
@@ -212,12 +286,14 @@ public class GUI extends JFrame {
                                 "Height has to be positive", 
                                 "Create Hex Network - Error",
                                 JOptionPane.ERROR_MESSAGE);
+                        GUI.this.repaint();
                         return;
                     }
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(GUI.this, "Not a number", 
                             "Create Hex Network - Error",
                             JOptionPane.ERROR_MESSAGE);
+                    GUI.this.repaint();
                     return;
                 }
                 
@@ -236,6 +312,7 @@ public class GUI extends JFrame {
                 }
                 
                 network = Network.generateHex(v1, v2, more);
+                selectedNode = null;
                 GUI.this.repaint();
             }
         });
@@ -245,6 +322,12 @@ public class GUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 String s1 = JOptionPane.showInputDialog(GUI.this, "Children:",
                         "Create Tree Network", JOptionPane.PLAIN_MESSAGE);
+                
+                if (s1 == null) {
+                    GUI.this.repaint();
+                    return;
+                }
+                
                 int v1;
                 try {
                     v1 = Integer.parseInt(s1);
@@ -253,18 +336,26 @@ public class GUI extends JFrame {
                                 "Children has to be positive", 
                                 "Create Tree Network - Error",
                                 JOptionPane.ERROR_MESSAGE);
+                        GUI.this.repaint();
                         return;
                     }
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(GUI.this, "Not a number", 
                             "Create Tree Network - Error",
                             JOptionPane.ERROR_MESSAGE);
+                    GUI.this.repaint();
                     return;
                 }
                 
                 String s2 = JOptionPane.showInputDialog(GUI.this,
                         "Levels:",
                         "Create Tree Network", JOptionPane.PLAIN_MESSAGE);
+                
+                if (s2 == null) {
+                    GUI.this.repaint();
+                    return;
+                }
+                
                 int v2;
                 try {
                     v2 = Integer.parseInt(s2);
@@ -273,16 +364,19 @@ public class GUI extends JFrame {
                                 "Levels has to be positive", 
                                 "Create Tree Network - Error",
                                 JOptionPane.ERROR_MESSAGE);
+                        GUI.this.repaint();
                         return;
                     }
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(GUI.this, "Not a number", 
                             "Create Tree Network - Error",
                             JOptionPane.ERROR_MESSAGE);
+                    GUI.this.repaint();
                     return;
                 }
                 
                 network = Network.generateFullTree(v1, v2);
+                selectedNode = null;
                 GUI.this.repaint();
             }
         });
@@ -290,28 +384,57 @@ public class GUI extends JFrame {
         menuItemAllToAll.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String v = JOptionPane.showInputDialog(GUI.this, "Nodes number:",
+                String s = JOptionPane.showInputDialog(GUI.this, "Nodes number:",
                         "Create All-to-all Network", JOptionPane.PLAIN_MESSAGE);
+                
+                if (s == null) {
+                    GUI.this.repaint();
+                    return;
+                }
                 
                 int v1;
                 try {
-                    v1 = Integer.parseInt(v);
+                    v1 = Integer.parseInt(s);
                     if (v1 < 2) {
                         JOptionPane.showMessageDialog(GUI.this,
                                 "There have to be at least two nodes", 
                                 "Create All-to-all Network - Error",
                                 JOptionPane.ERROR_MESSAGE);
+                        GUI.this.repaint();
                         return;
                     }
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(GUI.this, "Not a number", 
                             "Create All-to-all Network - Error",
                             JOptionPane.ERROR_MESSAGE);
-                    //TODO JOptionPanes do weird things with drawPanel, should repaint here? (and all other places like this one)
+                    GUI.this.repaint();
                     return;
                 }
                 
                 network = Network.generateFullyConnectedMesh(v1);
+                selectedNode = null;
+                GUI.this.repaint();
+            }
+        });
+        
+        menuItemStats.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                NetworkStats ns = network.getStatistics();
+                JTextArea ta = new JTextArea(
+                          "nodes:         " + ns.nodes + "\n"
+                        + "edges:         " + ns.edges + "\n"
+                        + "min degree:    " + ns.degreeMin + "\n"
+                        + "max degree:    " + ns.degreeMax + "\n"
+                        + "degree mode:   " + ns.degreeMode + "\n"
+                        + "degree mean:   " + ((int) (100 * ns.degreeMean)) / 100d + "\n"
+                        + "degree median: " + ns.degreeMedian + "\n"
+                );
+                ta.setFont(new Font("Lucida Console", Font.PLAIN, 14));
+                ta.setEditable(false);
+                ta.setBackground(new JPanel().getBackground());
+            
+                JOptionPane.showMessageDialog(GUI.this, ta, "Help", JOptionPane.PLAIN_MESSAGE);
                 GUI.this.repaint();
             }
         });
@@ -326,18 +449,45 @@ public class GUI extends JFrame {
         menuItemHelp.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //TODO about/help - remove what is printed on graphics
+                JTextArea ta = new JTextArea(
+                          "CREATE NODE\n"
+                        + "Double click with left mouse button.\n"
+                        + "\n"
+                        + "DELETE NODE\n"
+                        + "Double click with right mouse button.\n"
+                        + "\n"
+                        + "DELETE NODE - KEEP CONNECTIONS\n"
+                        + "Deletes node, however if any two nodes A and B\n"
+                        + "were connected via deleted node, after deletion\n"
+                        + "nodes A and B will be connected directly.\n"
+                        + "\n"
+                        + "(DIS)CONNECT TWO NODES\n"
+                        + "Drag from one node to another while\n"
+                        + "keeping left mouse button down.\n"
+                        + "\n"
+                        + "MOVE NODE\n"
+                        + "Press with right mouse button on the node\n"
+                        + "and keeping the button down move to the\n"
+                        + "new destination."
+                );
+                ta.setEditable(false);
+                ta.setBackground(new JPanel().getBackground());
+            
+                JOptionPane.showMessageDialog(GUI.this, ta, "Help", JOptionPane.PLAIN_MESSAGE);
+                GUI.this.repaint();
             }
         });
-        menuItemHelp.setEnabled(false); //TODO temporary until behaviour is implemented
         
         menuBar.add(menuNetwork);
+            menuNetwork.add(menuItemNew);
             menuNetwork.add(menuGenerate);
                 menuGenerate.add(menuItemRing);
+                menuGenerate.add(menuItemStar);
                 menuGenerate.add(menuItemGrid);
                 menuGenerate.add(menuItemHex);
                 menuGenerate.add(menuItemTree);
                 menuGenerate.add(menuItemAllToAll);
+            menuNetwork.add(menuItemStats);
             menuNetwork.add(menuItemPrint);
         menuAbout.add(menuItemHelp);
             menuBar.add(menuAbout);
@@ -347,8 +497,10 @@ public class GUI extends JFrame {
     
     
     
-    private class MListener implements MouseListener {
+    private class MListener implements MouseListener, MouseMotionListener {
 
+        private boolean dragging = false;
+        
         @Override
         public void mouseClicked(MouseEvent e) {
             if (e.getClickCount() >= 2) {
@@ -363,20 +515,26 @@ public class GUI extends JFrame {
                     if (n != null) {
                         Toolkit.getDefaultToolkit().beep();
                         return;
+                    } else {
+                        double dx = (double) x / size.width;
+                        double dy = (double) y / size.height;
+                        network.addNode(dx, dy);
                     }
-
-                    double dx = (double) x / size.width;
-                    double dy = (double) y / size.height;
-                    network.addNode(dx, dy);
                     
                 // delete node
                 } else if (e.getButton() == MouseEvent.BUTTON3) {
-                    if (n != null) {
-                        network.removeNode(n.id);
-                        if (n.equals(selectedNode)) {
-                            selectedNode = null;
+                    if (n == null) {
+                        Toolkit.getDefaultToolkit().beep();
+                        return;
+                    } else {
+                        if ((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) > 0) {
+                            network.removeNodeKeepConnections(n.id);
+                        } else {
+                            network.removeNode(n.id);
                         }
+                        selectedNode = null;
                     }
+                    
                 }
                 
                 GUI.this.repaint();
@@ -387,72 +545,53 @@ public class GUI extends JFrame {
         public void mousePressed(MouseEvent e) {
             final int x = e.getX() + x_change;
             final int y = e.getY() + y_change;
-                
-            if (e.getButton() == MouseEvent.BUTTON1) {
+            Node newSelecetion = findClosestNode(x, y);
 
-                //select
-                Node newSelecetion = findClosestNode(x, y);
-
-                // just deselect
-                if (newSelecetion == null && selectedNode != null) {
+            // just deselect
+            if (newSelecetion == null) {
+                if (selectedNode != null) {
                     selectedNode = null;
                     GUI.this.repaint();
+                }
 
-                // select new (if new is different than currect)
-                } else if (newSelecetion != null && !newSelecetion.equals(selectedNode)) {
+            // select new (if new is different than currect)
+            } else {
+                if (!newSelecetion.equals(selectedNode)) {
                     selectedNode = newSelecetion;
                     GUI.this.repaint();
                 }
-                
-            } else if (e.getButton() == MouseEvent.BUTTON3) {
-                if (e.getClickCount() == 1) {
-                    JPopupMenu menu = new JPopupMenu();
-                    menu.addPopupMenuListener(new PopupMenuListener() {
-                        @Override
-                        public void popupMenuWillBecomeVisible(PopupMenuEvent e) {}
-
-                        @Override
-                        public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-                            GUI.this.repaint();
-                        }
-                        @Override
-                        public void popupMenuCanceled(PopupMenuEvent e) {}
-                    });
-
-                    JMenuItem moveMI = new JMenuItem("move selected here");
-                    moveMI.setEnabled(selectedNode != null);
-                    moveMI.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            Dimension size = drawPane.getSize();
-                            network.moveNode(selectedNode.id, x, y);
-                            selectedNode.x = (double) x / size.width;
-                            selectedNode.y = (double) y / size.height;
-                            GUI.this.repaint();
-                        }
-                    });
-                    menu.add(moveMI);
-
-                    menu.show(drawPane, x + 1, y + 1); //a small fix that will be removed
-                }
             }
-            
         }
 
         @Override
         public void mouseReleased(MouseEvent e) {
+//            if (!dragging) { //TODO is it necessary?
+//                return;
+//            }
+            
             int x = e.getX() + x_change;
             int y = e.getY() + y_change;
-            Node n = findClosestNode(x, y);
-            if (n != null && !n.equals(selectedNode) && selectedNode != null) {
-                if (network.isConnected(n.id, selectedNode.id)) {
-                    network.disconnectNodes(selectedNode.id, n.id);
-                } else {
-                    network.connectNodes(selectedNode.id, n.id);
+            if (e.getButton() == MouseEvent.BUTTON1) {
+                Node n = findClosestNode(x, y);
+                if (n != null && !n.equals(selectedNode) && selectedNode != null) {
+                    if (network.isConnected(n.id, selectedNode.id)) {
+                        network.disconnectNodes(selectedNode.id, n.id);
+                    } else {
+                        network.connectNodes(selectedNode.id, n.id);
+                    }
                 }
                 selectedNode = null;
-                GUI.this.repaint();
+            } else if (e.getButton() == MouseEvent.BUTTON3) {
+                if (selectedNode != null) {
+                    Dimension size = drawPane.getSize();
+                    selectedNode.x = (double) x / size.width;
+                    selectedNode.y = (double) y / size.height;
+                    network.moveNode(selectedNode.id, selectedNode.x, selectedNode.y);
+                }
             }
+            
+            dragging = false;
+            GUI.this.repaint();
         }
 
         @Override
@@ -460,6 +599,32 @@ public class GUI extends JFrame {
 
         @Override
         public void mouseExited(MouseEvent e) {}
+
+        @Override
+        public void mouseDragged(MouseEvent e) {
+            if (selectedNode != null) {
+                int mask = MouseEvent.BUTTON1_DOWN_MASK
+                               | MouseEvent.BUTTON3_DOWN_MASK;
+                
+                if ((e.getModifiersEx() & mask)
+                                              == MouseEvent.BUTTON1_DOWN_MASK) {
+                    Graphics g = drawPane.getGraphics();
+                    g.drawLine(e.getX() + x_change, e.getY() + y_change,
+                               e.getX() + x_change, e.getY() + y_change);
+                    dragging = true;
+                } else if ((e.getModifiersEx() & mask)
+                                              == MouseEvent.BUTTON3_DOWN_MASK) {
+                    Graphics g = drawPane.getGraphics();
+                    g.setColor(Color.red);
+                    g.drawLine(e.getX() + x_change, e.getY() + y_change,
+                               e.getX() + x_change, e.getY() + y_change);
+                    dragging = true;
+                }
+            }
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {}
     }
     
     private class DrawablePanel extends JPanel {
@@ -471,21 +636,27 @@ public class GUI extends JFrame {
         
         @Override
         public void paint(Graphics g) {
+            /* //FIXME JOptionPanes break drawing on graphics
+             * 
+             * When JOptionPane is dragged around, this method is invoked,
+             * however drawable pane sizes are not valid and this method should
+             * not be called.
+             * 
+             * Best solution would be to check if there is already JOptionPane
+             * showing and in that case do not call this method.
+             * 
+             * If there is no way to do it, it is possible to add a boolean
+             * variable that indicates whether to draw or not. It has to be
+             * changed before creating each JOptionPane and after its closing.
+             * Hence all used JOptionPanes should be extracted to the separate
+             * method that will be resulting user input (inserted into
+             * JOptionPane) and also handling this variable.
+             */
             Rectangle size = g.getClipBounds();
             g.setColor(Color.white);
             g.fillRect(size.x, size.y, size.width, size.height);
             
             g.setFont(new Font("Arial", Font.BOLD, 13));
-            
-            { //HELP
-                g.setColor(Color.lightGray);
-                g.drawString("create node - double left click", 5, 15);
-                g.drawString("delete node - double right click", 5, 30);
-                g.drawString("select node - left click", 5, 45);
-                g.drawString("(dis)connect nodes - drag from one to other", 5, 60);
-                g.drawString("move node - first select, "
-                        + "then right click at destination", 5, 75);
-            }
             
             int w = size.width;
             int h = size.height;
