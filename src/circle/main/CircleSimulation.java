@@ -2,6 +2,9 @@ package circle.main;
 
 import circle.agents.AbstractAgent;
 import circle.agents.AgentInfo;
+import exceptions.FeatureDisabledException;
+import exceptions.IncorrectUsageException;
+import exceptions.ShouldNeverHappenException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -97,7 +100,8 @@ public class CircleSimulation {
      */
     private void firstRound() {
         if (round != 0) {
-            throw new RuntimeException("firstRound() call during round " + round);
+            throw new ShouldNeverHappenException(
+                    "firstRound() call during round " + round);
         }
         
         int[] flags = getFirstRoundFlags();
@@ -114,14 +118,16 @@ public class CircleSimulation {
         
         // check length
         if (flags.length != agents.length) {
-            throw new RuntimeException("firstRoundFlags() returns an array "
+            throw new IncorrectUsageException(
+                    "getFirstRoundFlags() returns an array "
                     + "of different length than the number of agents");
         }
         
         // check flags
         for (int i = 0; i < flags.length; i++) {
             if (flags[i] < 0 || flags[i] >= Flag.COUNT) {
-                throw new RuntimeException("firstRoundFlags() returns an array "
+                throw new IncorrectUsageException(
+                        "getFirstRoundFlags() returns an array "
                         + "containing invalid flag: i = " + i + ", flag = "
                         + flags[i] + ", Flag.COUNT = " + Flag.COUNT);
             }
@@ -137,6 +143,9 @@ public class CircleSimulation {
     /**
      * Override it to define flags raised in the first round. This will override
      * agents' behaviour for the first round that is usually random choice.
+     * 
+     * If overridden incorrectly, IncorrectUsageException may be thrown
+     * later on by the simulation.
      */
     protected int[] getFirstRoundFlags() {
         return null;

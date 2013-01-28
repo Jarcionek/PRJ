@@ -498,8 +498,6 @@ public class GUI extends JFrame {
     
     
     private class MListener implements MouseListener, MouseMotionListener {
-
-        private boolean dragging = false;
         
         @Override
         public void mouseClicked(MouseEvent e) {
@@ -565,10 +563,6 @@ public class GUI extends JFrame {
 
         @Override
         public void mouseReleased(MouseEvent e) {
-//            if (!dragging) { //TODO is it necessary?
-//                return;
-//            }
-            
             int x = e.getX() + x_change;
             int y = e.getY() + y_change;
             if (e.getButton() == MouseEvent.BUTTON1) {
@@ -590,7 +584,6 @@ public class GUI extends JFrame {
                 }
             }
             
-            dragging = false;
             GUI.this.repaint();
         }
 
@@ -611,14 +604,12 @@ public class GUI extends JFrame {
                     Graphics g = drawPane.getGraphics();
                     g.drawLine(e.getX() + x_change, e.getY() + y_change,
                                e.getX() + x_change, e.getY() + y_change);
-                    dragging = true;
                 } else if ((e.getModifiersEx() & mask)
                                               == MouseEvent.BUTTON3_DOWN_MASK) {
                     Graphics g = drawPane.getGraphics();
                     g.setColor(Color.red);
                     g.drawLine(e.getX() + x_change, e.getY() + y_change,
                                e.getX() + x_change, e.getY() + y_change);
-                    dragging = true;
                 }
             }
         }
@@ -636,23 +627,8 @@ public class GUI extends JFrame {
         
         @Override
         public void paint(Graphics g) {
-            /* //FIXME JOptionPanes break drawing on graphics
-             * 
-             * When JOptionPane is dragged around, this method is invoked,
-             * however drawable pane sizes are not valid and this method should
-             * not be called.
-             * 
-             * Best solution would be to check if there is already JOptionPane
-             * showing and in that case do not call this method.
-             * 
-             * If there is no way to do it, it is possible to add a boolean
-             * variable that indicates whether to draw or not. It has to be
-             * changed before creating each JOptionPane and after its closing.
-             * Hence all used JOptionPanes should be extracted to the separate
-             * method that will be resulting user input (inserted into
-             * JOptionPane) and also handling this variable.
-             */
-            Rectangle size = g.getClipBounds();
+            Rectangle size = drawPane.getBounds();
+            size.y = 0; // because of JMenuBar
             g.setColor(Color.white);
             g.fillRect(size.x, size.y, size.width, size.height);
             
@@ -662,7 +638,7 @@ public class GUI extends JFrame {
             int h = size.height;
             
             g.setColor(Color.black);
-            for (int i = 0; i < network.nodesNumber(); i++) {
+            for (int i = 0; i < network.getNumberOfNodes(); i++) {
                 int x1 = (int) (network.getNode(i).x * w);
                 int y1 = (int) (network.getNode(i).y * h);
                 for (Integer j : network.adjacentTo(i)) {

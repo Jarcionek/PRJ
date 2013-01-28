@@ -2,6 +2,7 @@ package circle.main;
 
 import circle.agents.AbstractAgent;
 import circle.agents.AgentInfo;
+import exceptions.ShouldNeverHappenException;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -10,8 +11,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -183,7 +182,7 @@ public final class MemoryAccessor extends JPanel {
                     result[i] = new JButton("" + ((Object[]) o)[i - 3]);
 
                 } else {
-                    throw new RuntimeException("Should never happen");
+                    throw new ShouldNeverHappenException();
                 }
                 
                 final int fi = i;

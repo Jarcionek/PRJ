@@ -1,19 +1,15 @@
 package network.creator;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import sun.security.provider.certpath.AdjacencyList;
+import exceptions.ShouldNeverHappenException;
+import java.util.*;
 
 /**
  * @author Jaroslaw Pawlak
  */
 public class Network implements Iterable<Node> {
     
-    private List<Node> nodeList = new LinkedList<Node>();
-    private List<List<Integer>> adjacencyList = new LinkedList<List<Integer>>();
+    private final List<Node> nodeList = new LinkedList<Node>();
+    private final List<List<Integer>> adjacencyList = new LinkedList<List<Integer>>();
     
     public void addNode(double x, double y) {
         if (x < 0 || x > 1 || y < 0 || y > 1) {
@@ -128,7 +124,7 @@ public class Network implements Iterable<Node> {
     @Override
     public String toString() {
         if (nodeList.size() != adjacencyList.size()) {
-            throw new RuntimeException("Ups! Something is wrong!");
+            throw new ShouldNeverHappenException("Ups! Something is wrong!");
         }
         
         String result = "";
@@ -136,7 +132,7 @@ public class Network implements Iterable<Node> {
         for (int i = 0; i < nodeList.size(); i++) {
             Node n = nodeList.get(i);
             if (n.id != i) {
-                throw new RuntimeException("IDs do not match!");
+                throw new ShouldNeverHappenException("IDs do not match!");
             }
             result += i + " (" + n.x + "; " + n.y + "): ";
             for (int j : adjacencyList.get(i)) {
@@ -169,7 +165,10 @@ public class Network implements Iterable<Node> {
         return adjacencyList.get(id).toArray(new Integer[] {});
     }
     
-    public int nodesNumber() {
+    public int getNumberOfNodes() {
+        if (nodeList.size() != adjacencyList.size()) {
+            throw new ShouldNeverHappenException("error 12463465472625324");
+        }
         return nodeList.size();
     }
     
@@ -385,7 +384,7 @@ public class Network implements Iterable<Node> {
 
     public static NetworkStats generateStatistics(Network n) {
         if (n.nodeList.size() != n.adjacencyList.size()) {
-            throw new RuntimeException("Ups! It should never happen!");
+            throw new ShouldNeverHappenException("Ups! It should never happen!");
         }
         
         int[] neighbours = new int[n.adjacencyList.size()];
