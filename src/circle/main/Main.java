@@ -11,7 +11,7 @@ public class Main {
             
     private static final int AGENTS = 20;
     private static final int VISIBILITY = 1;
-    private static final Class AGENT = ConsistentAgent.class;
+    private static final Class AGENT = ThirdAgent.class;
     
     public static void main(String[] args) {
         CircleSimulation sim = new CircleSimulation(AGENTS, VISIBILITY, AGENT);

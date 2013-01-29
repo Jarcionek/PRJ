@@ -54,6 +54,11 @@ public final class MemoryAccessor extends JPanel {
         }
     }
 
+    /* //TODO
+     * It should take an object and check its class (and superclasses) -
+     * if it is AgentInfo, then the title should be set accordingly,
+     * otherwise it should be just a name of the class.
+     */
     public void setAgent(AgentInfo ai) {
 
         agentInfo = ai;
@@ -80,7 +85,7 @@ public final class MemoryAccessor extends JPanel {
     }
 
     /**
-     * //TODO handle other keywords (e.g. final)
+     * //TODO handle other keywords (at least final & static)
      * 
      * @throws IllegalAccessException 
      *         protected and friendly (no-modifier) access modifiers are

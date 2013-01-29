@@ -64,7 +64,8 @@ public class SimulationGUI extends JFrame {
             }
             @Override
             public void paint(Graphics g) {
-                Rectangle rect = g.getClipBounds();
+                Rectangle rect = drawablePanel.getBounds();
+                rect.y = 0; // in case JMenuBar was added in the future
                 g.setColor(Color.white);
                 g.fillRect(rect.x, rect.y, rect.width, rect.height);
                 if (visibilityCheckBox != null) {
@@ -295,7 +296,8 @@ public class SimulationGUI extends JFrame {
      * Draws connections between agents, their states, etc.
      */
     private void draw(Graphics g) {
-        Rectangle rect = g.getClipBounds();
+        Rectangle rect = drawablePanel.getBounds();
+        rect.y = 0; // in case JMenuBar was added in the future
         
         Point centre = new Point(rect.width / 2, rect.height / 2);
         int radius = Math.min(rect.width, rect.height) * 3 / 4 / 2;

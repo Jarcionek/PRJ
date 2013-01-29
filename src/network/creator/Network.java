@@ -144,6 +144,9 @@ public class Network implements Iterable<Node> {
         return result;
     }
     
+    /**
+     * Returns network as string ignoring positions (x, y) of nodes.
+     */
     public String toStringAdjacencyOnly() {
         return this.toString().replaceAll("\\(.*\\)", "");
     }
@@ -160,7 +163,7 @@ public class Network implements Iterable<Node> {
     
     public Integer[] adjacentTo(int id) {
         if (id < 0 || id >= adjacencyList.size()) {
-            throw new IllegalArgumentException("Incorrect ID!");
+            throw new IllegalArgumentException("Incorrect ID! id = " + id);
         }
         return adjacencyList.get(id).toArray(new Integer[] {});
     }
@@ -225,8 +228,11 @@ public class Network implements Iterable<Node> {
      * Odd height recommended.
      */
     public static Network generateHex(int width, int height, boolean more) {
-        if (width <= 0 || height <= 0) {
-            throw new IllegalArgumentException("Values must be positive");
+        if (width < 2) {
+            throw new IllegalArgumentException("Width cannot be smaller than 2.");
+        }
+        if (height < 1) {
+            throw new IllegalArgumentException("Height cannot be smaller than 1.");
         }
         
         Network n = new Network();
@@ -398,17 +404,16 @@ public class Network implements Iterable<Node> {
         
         int nodes = neighbours.length;
         
-        int edges = 0;
+        int edges_x2 = 0;
         for (int i : neighbours) {
-            edges += i;
+            edges_x2 += i;
         }
-        edges >>= 1;
         
         int degreeMin = neighbours[0];
         
         int degreeMax = neighbours[neighbours.length - 1];
         
-        double degreeMean = (double) (edges << 1) / nodes;
+        double degreeMean = (double) edges_x2 / nodes;
         
         int degreeMedian = neighbours[neighbours.length / 2];
         
@@ -430,7 +435,7 @@ public class Network implements Iterable<Node> {
             degreeMode = neighbours[neighbours.length - 1];
         }
         
-        return new NetworkStats(nodes, edges, degreeMin, degreeMax,
+        return new NetworkStats(nodes, edges_x2 >> 1, degreeMin, degreeMax,
                                 degreeMean, degreeMedian, degreeMode);
         
     }

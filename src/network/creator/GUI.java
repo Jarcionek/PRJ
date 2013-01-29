@@ -21,6 +21,9 @@ public class GUI extends JFrame {
     
     private DrawablePanel drawPane;
     
+    private int[] nodeColor = null;
+    private boolean colorNetwork = false;
+    
     public GUI(Network network)  {
         super("Network Creator");
         this.network = network;
@@ -79,6 +82,7 @@ public class GUI extends JFrame {
                     JMenuItem menuItemAllToAll = new JMenuItem("All-to-all");
                 JMenuItem menuItemStats = new JMenuItem("Show statistics");
                 JMenuItem menuItemPrint = new JMenuItem("Print to console");
+                JCheckBoxMenuItem menuItemColor = new JCheckBoxMenuItem("Color the network");
             JMenu menuAbout = new JMenu("About");
                 JMenuItem menuItemHelp = new JMenuItem("Help");
         
@@ -104,6 +108,7 @@ public class GUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 network = new Network();
+                nodeColor = null;
                 selectedNode = null;
                 GUI.this.repaint();
             }
@@ -112,13 +117,18 @@ public class GUI extends JFrame {
         menuItemRing.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String v = JOptionPane.showInputDialog(GUI.this, "Nodes number:",
+                String s = JOptionPane.showInputDialog(GUI.this, "Nodes number:",
                         "Create Ring Network", JOptionPane.PLAIN_MESSAGE);
+                                
+                if (s == null) {
+                    GUI.this.repaint();
+                    return;
+                }
                 
-                int v1;
+                int v;
                 try {
-                    v1 = Integer.parseInt(v);
-                    if (v1 < 3) {
+                    v = Integer.parseInt(s);
+                    if (v < 3) {
                         JOptionPane.showMessageDialog(GUI.this,
                                 "There have to be at least three nodes", 
                                 "Create Ring Network - Error",
@@ -134,7 +144,8 @@ public class GUI extends JFrame {
                     return;
                 }
                 
-                network = Network.generateRing(v1);
+                network = Network.generateRing(v);
+                nodeColor = null;
                 selectedNode = null;
                 GUI.this.repaint();
             }
@@ -171,6 +182,7 @@ public class GUI extends JFrame {
                 }
                 
                 network = Network.generateStar(v1);
+                nodeColor = null;
                 selectedNode = null;
                 GUI.this.repaint();
             }
@@ -234,6 +246,7 @@ public class GUI extends JFrame {
                 }
                 
                 network = Network.generateGrid(v1, v2);
+                nodeColor = null;
                 selectedNode = null;
                 GUI.this.repaint();
             }
@@ -253,9 +266,9 @@ public class GUI extends JFrame {
                 int v1;
                 try {
                     v1 = Integer.parseInt(s1);
-                    if (v1 < 1) {
+                    if (v1 < 2) {
                         JOptionPane.showMessageDialog(GUI.this,
-                                "Width has to be positive", 
+                                "Width has to be at least 2", 
                                 "Create Hex Network - Error",
                                 JOptionPane.ERROR_MESSAGE);
                         GUI.this.repaint();
@@ -308,10 +321,12 @@ public class GUI extends JFrame {
                 } else if (c == JOptionPane.NO_OPTION) {
                     more = false;
                 } else {
+                    GUI.this.repaint();
                     return;
                 }
                 
                 network = Network.generateHex(v1, v2, more);
+                nodeColor = null;
                 selectedNode = null;
                 GUI.this.repaint();
             }
@@ -376,6 +391,7 @@ public class GUI extends JFrame {
                 }
                 
                 network = Network.generateFullTree(v1, v2);
+                nodeColor = null;
                 selectedNode = null;
                 GUI.this.repaint();
             }
@@ -412,6 +428,7 @@ public class GUI extends JFrame {
                 }
                 
                 network = Network.generateFullyConnectedMesh(v1);
+                nodeColor = null;
                 selectedNode = null;
                 GUI.this.repaint();
             }
@@ -443,6 +460,17 @@ public class GUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println(network.toStringAdjacencyOnly());
+            }
+        });
+        
+        menuItemColor.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                colorNetwork = ((JCheckBoxMenuItem) e.getSource()).isSelected();
+                if (colorNetwork) {
+                    nodeColor = GraphPainter.paint(network);
+                }
+                GUI.this.repaint();
             }
         });
         
@@ -489,6 +517,7 @@ public class GUI extends JFrame {
                 menuGenerate.add(menuItemAllToAll);
             menuNetwork.add(menuItemStats);
             menuNetwork.add(menuItemPrint);
+            menuNetwork.add(menuItemColor);
         menuAbout.add(menuItemHelp);
             menuBar.add(menuAbout);
         
@@ -517,6 +546,7 @@ public class GUI extends JFrame {
                         double dx = (double) x / size.width;
                         double dy = (double) y / size.height;
                         network.addNode(dx, dy);
+                        nodeColor = null;
                     }
                     
                 // delete node
@@ -530,6 +560,7 @@ public class GUI extends JFrame {
                         } else {
                             network.removeNode(n.id);
                         }
+                        nodeColor = null;
                         selectedNode = null;
                     }
                     
@@ -565,6 +596,8 @@ public class GUI extends JFrame {
         public void mouseReleased(MouseEvent e) {
             int x = e.getX() + x_change;
             int y = e.getY() + y_change;
+            
+            // connect/disconnect
             if (e.getButton() == MouseEvent.BUTTON1) {
                 Node n = findClosestNode(x, y);
                 if (n != null && !n.equals(selectedNode) && selectedNode != null) {
@@ -574,7 +607,10 @@ public class GUI extends JFrame {
                         network.connectNodes(selectedNode.id, n.id);
                     }
                 }
+                nodeColor = null;
                 selectedNode = null;
+                
+            // move node
             } else if (e.getButton() == MouseEvent.BUTTON3) {
                 if (selectedNode != null) {
                     Dimension size = drawPane.getSize();
@@ -627,16 +663,18 @@ public class GUI extends JFrame {
         
         @Override
         public void paint(Graphics g) {
+            if (colorNetwork && nodeColor == null) {
+                nodeColor = GraphPainter.paint(network);
+            }
+            
             Rectangle size = drawPane.getBounds();
             size.y = 0; // because of JMenuBar
             g.setColor(Color.white);
             g.fillRect(size.x, size.y, size.width, size.height);
-            
-            g.setFont(new Font("Arial", Font.BOLD, 13));
-            
             int w = size.width;
             int h = size.height;
             
+            // draw edges
             g.setColor(Color.black);
             for (int i = 0; i < network.getNumberOfNodes(); i++) {
                 int x1 = (int) (network.getNode(i).x * w);
@@ -648,10 +686,15 @@ public class GUI extends JFrame {
                 }
             }
             
+            // draw nodes and their labels
+            g.setFont(new Font("Arial", Font.BOLD, 13));
             FontMetrics fm = this.getFontMetrics(g.getFont());
-            
             for (Node n : network) {
-                g.setColor(Color.green);
+                if (colorNetwork) {
+                    g.setColor(GraphPainter.getColor(nodeColor[n.id]));
+                } else {
+                    g.setColor(Color.green); 
+                }
                 g.fillOval((int) (n.x * w) - S / 2, (int) (n.y * h) - S / 2, S, S);
                 g.setColor(Color.black);
                 String id = "" + n.id;
@@ -659,6 +702,7 @@ public class GUI extends JFrame {
                                  (int) (n.y * h) + g.getFont().getSize() / 2);
             }
             
+            // highlight selection
             if (selectedNode != null) {
                 int rx = (int) (selectedNode.x * w);
                 int ry = (int) (selectedNode.y * h);
