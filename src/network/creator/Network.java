@@ -179,17 +179,17 @@ public class Network implements Iterable<Node> {
         return adjacencyList.get(Math.min(id1, id2)).contains(Math.max(id1, id2));
     }
     
+    /**
+     * If any coordinate is out of range [0, 1] it will be set to 0 if it was
+     * negative or to 1 if it was greater than 1.
+     */
     public void moveNode(int id, double x, double y) {
         if (id < 0 || id > nodeList.size()) {
             throw new IllegalArgumentException("Invalid ID!");
         }
-        if (x < 0 || x > 1 || y < 0 || y > 1) {
-            throw new IllegalArgumentException("New coordinates invalid: "
-                    + "x = " + x + ", y = " + y);
-        }
         
-        nodeList.get(id).x = x;
-        nodeList.get(id).y = y;
+        nodeList.get(id).x = Math.max(0, Math.min(x, 1));
+        nodeList.get(id).y = Math.max(0, Math.min(y, 1));
     }
     
     public NetworkStats getStatistics() {

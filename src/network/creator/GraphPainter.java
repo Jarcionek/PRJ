@@ -113,4 +113,8 @@ public class GraphPainter {
         }
         return COLOR[i];
     }
+    
+    public static int getNumberOfDefinedColors() {
+        return COLOR.length;
+    }
 }

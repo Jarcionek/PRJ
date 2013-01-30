@@ -21,8 +21,8 @@ public class GUI extends JFrame {
     
     private DrawablePanel drawPane;
     
+    private JCheckBoxMenuItem menuItemColor;
     private int[] nodeColor = null;
-    private boolean colorNetwork = false;
     
     public GUI(Network network)  {
         super("Network Creator");
@@ -82,7 +82,7 @@ public class GUI extends JFrame {
                     JMenuItem menuItemAllToAll = new JMenuItem("All-to-all");
                 JMenuItem menuItemStats = new JMenuItem("Show statistics");
                 JMenuItem menuItemPrint = new JMenuItem("Print to console");
-                JCheckBoxMenuItem menuItemColor = new JCheckBoxMenuItem("Color the network");
+                menuItemColor = new JCheckBoxMenuItem("Color the network");
             JMenu menuAbout = new JMenu("About");
                 JMenuItem menuItemHelp = new JMenuItem("Help");
         
@@ -466,9 +466,21 @@ public class GUI extends JFrame {
         menuItemColor.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                colorNetwork = ((JCheckBoxMenuItem) e.getSource()).isSelected();
-                if (colorNetwork) {
+                if (menuItemColor.isSelected()) {
                     nodeColor = GraphPainter.paint(network);
+                    int maxFlag = -1;
+                    for (int i : nodeColor) {
+                        if (i > maxFlag) {
+                            maxFlag = i;
+                        }
+                    }
+                    if (maxFlag >= GraphPainter.getNumberOfDefinedColors()) {
+                        menuItemColor.setSelected(false);
+                        JOptionPane.showMessageDialog(GUI.this,
+                                "There are not enough color definitions "
+                                + "to color this graph!",
+                                "Color the graph - error", JOptionPane.WARNING_MESSAGE);
+                    }
                 }
                 GUI.this.repaint();
             }
@@ -614,6 +626,8 @@ public class GUI extends JFrame {
             } else if (e.getButton() == MouseEvent.BUTTON3) {
                 if (selectedNode != null) {
                     Dimension size = drawPane.getSize();
+                    x = Math.max(S / 2, Math.min(x, size.width - S / 2));
+                    y = Math.max(S / 2, Math.min(y, size.height - S / 2));
                     selectedNode.x = (double) x / size.width;
                     selectedNode.y = (double) y / size.height;
                     network.moveNode(selectedNode.id, selectedNode.x, selectedNode.y);
@@ -663,8 +677,22 @@ public class GUI extends JFrame {
         
         @Override
         public void paint(Graphics g) {
-            if (colorNetwork && nodeColor == null) {
-                nodeColor = GraphPainter.paint(network);
+            if (menuItemColor.isSelected()) {
+                if (nodeColor == null) {
+                    nodeColor = GraphPainter.paint(network);
+                }
+                
+                int maxFlag = -1;
+                for (int i : nodeColor) {
+                    if (i > maxFlag) {
+                        maxFlag = i;
+                    }
+                }
+                if (maxFlag >= GraphPainter.getNumberOfDefinedColors()) {
+                    menuItemColor.setSelected(false);
+                    //TODO maybe somehow some popup here instead of just beep?
+                    Toolkit.getDefaultToolkit().beep();
+                }
             }
             
             Rectangle size = drawPane.getBounds();
@@ -690,7 +718,7 @@ public class GUI extends JFrame {
             g.setFont(new Font("Arial", Font.BOLD, 13));
             FontMetrics fm = this.getFontMetrics(g.getFont());
             for (Node n : network) {
-                if (colorNetwork) {
+                if (menuItemColor.isSelected()) {
                     g.setColor(GraphPainter.getColor(nodeColor[n.id]));
                 } else {
                     g.setColor(Color.green); 
