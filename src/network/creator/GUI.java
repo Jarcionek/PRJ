@@ -22,6 +22,8 @@ public class GUI extends JFrame {
     
     private DrawablePanel drawPane;
     
+    private JCheckBoxMenuItem menuItemAntiAliasing;
+    private JCheckBoxMenuItem menuItemAdvancedMoving;
     private JCheckBoxMenuItem menuItemColor;
     private int[] nodeColor = null;
     
@@ -44,6 +46,8 @@ public class GUI extends JFrame {
         Point p2 = this.getLocationOnScreen();
         x_change = -(p1.x - p2.x);
         y_change = -(p1.y - p2.y);
+        
+        ToolTipManager.sharedInstance().setInitialDelay(200);
         
         //TODO replace with window listener? what to do on close? ask to save?
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -84,6 +88,9 @@ public class GUI extends JFrame {
                 JMenuItem menuItemStats = new JMenuItem("Show statistics");
                 JMenuItem menuItemPrint = new JMenuItem("Print to console");
                 menuItemColor = new JCheckBoxMenuItem("Color the network");
+            JMenu menuOptions = new JMenu("Options");
+                menuItemAntiAliasing = new JCheckBoxMenuItem("Anti-aliasing");
+                menuItemAdvancedMoving = new JCheckBoxMenuItem("Advanced nodes moving");
             JMenu menuAbout = new JMenu("About");
                 JMenuItem menuItemHelp = new JMenuItem("Help");
         
@@ -103,6 +110,7 @@ public class GUI extends JFrame {
         };
         menuNetwork.addMenuListener(menuListener);
         menuGenerate.addMenuListener(menuListener);
+        menuOptions.addMenuListener(menuListener);
         menuAbout.addMenuListener(menuListener);
 
         menuItemNew.addActionListener(new ActionListener() {
@@ -487,6 +495,12 @@ public class GUI extends JFrame {
             }
         });
         
+        menuItemAntiAliasing.setSelected(true);
+        menuItemAntiAliasing.setToolTipText("Disable to increase performance");
+                
+        menuItemAdvancedMoving.setSelected(true);
+        menuItemAdvancedMoving.setToolTipText("Disable to increase performance");
+        
         menuItemHelp.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -531,8 +545,11 @@ public class GUI extends JFrame {
             menuNetwork.add(menuItemStats);
             menuNetwork.add(menuItemPrint);
             menuNetwork.add(menuItemColor);
-        menuAbout.add(menuItemHelp);
-            menuBar.add(menuAbout);
+        menuBar.add(menuOptions);
+            menuOptions.add(menuItemAntiAliasing);
+            menuOptions.add(menuItemAdvancedMoving);
+        menuBar.add(menuAbout);
+            menuAbout.add(menuItemHelp);
         
         return menuBar;
     }
@@ -658,7 +675,19 @@ public class GUI extends JFrame {
                 color = Color.black;
             } else if ((e.getModifiersEx() & mask)
                                               == MouseEvent.BUTTON3_DOWN_MASK) {
-                color = Color.red;
+                if (menuItemAdvancedMoving.isSelected()) {
+                    int x = e.getX() + x_change;
+                    int y = e.getY() + y_change;
+                    Dimension size = drawPane.getSize();
+                    x = Math.max(S / 2, Math.min(x, size.width - S / 2));
+                    y = Math.max(S / 2, Math.min(y, size.height - S / 2));
+                    selectedNode.x = (double) x / size.width;
+                    selectedNode.y = (double) y / size.height;
+                    network.moveNode(selectedNode.id, selectedNode.x, selectedNode.y);
+                    GUI.this.repaint();
+                } else {
+                    color = Color.red;
+                }
             }
 
             if (color != null) {
@@ -669,9 +698,11 @@ public class GUI extends JFrame {
                 Graphics2D g2d = image.createGraphics();
 
                 // anti-aliasing
-                g2d.setStroke(new BasicStroke(1.0f));
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                                        RenderingHints.VALUE_ANTIALIAS_ON);
+                if (menuItemAntiAliasing.isSelected()) {
+                    g2d.setStroke(new BasicStroke(1.0f));
+                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                                         RenderingHints.VALUE_ANTIALIAS_ON);
+                }
 
                 // drawing
                 g2d.setColor(color);
@@ -726,9 +757,11 @@ public class GUI extends JFrame {
             Graphics2D g2d = image.createGraphics();
 
             // anti-aliasing
-            g2d.setStroke(new BasicStroke(1.5f));
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                                 RenderingHints.VALUE_ANTIALIAS_ON);
+            if (menuItemAntiAliasing.isSelected()) {
+                g2d.setStroke(new BasicStroke(1.5f));
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                                     RenderingHints.VALUE_ANTIALIAS_ON);
+            }
             // white background
             g2d.setColor(Color.white);
             g2d.fillRect(0, 0, w, h);
