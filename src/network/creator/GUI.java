@@ -2,6 +2,7 @@ package network.creator;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
@@ -540,6 +541,9 @@ public class GUI extends JFrame {
     
     private class MListener implements MouseListener, MouseMotionListener {
         
+        private int lastX;
+        private int lastY;
+        
         @Override
         public void mouseClicked(MouseEvent e) {
             if (e.getClickCount() >= 2) {
@@ -551,10 +555,7 @@ public class GUI extends JFrame {
                 
                 // add new node
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    if (n != null) {
-                        Toolkit.getDefaultToolkit().beep();
-                        return;
-                    } else {
+                    if (n == null) {
                         double dx = (double) x / size.width;
                         double dy = (double) y / size.height;
                         network.addNode(dx, dy);
@@ -563,10 +564,7 @@ public class GUI extends JFrame {
                     
                 // delete node
                 } else if (e.getButton() == MouseEvent.BUTTON3) {
-                    if (n == null) {
-                        Toolkit.getDefaultToolkit().beep();
-                        return;
-                    } else {
+                    if (n != null) {
                         if ((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) > 0) {
                             network.removeNodeKeepConnections(n.id);
                         } else {
@@ -586,6 +584,8 @@ public class GUI extends JFrame {
         public void mousePressed(MouseEvent e) {
             final int x = e.getX() + x_change;
             final int y = e.getY() + y_change;
+            lastX = e.getX();
+            lastY = e.getY();
             Node newSelecetion = findClosestNode(x, y);
 
             // just deselect
@@ -620,7 +620,6 @@ public class GUI extends JFrame {
                     }
                 }
                 nodeColor = null;
-                selectedNode = null;
                 
             // move node
             } else if (e.getButton() == MouseEvent.BUTTON3) {
@@ -645,22 +644,41 @@ public class GUI extends JFrame {
 
         @Override
         public void mouseDragged(MouseEvent e) {
-            if (selectedNode != null) {
-                int mask = MouseEvent.BUTTON1_DOWN_MASK
-                               | MouseEvent.BUTTON3_DOWN_MASK;
-                
-                if ((e.getModifiersEx() & mask)
-                                              == MouseEvent.BUTTON1_DOWN_MASK) {
-                    Graphics g = drawPane.getGraphics();
-                    g.drawLine(e.getX() + x_change, e.getY() + y_change,
-                               e.getX() + x_change, e.getY() + y_change);
-                } else if ((e.getModifiersEx() & mask)
+            if (selectedNode == null) {
+                return;
+            }
+            
+            int mask = MouseEvent.BUTTON1_DOWN_MASK
+                            | MouseEvent.BUTTON3_DOWN_MASK;
+
+            Color color = null;
+            if ((e.getModifiersEx() & mask) == MouseEvent.BUTTON1_DOWN_MASK) {
+                color = Color.black;
+            } else if ((e.getModifiersEx() & mask)
                                               == MouseEvent.BUTTON3_DOWN_MASK) {
-                    Graphics g = drawPane.getGraphics();
-                    g.setColor(Color.red);
-                    g.drawLine(e.getX() + x_change, e.getY() + y_change,
-                               e.getX() + x_change, e.getY() + y_change);
-                }
+                color = Color.red;
+            }
+
+            if (color != null) {
+                BufferedImage image = new BufferedImage(
+                                                   drawPane.getBounds().width,
+                                                   drawPane.getBounds().height,
+                                                   BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g2d = image.createGraphics();
+
+                // anti-aliasing
+                g2d.setStroke(new BasicStroke(1.0f));
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                                        RenderingHints.VALUE_ANTIALIAS_ON);
+
+                // drawing
+                g2d.setColor(color);
+                g2d.drawLine(e.getX() + x_change, e.getY() + y_change,
+                            lastX + x_change,    lastY + y_change);
+                lastX = e.getX();
+                lastY = e.getY();
+
+                drawPane.getGraphics().drawImage(image, 0, 0, null);
             }
         }
 
@@ -677,11 +695,13 @@ public class GUI extends JFrame {
         
         @Override
         public void paint(Graphics g) {
+            // paint the graph if feature enabled but not yet painted
             if (menuItemColor.isSelected()) {
                 if (nodeColor == null) {
                     nodeColor = GraphPainter.paint(network);
                 }
                 
+                // if more colors required than defined
                 int maxFlag = -1;
                 for (int i : nodeColor) {
                     if (i > maxFlag) {
@@ -695,50 +715,61 @@ public class GUI extends JFrame {
                 }
             }
             
+            // get drawing area size
             Rectangle size = drawPane.getBounds();
-            size.y = 0; // because of JMenuBar
-            g.setColor(Color.white);
-            g.fillRect(size.x, size.y, size.width, size.height);
             int w = size.width;
             int h = size.height;
             
+            // create image
+            BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2d = image.createGraphics();
+
+            // anti-aliasing
+            g2d.setStroke(new BasicStroke(1.5f));
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                                 RenderingHints.VALUE_ANTIALIAS_ON);
+            // white background
+            g2d.setColor(Color.white);
+            g2d.fillRect(0, 0, size.width, size.height);
+            
             // draw edges
-            g.setColor(Color.black);
+            g2d.setColor(Color.black);
             for (int i = 0; i < network.getNumberOfNodes(); i++) {
                 int x1 = (int) (network.getNode(i).x * w);
                 int y1 = (int) (network.getNode(i).y * h);
                 for (Integer j : network.adjacentTo(i)) {
                     int x2 = (int) (network.getNode(j).x * w);
                     int y2 = (int) (network.getNode(j).y * h);
-                    g.drawLine(x1, y1, x2, y2);
+                    g2d.drawLine(x1, y1, x2, y2);
                 }
             }
             
             // draw nodes and their labels
-            g.setFont(new Font("Arial", Font.BOLD, 13));
-            FontMetrics fm = this.getFontMetrics(g.getFont());
+            g2d.setFont(new Font("Arial", Font.BOLD, 13));
+            FontMetrics fm = this.getFontMetrics(g2d.getFont());
             for (Node n : network) {
                 if (menuItemColor.isSelected()) {
-                    g.setColor(GraphPainter.getColor(nodeColor[n.id]));
+                    g2d.setColor(GraphPainter.getColor(nodeColor[n.id]));
                 } else {
-                    g.setColor(Color.green); 
+                    g2d.setColor(Color.green); 
                 }
-                g.fillOval((int) (n.x * w) - S / 2, (int) (n.y * h) - S / 2, S, S);
-                g.setColor(Color.black);
+                g2d.fillOval((int) (n.x * w) - S / 2, (int) (n.y * h) - S / 2, S, S);
+                g2d.setColor(Color.black);
                 String id = "" + n.id;
-                g.drawString(id, (int) (n.x * w) - fm.stringWidth(id) / 2,
-                                 (int) (n.y * h) + g.getFont().getSize() / 2);
+                g2d.drawString(id, (int) (n.x * w) - fm.stringWidth(id) / 2,
+                                 (int) (n.y * h) + g2d.getFont().getSize() / 2);
             }
             
             // highlight selection
             if (selectedNode != null) {
                 int rx = (int) (selectedNode.x * w);
                 int ry = (int) (selectedNode.y * h);
-                g.setColor(Color.red);
-                g.drawOval(rx - S/2, ry - S/2, S, S);
+                g2d.setColor(Color.red);
+                g2d.drawOval(rx - S/2, ry - S/2, S, S);
             }
             
-            super.paint(g);
+            super.paint(g2d);
+            g.drawImage(image, 0, 0, null);
         }
     }
 }
