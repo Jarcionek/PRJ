@@ -556,6 +556,8 @@ public class GUI extends JFrame {
                 // add new node
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     if (n == null) {
+                        x = Math.max(S / 2, Math.min(x, size.width - S / 2));
+                        y = Math.max(S / 2, Math.min(y, size.height - S / 2));
                         double dx = (double) x / size.width;
                         double dy = (double) y / size.height;
                         network.addNode(dx, dy);
@@ -716,9 +718,8 @@ public class GUI extends JFrame {
             }
             
             // get drawing area size
-            Rectangle size = drawPane.getBounds();
-            int w = size.width;
-            int h = size.height;
+            int w = drawPane.getBounds().width;
+            int h = drawPane.getBounds().height;
             
             // create image
             BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
@@ -730,7 +731,7 @@ public class GUI extends JFrame {
                                  RenderingHints.VALUE_ANTIALIAS_ON);
             // white background
             g2d.setColor(Color.white);
-            g2d.fillRect(0, 0, size.width, size.height);
+            g2d.fillRect(0, 0, w, h);
             
             // draw edges
             g2d.setColor(Color.black);
