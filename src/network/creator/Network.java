@@ -1,12 +1,34 @@
 package network.creator;
 
 import exceptions.ShouldNeverHappenException;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.*;
+import javax.swing.filechooser.FileFilter;
 
 /**
  * @author Jaroslaw Pawlak
  */
 public class Network implements Iterable<Node> {
+    
+    public static final String EXTENSION = "network";
+    public static final FileFilter FILE_FILTER = new FileFilter() {
+        @Override
+        public boolean accept(File f) {
+            return f.isDirectory() || f.getName()
+                    .substring(f.getName().lastIndexOf('.') + 1)
+                    .equalsIgnoreCase(EXTENSION);
+        }
+
+        @Override
+        public String getDescription() {
+            return "*." + EXTENSION;
+        }
+    };
     
     private final List<Node> nodeList = new LinkedList<Node>();
     private final List<List<Integer>> adjacencyList = new LinkedList<List<Integer>>();
@@ -135,10 +157,15 @@ public class Network implements Iterable<Node> {
                 throw new ShouldNeverHappenException("IDs do not match!");
             }
             result += i + " (" + n.x + "; " + n.y + "): ";
-            for (int j : adjacencyList.get(i)) {
-                result += j + ", ";
+            for (int j = 0; j < adjacencyList.get(i).size(); j++) {
+                result += adjacencyList.get(i).get(j);
+                if (j < adjacencyList.get(i).size() - 1) {
+                    result += ", ";
+                }
             }
-            result += "\n";
+            if (i < nodeList.size() - 1) {
+                result += "\r\n";
+            }
         }
         
         return result;
@@ -148,7 +175,7 @@ public class Network implements Iterable<Node> {
      * Returns network as string ignoring positions (x, y) of nodes.
      */
     public String toStringAdjacencyOnly() {
-        return this.toString().replaceAll("\\(.*\\)", "");
+        return this.toString().replaceAll(" \\(.*\\)", "");
     }
 
     @Override
@@ -193,10 +220,117 @@ public class Network implements Iterable<Node> {
     }
     
     public NetworkStats getStatistics() {
-        return generateStatistics(this);
+        if (getNumberOfNodes() == 0) {
+            return new NetworkStats(0, 0, 0, 0, 0, 0, 0);
+        }
+        
+        int[] neighbours = new int[adjacencyList.size()];
+        {
+            int index = 0;
+            for (List list : adjacencyList) {
+                neighbours[index++] = list.size();
+            }
+        }
+        Arrays.sort(neighbours);
+        
+        int nodes = neighbours.length;
+        
+        int edges_x2 = 0;
+        for (int i : neighbours) {
+            edges_x2 += i;
+        }
+        
+        int degreeMin = neighbours[0];
+        
+        int degreeMax = neighbours[neighbours.length - 1];
+        
+        double degreeMean = (double) edges_x2 / nodes;
+        
+        int degreeMedian = neighbours[neighbours.length / 2];
+        
+        int degreeMode = 0; // best value
+        int bestLength = 0;
+        int currentLength = 1;
+        for (int i = 1; i < neighbours.length; i++) {
+            if (neighbours[i] == neighbours[i-1]) {
+                currentLength++;
+            } else {
+                if (currentLength > bestLength) {
+                    bestLength = currentLength;
+                    degreeMode = neighbours[i - 1];
+                }
+                currentLength = 1;
+            }
+        }
+        if (currentLength > bestLength) {
+            degreeMode = neighbours[neighbours.length - 1];
+        }
+        
+        return new NetworkStats(nodes, edges_x2 >> 1, degreeMin, degreeMax,
+                                degreeMean, degreeMedian, degreeMode);
+    }
+    
+    /**
+     * Returns true if saved successfully.
+     */
+    public boolean save(File file) {
+        try {
+            Charset cs = Charset.forName("US-ASCII");
+            BufferedWriter writer = Files.newBufferedWriter(file.toPath(), cs);
+            String string = this.toString();
+            writer.write(string, 0, string.length());
+            writer.close();
+            return true;
+        } catch (IOException ex) {
+            return false;
+        }
+    }
+    
+    /**
+     * Returns null in case of error.
+     */
+    public static Network load(File file) {
+        try {
+            Scanner scanner = new Scanner(file);
+            Network network = new Network();
+            
+            while (scanner.hasNextLine()) {
+                
+                String line = scanner.nextLine().replaceAll("\\s+", "");
+                if (line.length() == 0 || line.charAt(0) == '#') {
+                    continue;
+                }
+                
+                String[] split = line.split("\\(|;|\\):|,");
+                if (split.length < 3) {
+                    return null;
+                }
+                
+                Node n = new Node(Integer.parseInt(split[0]),
+                                  Double.parseDouble(split[1]),
+                                  Double.parseDouble(split[2]));
+                if (n.id != network.nodeList.size()) {
+                    return null;
+                }
+                network.nodeList.add(n);
+                network.adjacencyList.add(new ArrayList<Integer>());
+                
+                for (int i = 3; i < split.length; i++) {
+                    network.adjacencyList.get(n.id).add(Integer.parseInt(split[i]));
+                }
+            }
+            
+            scanner.close();
+            return network;
+        } catch (NumberFormatException ex) {
+            return null;
+        } catch (FileNotFoundException ex) {
+            return null;
+        }
     }
     
     
+    // GENERATORS
     
     public static Network generateGrid(int width, int height) {
         if (width <= 0 || height <= 0) {
@@ -386,57 +520,5 @@ public class Network implements Iterable<Node> {
             return ((exponent & 1) == 0? 1 : base)
                     * pow(base * base, exponent / 2);
         }
-    }
-
-    public static NetworkStats generateStatistics(Network n) {
-        if (n.nodeList.size() != n.adjacencyList.size()) {
-            throw new ShouldNeverHappenException("Ups! It should never happen!");
-        }
-        
-        int[] neighbours = new int[n.adjacencyList.size()];
-        {
-            int index = 0;
-            for (List list : n.adjacencyList) {
-                neighbours[index++] = list.size();
-            }
-        }
-        Arrays.sort(neighbours);
-        
-        int nodes = neighbours.length;
-        
-        int edges_x2 = 0;
-        for (int i : neighbours) {
-            edges_x2 += i;
-        }
-        
-        int degreeMin = neighbours[0];
-        
-        int degreeMax = neighbours[neighbours.length - 1];
-        
-        double degreeMean = (double) edges_x2 / nodes;
-        
-        int degreeMedian = neighbours[neighbours.length / 2];
-        
-        int degreeMode = 0; // best value
-        int bestLength = 0;
-        int currentLength = 1;
-        for (int i = 1; i < neighbours.length; i++) {
-            if (neighbours[i] == neighbours[i-1]) {
-                currentLength++;
-            } else {
-                if (currentLength > bestLength) {
-                    bestLength = currentLength;
-                    degreeMode = neighbours[i - 1];
-                }
-                currentLength = 1;
-            }
-        }
-        if (currentLength > bestLength) {
-            degreeMode = neighbours[neighbours.length - 1];
-        }
-        
-        return new NetworkStats(nodes, edges_x2 >> 1, degreeMin, degreeMax,
-                                degreeMean, degreeMedian, degreeMode);
-        
     }
 }

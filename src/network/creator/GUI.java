@@ -3,6 +3,7 @@ package network.creator;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
@@ -12,32 +13,40 @@ import javax.swing.event.MenuListener;
  */
 public class GUI extends JFrame {
     
+    private static final String TITLE = "Network Creator";
+    
+    // drawing
     private final int S = 20; // oval sizes
     private final int x_change;
     private final int y_change;
 
-    private Network network;
-    
+    // main functionality
+    private Network network = new Network();
+    private DrawablePanel drawPane = new DrawablePanel();
     private Node selectedNode = null;
     
-    private DrawablePanel drawPane;
-    
+    // options
     private JCheckBoxMenuItem menuItemAntiAliasing;
     private JCheckBoxMenuItem menuItemAdvancedMoving;
+    
+    // grpah painter
     private JCheckBoxMenuItem menuItemColor;
     private int[] nodeColor = null;
     
-    public GUI(Network network)  {
-        super("Network Creator");
-        this.network = network;
+    // save/load
+    private File location = null;
+    private boolean modified = false;
+
+    public GUI()  {
+        super();
+        updateTitle(false);
         
         MListener mlistener = new MListener();
         this.addMouseListener(mlistener);
         this.addMouseMotionListener(mlistener);
         
         this.setJMenuBar(createMenuBar());
-        
-        drawPane = new DrawablePanel();
+
         this.setContentPane(drawPane);
         this.setSize(800, 600);
         this.setVisible(true);
@@ -49,8 +58,34 @@ public class GUI extends JFrame {
         
         ToolTipManager.sharedInstance().setInitialDelay(200);
         
-        //TODO replace with window listener? what to do on close? ask to save?
-        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                exit();
+            }
+        });
+    }
+    
+    private void updateTitle(boolean modified) {
+        this.modified = modified;
+        String newTitle = TITLE + ": ";
+        if (location == null) {
+            newTitle += "unnamed";
+        } else {
+            if (location.getName().contains(".")) {
+                // remove extension
+                newTitle += location.getName()
+                             .substring(0, location.getName().lastIndexOf('.'));
+            } else {
+                newTitle += location.getName();
+            }
+        }
+        if (modified) {
+            newTitle += "*";
+        }
+        this.setTitle(newTitle);
     }
     
     private Node findClosestNode(int x, int y) {
@@ -85,9 +120,13 @@ public class GUI extends JFrame {
                     JMenuItem menuItemHex = new JMenuItem("Hex");
                     JMenuItem menuItemTree = new JMenuItem("Tree");
                     JMenuItem menuItemAllToAll = new JMenuItem("All-to-all");
+                JMenuItem menuItemSave = new JMenuItem("Save");
+                JMenuItem menuItemSaveAs = new JMenuItem("Save as");
+                JMenuItem menuItemLoad = new JMenuItem("Load");
                 JMenuItem menuItemStats = new JMenuItem("Show statistics");
                 JMenuItem menuItemPrint = new JMenuItem("Print to console");
                 menuItemColor = new JCheckBoxMenuItem("Color the network");
+                JMenuItem menuItemExit = new JMenuItem("Exit");
             JMenu menuOptions = new JMenu("Options");
                 menuItemAntiAliasing = new JCheckBoxMenuItem("Anti-aliasing");
                 menuItemAdvancedMoving = new JCheckBoxMenuItem("Advanced nodes moving");
@@ -119,6 +158,8 @@ public class GUI extends JFrame {
                 network = new Network();
                 nodeColor = null;
                 selectedNode = null;
+                location = null;
+                updateTitle(false);
                 GUI.this.repaint();
             }
         });
@@ -156,6 +197,8 @@ public class GUI extends JFrame {
                 network = Network.generateRing(v);
                 nodeColor = null;
                 selectedNode = null;
+                location = null;
+                updateTitle(true);
                 GUI.this.repaint();
             }
         });
@@ -193,6 +236,8 @@ public class GUI extends JFrame {
                 network = Network.generateStar(v1);
                 nodeColor = null;
                 selectedNode = null;
+                location = null;
+                updateTitle(true);
                 GUI.this.repaint();
             }
         });
@@ -257,6 +302,8 @@ public class GUI extends JFrame {
                 network = Network.generateGrid(v1, v2);
                 nodeColor = null;
                 selectedNode = null;
+                location = null;
+                updateTitle(true);
                 GUI.this.repaint();
             }
         });
@@ -337,6 +384,8 @@ public class GUI extends JFrame {
                 network = Network.generateHex(v1, v2, more);
                 nodeColor = null;
                 selectedNode = null;
+                location = null;
+                updateTitle(true);
                 GUI.this.repaint();
             }
         });
@@ -402,6 +451,8 @@ public class GUI extends JFrame {
                 network = Network.generateFullTree(v1, v2);
                 nodeColor = null;
                 selectedNode = null;
+                location = null;
+                updateTitle(true);
                 GUI.this.repaint();
             }
         });
@@ -439,7 +490,30 @@ public class GUI extends JFrame {
                 network = Network.generateFullyConnectedMesh(v1);
                 nodeColor = null;
                 selectedNode = null;
+                location = null;
+                updateTitle(true);
                 GUI.this.repaint();
+            }
+        });
+        
+        menuItemSave.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                save();
+            }
+        });
+        
+        menuItemSaveAs.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveAs();
+            }
+        });
+        
+        menuItemLoad.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                load();
             }
         });
         
@@ -495,6 +569,13 @@ public class GUI extends JFrame {
             }
         });
         
+        menuItemExit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                exit();
+            }
+        });
+        
         menuItemAntiAliasing.setSelected(true);
         menuItemAntiAliasing.setToolTipText("Disable to increase performance");
                 
@@ -542,9 +623,15 @@ public class GUI extends JFrame {
                 menuGenerate.add(menuItemHex);
                 menuGenerate.add(menuItemTree);
                 menuGenerate.add(menuItemAllToAll);
+            menuNetwork.add(menuItemSave);
+            menuNetwork.add(menuItemSaveAs);
+            menuNetwork.add(menuItemLoad);
+            menuNetwork.add(new JSeparator());
             menuNetwork.add(menuItemStats);
             menuNetwork.add(menuItemPrint);
             menuNetwork.add(menuItemColor);
+            menuNetwork.add(new JSeparator());
+            menuNetwork.add(menuItemExit);
         menuBar.add(menuOptions);
             menuOptions.add(menuItemAntiAliasing);
             menuOptions.add(menuItemAdvancedMoving);
@@ -553,6 +640,91 @@ public class GUI extends JFrame {
         
         return menuBar;
     }
+    
+    /**
+     * Returns true if saved
+     */
+    private boolean saveAs() {
+        JFileChooser jfc = new JFileChooser();
+        jfc.setFileFilter(Network.FILE_FILTER);
+        int choice = jfc.showSaveDialog(GUI.this);
+        if (choice == JFileChooser.APPROVE_OPTION) {
+            File f = jfc.getSelectedFile();
+            if (!f.getName().substring(f.getName().lastIndexOf('.') + 1)
+                    .equalsIgnoreCase(Network.EXTENSION)) {
+                f = new File(f.getPath() + "." + Network.EXTENSION);
+            }
+            if (network.save(f)) {
+                location = f;
+                updateTitle(false);
+                return true;
+            } else {
+                JOptionPane.showMessageDialog(GUI.this, "Could not save the network!",
+                                 TITLE + " - error", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Returns true if saved
+     */
+    private boolean save() {
+        if (location != null) {
+            if (network.save(location)) {
+                updateTitle(false);
+                return true;
+            } else {
+                JOptionPane.showMessageDialog(GUI.this, "Could not save the network!",
+                                 TITLE + " - error", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+        }
+        return saveAs();
+    }
+    
+    private void load() {
+        JFileChooser jfc = new JFileChooser();
+        jfc.setFileFilter(Network.FILE_FILTER);
+        int choice = jfc.showOpenDialog(GUI.this);
+        if (choice == JFileChooser.APPROVE_OPTION) {
+            Network loaded = Network.load(jfc.getSelectedFile());
+            if (loaded == null) {
+                JOptionPane.showMessageDialog(GUI.this,
+                        "Could not load the network!",
+                        TITLE + " - error",
+                        JOptionPane.ERROR_MESSAGE);
+            } else {
+                network = loaded;
+                nodeColor = null;
+                selectedNode = null;
+                location = jfc.getSelectedFile();
+                updateTitle(false);
+                GUI.this.repaint();
+            }
+        }
+    }
+    
+    private void exit() {
+        if (!modified) {
+            GUI.this.dispose();
+            return;
+        }
+
+        int c = JOptionPane.showConfirmDialog(GUI.this,
+                "Network has been modified, do you want to save it?", TITLE,
+                JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        if (c == JOptionPane.YES_OPTION) {
+            if (save()) {
+                GUI.this.dispose();
+            }
+        } else if (c == JOptionPane.NO_OPTION) {
+            GUI.this.dispose();
+        }
+    }
+    
     
     
     
@@ -579,6 +751,8 @@ public class GUI extends JFrame {
                         double dy = (double) y / size.height;
                         network.addNode(dx, dy);
                         nodeColor = null;
+                        updateTitle(true);
+                        GUI.this.repaint();
                     }
                     
                 // delete node
@@ -591,11 +765,12 @@ public class GUI extends JFrame {
                         }
                         nodeColor = null;
                         selectedNode = null;
+                        updateTitle(true);
+                        GUI.this.repaint();
                     }
                     
                 }
                 
-                GUI.this.repaint();
             }
         }
 
@@ -637,22 +812,24 @@ public class GUI extends JFrame {
                     } else {
                         network.connectNodes(selectedNode.id, n.id);
                     }
+                    nodeColor = null;
+                    updateTitle(true);
                 }
-                nodeColor = null;
                 
             // move node
             } else if (e.getButton() == MouseEvent.BUTTON3) {
-                if (selectedNode != null) {
+                if (selectedNode != null && !menuItemAdvancedMoving.isSelected()) {
                     Dimension size = drawPane.getSize();
                     x = Math.max(S / 2, Math.min(x, size.width - S / 2));
                     y = Math.max(S / 2, Math.min(y, size.height - S / 2));
                     selectedNode.x = (double) x / size.width;
                     selectedNode.y = (double) y / size.height;
                     network.moveNode(selectedNode.id, selectedNode.x, selectedNode.y);
+                    updateTitle(true);
                 }
             }
             
-            GUI.this.repaint();
+            GUI.this.repaint(); // to remove drawn line
         }
 
         @Override
@@ -684,6 +861,7 @@ public class GUI extends JFrame {
                     selectedNode.x = (double) x / size.width;
                     selectedNode.y = (double) y / size.height;
                     network.moveNode(selectedNode.id, selectedNode.x, selectedNode.y);
+                    updateTitle(true);
                     GUI.this.repaint();
                 } else {
                     color = Color.red;
@@ -743,7 +921,6 @@ public class GUI extends JFrame {
                 }
                 if (maxFlag >= GraphPainter.getNumberOfDefinedColors()) {
                     menuItemColor.setSelected(false);
-                    //TODO maybe somehow some popup here instead of just beep?
                     Toolkit.getDefaultToolkit().beep();
                 }
             }
