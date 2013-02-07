@@ -1,7 +1,10 @@
 package network.GUI;
 
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.swing.*;
@@ -19,15 +22,14 @@ public class MainWindow extends JFrame {
     
     private static final String TITLE = "Network Creator";
     
-    // drawing
-    private final int S = 20; // oval sizes
-    private final int x_change;
-    private final int y_change;
+//    // drawing
+//    private final int x_change;
+//    private final int y_change;
 
     // main functionality
-    private Network network = new Network();
-    private DrawablePanel drawPane = new DrawablePanel();
-    private Node selectedNode = null;
+    private final DrawablePanel drawPane = new DrawablePanel();
+    Network network = new Network();
+    Node selectedNode = null;
     
     // options
     private JCheckBoxMenuItem menuItemAntiAliasing;
@@ -35,20 +37,16 @@ public class MainWindow extends JFrame {
     
     // grpah painter
     private JCheckBoxMenuItem menuItemColor;
-    private int[] nodeColor = null;
+    int[] nodeColor = null;
     
     // save/load
     private File location = null;
     private boolean modified = false;
 
-    public MainWindow()  {
+    public MainWindow() {
         super();
         updateTitle(false);
-        
-        MListener mlistener = new MListener();
-        this.addMouseListener(mlistener);
-        this.addMouseMotionListener(mlistener);
-        
+
         this.setJMenuBar(createMenuBar());
 
         this.setContentPane(drawPane);
@@ -57,8 +55,16 @@ public class MainWindow extends JFrame {
         
         Point p1 = getContentPane().getLocationOnScreen();
         Point p2 = this.getLocationOnScreen();
-        x_change = -(p1.x - p2.x);
-        y_change = -(p1.y - p2.y);
+        int x_change = -(p1.x - p2.x);
+        int y_change = -(p1.y - p2.y);
+        x_change = 0;
+        y_change = 0;
+        
+        CreatorMouseListener mlistener = new CreatorMouseListener(
+                                            this, drawPane, x_change, y_change);
+        //TODO listener should be added to drawPane, remove x_change/y_change
+        this.addMouseListener(mlistener);
+        this.addMouseMotionListener(mlistener);
         
         ToolTipManager.sharedInstance().setInitialDelay(200);
         
@@ -72,7 +78,7 @@ public class MainWindow extends JFrame {
         });
     }
     
-    private void updateTitle(boolean modified) {
+    final void updateTitle(boolean modified) {
         this.modified = modified;
         String newTitle = TITLE + ": ";
         if (location == null) {
@@ -90,27 +96,6 @@ public class MainWindow extends JFrame {
             newTitle += "*";
         }
         this.setTitle(newTitle);
-    }
-    
-    private Node findClosestNode(int x, int y) {
-        Dimension size = drawPane.getSize();
-        
-        Node best = null;
-        double bestDist = Double.MAX_VALUE;
-        
-        for (Node n : network) {
-            int nx = (int) (n.x() * size.width);
-            int ny = (int) (n.y() * size.height);
-            if (Math.abs(nx - x) < S && Math.abs(ny - y) < S) {
-                double newDist = (nx-x)*(nx-x) + (ny-y)*(ny-y);
-                if (newDist < bestDist) {
-                    bestDist = newDist;
-                    best = n;
-                }
-            }
-        }
-        
-        return best;
     }
     
     private JMenuBar createMenuBar() {
@@ -729,181 +714,17 @@ public class MainWindow extends JFrame {
         }
     }
     
+    //TODO above - to another file, below - stays here
     
-    
-    
-    private class MListener implements MouseListener, MouseMotionListener {
-        
-        private int lastX;
-        private int lastY;
-        
-        @Override
-        public void mouseClicked(MouseEvent e) {
-            if (e.getClickCount() >= 2) {
-                Dimension size = drawPane.getSize();
-                int x = e.getX() + x_change;
-                int y = e.getY() + y_change;
-                
-                Node n = findClosestNode(x, y);
-                
-                // add new node
-                if (e.getButton() == MouseEvent.BUTTON1) {
-                    if (n == null) {
-                        x = Math.max(S / 2, Math.min(x, size.width - S / 2));
-                        y = Math.max(S / 2, Math.min(y, size.height - S / 2));
-                        double dx = (double) x / size.width;
-                        double dy = (double) y / size.height;
-                        network.addNode(dx, dy);
-                        nodeColor = null;
-                        updateTitle(true);
-                        MainWindow.this.repaint();
-                    }
-                    
-                // delete node
-                } else if (e.getButton() == MouseEvent.BUTTON3) {
-                    if (n != null) {
-                        if ((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) > 0) {
-                            network.removeNodeKeepConnections(n.id());
-                        } else {
-                            network.removeNode(n.id());
-                        }
-                        nodeColor = null;
-                        selectedNode = null;
-                        updateTitle(true);
-                        MainWindow.this.repaint();
-                    }
-                    
-                }
-                
-            }
-        }
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-            final int x = e.getX() + x_change;
-            final int y = e.getY() + y_change;
-            lastX = e.getX();
-            lastY = e.getY();
-            Node newSelecetion = findClosestNode(x, y);
-
-            // just deselect
-            if (newSelecetion == null) {
-                if (selectedNode != null) {
-                    selectedNode = null;
-                    MainWindow.this.repaint();
-                }
-
-            // select new (if new is different than currect)
-            } else {
-                if (!newSelecetion.equals(selectedNode)) {
-                    selectedNode = newSelecetion;
-                    MainWindow.this.repaint();
-                }
-            }
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent e) {
-            int x = e.getX() + x_change;
-            int y = e.getY() + y_change;
-            
-            // connect/disconnect
-            if (e.getButton() == MouseEvent.BUTTON1) {
-                Node n = findClosestNode(x, y);
-                if (n != null && !n.equals(selectedNode) && selectedNode != null) {
-                    if (network.isConnected(selectedNode.id(), n.id())) {
-                        network.disconnectNodes(selectedNode.id(), n.id());
-                    } else {
-                        network.connectNodes(selectedNode.id(), n.id());
-                    }
-                    nodeColor = null;
-                    updateTitle(true);
-                }
-                
-            // move node
-            } else if (e.getButton() == MouseEvent.BUTTON3) {
-                if (selectedNode != null && !menuItemAdvancedMoving.isSelected()) {
-                    //TODO repetition 1
-                    Dimension size = drawPane.getSize();
-                    x = Math.max(S / 2, Math.min(x, size.width - S / 2));
-                    y = Math.max(S / 2, Math.min(y, size.height - S / 2));
-                    selectedNode = new Node(selectedNode.id(),
-                                            (double) x / size.width,
-                                            (double) y / size.height);
-                    network.moveNode(selectedNode.id(), selectedNode.x(), selectedNode.y());
-                    updateTitle(true);
-                }
-            }
-            
-            MainWindow.this.repaint(); // to remove drawn line
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent e) {}
-
-        @Override
-        public void mouseExited(MouseEvent e) {}
-
-        @Override
-        public void mouseDragged(MouseEvent e) {
-            if (selectedNode == null) {
-                return;
-            }
-            
-            int mask = MouseEvent.BUTTON1_DOWN_MASK
-                            | MouseEvent.BUTTON3_DOWN_MASK;
-
-            Color color = null;
-            if ((e.getModifiersEx() & mask) == MouseEvent.BUTTON1_DOWN_MASK) {
-                color = Color.black;
-            } else if ((e.getModifiersEx() & mask)
-                                              == MouseEvent.BUTTON3_DOWN_MASK) {
-                if (menuItemAdvancedMoving.isSelected()) {
-                    int x = e.getX() + x_change;
-                    int y = e.getY() + y_change;
-                    //TODO repetition 1
-                    Dimension size = drawPane.getSize();
-                    x = Math.max(S / 2, Math.min(x, size.width - S / 2));
-                    y = Math.max(S / 2, Math.min(y, size.height - S / 2));
-                    selectedNode = new Node(selectedNode.id(),
-                                            (double) x / size.width,
-                                            (double) y / size.height);
-                    network.moveNode(selectedNode.id(), selectedNode.x(), selectedNode.y());
-                    updateTitle(true);
-                    MainWindow.this.repaint();
-                } else {
-                    color = Color.red;
-                }
-            }
-
-            if (color != null) {
-                BufferedImage image = new BufferedImage(
-                                                   drawPane.getBounds().width,
-                                                   drawPane.getBounds().height,
-                                                   BufferedImage.TYPE_INT_ARGB);
-                Graphics2D g2d = image.createGraphics();
-
-                // anti-aliasing
-                if (menuItemAntiAliasing.isSelected()) {
-                    g2d.setStroke(new BasicStroke(1.0f));
-                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                                         RenderingHints.VALUE_ANTIALIAS_ON);
-                }
-
-                // drawing
-                g2d.setColor(color);
-                g2d.drawLine(e.getX() + x_change, e.getY() + y_change,
-                            lastX + x_change,    lastY + y_change);
-                lastX = e.getX();
-                lastY = e.getY();
-
-                drawPane.getGraphics().drawImage(image, 0, 0, null);
-            }
-        }
-
-        @Override
-        public void mouseMoved(MouseEvent e) {}
+    boolean isAntiAliasingEnabled() {
+        return menuItemAntiAliasing.isSelected();
     }
+    
+    boolean isAdvancedMovingEnabled() {
+        return menuItemAdvancedMoving.isSelected();
+    }
+    
+    //TODO belov - to another file, above - stays here
     
     private class DrawablePanel extends JPanel {
 
@@ -972,7 +793,9 @@ public class MainWindow extends JFrame {
                 } else {
                     g2d.setColor(Color.green); 
                 }
-                g2d.fillOval((int) (n.x() * w) - S / 2, (int) (n.y() * h) - S / 2, S, S);
+                g2d.fillOval((int) (n.x() * w) - C.S / 2,
+                             (int) (n.y() * h) - C.S / 2,
+                             C.S, C.S);
                 g2d.setColor(Color.black);
                 String id = "" + n.id();
                 g2d.drawString(id, (int) (n.x() * w) - fm.stringWidth(id) / 2,
@@ -984,7 +807,7 @@ public class MainWindow extends JFrame {
                 int rx = (int) (selectedNode.x() * w);
                 int ry = (int) (selectedNode.y() * h);
                 g2d.setColor(Color.red);
-                g2d.drawOval(rx - S/2, ry - S/2, S, S);
+                g2d.drawOval(rx - C.S/2, ry - C.S/2, C.S, C.S);
             }
             
             super.paint(g2d);
