@@ -7,10 +7,14 @@ import network.creator.Node;
 /**
  * @author Jaroslaw Pawlak
  */
-public class Util {
-    
+class Util {
+
     /**
-     * Mouse click position (relative to the drawPane, i.e. after shift)
+     * @param network network
+     * @param size sizes of a drawable panel where the network is drawn
+     * @param x position of mouse click on a drawable pane (in pixels)
+     * @param y position of mouse click on a drawable pane (in pixels)
+     * @return closest node or null if there or null if not found
      */
     static Node findClosestNode(Network network, Dimension size, int x, int y) {
         Node best = null;
@@ -29,5 +33,18 @@ public class Util {
         }
         
         return best;
+    }
+    
+    /**
+     * Returns the closest integer value in range [margin; size - margin].
+     * If margin > size / 2, this method's behaviour is unknown, no exception
+     * will be thrown.
+     * @param value value to check
+     * @param size range
+     * @param margin margin
+     * @return the closest integer to 'value' in [margin; size - margin]
+     */
+    static int fixRange(int value, int size, int margin) {
+        return Math.max(margin, Math.min(value, size - margin));
     }
 }

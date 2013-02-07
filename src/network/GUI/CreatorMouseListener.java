@@ -11,76 +11,66 @@ import network.creator.Node;
 /**
  * @author Jaroslaw Pawlak
  */
-public class CreatorMouseListener implements MouseListener, MouseMotionListener {
-
-    private int lastX;
-    private int lastY;
-
-////// from MainWindow /////////////////////////////////////////////////////////
+class CreatorMouseListener implements MouseListener, MouseMotionListener {
     
     private final MainWindow window;
     private final JPanel drawPane;
-    
-    private final int x_change;
-    private final int y_change;
 
-////////////////////////////////////////////////////////////////////////////////
+    private int lastX;
+    private int lastY;
     
-    public CreatorMouseListener(MainWindow window, JPanel drawPane,
-                                int x_change, int y_change) {
+    public CreatorMouseListener(MainWindow window, JPanel drawPane) {
         this.window = window;
         this.drawPane = drawPane;
-        this.x_change = x_change;
-        this.y_change = y_change;
     }
-
-    
     
     @Override
     public void mouseClicked(MouseEvent e) {
-        if (e.getClickCount() >= 2) {
-            Dimension size = drawPane.getSize();
-            int x = e.getX() + x_change;
-            int y = e.getY() + y_change;
+        if (e.getClickCount() < 2) {
+            return;
+        }
+        
+        Dimension size = drawPane.getSize();
+        int x = e.getX();
+        int y = e.getY();
 
-            Node n = Util.findClosestNode(window.network, size, x, y);
+        Node n = Util.findClosestNode(window.network, size, x, y);
 
-            // add new node
-            if (e.getButton() == MouseEvent.BUTTON1) {
-                if (n == null) {
-                    x = Math.max(C.S / 2, Math.min(x, size.width - C.S / 2));
-                    y = Math.max(C.S / 2, Math.min(y, size.height - C.S / 2));
-                    double dx = (double) x / size.width;
-                    double dy = (double) y / size.height;
-                    window.network.addNode(dx, dy);
-                    window.nodeColor = null;
-                    window.updateTitle(true);
-                    window.repaint();
+        // add new node
+        if (e.getButton() == MouseEvent.BUTTON1) {
+            if (n == null) {
+                x = Util.fixRange(x, size.width, C.S / 2);
+                y = Util.fixRange(y, size.height, C.S / 2);
+                double dx = (double) x / size.width;
+                double dy = (double) y / size.height;
+                window.network.addNode(dx, dy);
+                window.nodeColor = null;
+                window.updateTitle(true);
+                window.repaint();
+            }
+
+        // delete node
+        } else if (e.getButton() == MouseEvent.BUTTON3) {
+            if (n != null) {
+                if ((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) > 0) {
+                    window.network.removeNodeKeepConnections(n.id());
+                } else {
+                    window.network.removeNode(n.id());
                 }
-
-            // delete node
-            } else if (e.getButton() == MouseEvent.BUTTON3) {
-                if (n != null) {
-                    if ((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) > 0) {
-                        window.network.removeNodeKeepConnections(n.id());
-                    } else {
-                        window.network.removeNode(n.id());
-                    }
-                    window.nodeColor = null;
-                    window.selectedNode = null;
-                    window.updateTitle(true);
-                    window.repaint();
-                }
-
+                window.nodeColor = null;
+                window.selectedNode = null;
+                window.updateTitle(true);
+                window.repaint();
             }
 
         }
+
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-        final int x = e.getX() + x_change;
-        final int y = e.getY() + y_change;
+        final int x = e.getX();
+        final int y = e.getY();
         lastX = e.getX();
         lastY = e.getY();
         Node newSelection = Util.findClosestNode(window.network,
@@ -104,8 +94,8 @@ public class CreatorMouseListener implements MouseListener, MouseMotionListener 
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        int x = e.getX() + x_change;
-        int y = e.getY() + y_change;
+        int x = e.getX();
+        int y = e.getY();
 
         // connect/disconnect
         if (e.getButton() == MouseEvent.BUTTON1) {
@@ -148,8 +138,8 @@ public class CreatorMouseListener implements MouseListener, MouseMotionListener 
         } else if ((e.getModifiersEx() & mask)
                                             == MouseEvent.BUTTON3_DOWN_MASK) {
             if (window.isAdvancedMovingEnabled()) {
-                int x = e.getX() + x_change;
-                int y = e.getY() + y_change;
+                int x = e.getX();
+                int y = e.getY();
                 moveNode(x, y);
                 window.repaint();
             } else {
@@ -173,8 +163,7 @@ public class CreatorMouseListener implements MouseListener, MouseMotionListener 
 
             // drawing
             g2d.setColor(color);
-            g2d.drawLine(e.getX() + x_change, e.getY() + y_change,
-                         lastX + x_change,    lastY + y_change);
+            g2d.drawLine(e.getX(), e.getY(), lastX, lastY);
             lastX = e.getX();
             lastY = e.getY();
 
@@ -187,8 +176,8 @@ public class CreatorMouseListener implements MouseListener, MouseMotionListener 
      */
     private void moveNode(int x, int y) {
         Dimension size = drawPane.getSize();
-        x = Math.max(C.S / 2, Math.min(x, size.width - C.S / 2));
-        y = Math.max(C.S / 2, Math.min(y, size.height - C.S / 2));
+        x = Util.fixRange(x, size.width, C.S / 2);
+        y = Util.fixRange(y, size.height, C.S / 2);
         
         int id = window.selectedNode.id();
         double dx = (double) x / size.width;

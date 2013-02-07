@@ -21,10 +21,6 @@ import network.painter.GraphPainter;
 public class MainWindow extends JFrame {
     
     private static final String TITLE = "Network Creator";
-    
-//    // drawing
-//    private final int x_change;
-//    private final int y_change;
 
     // main functionality
     private final DrawablePanel drawPane = new DrawablePanel();
@@ -53,18 +49,9 @@ public class MainWindow extends JFrame {
         this.setSize(800, 600);
         this.setVisible(true);
         
-        Point p1 = getContentPane().getLocationOnScreen();
-        Point p2 = this.getLocationOnScreen();
-        int x_change = -(p1.x - p2.x);
-        int y_change = -(p1.y - p2.y);
-        x_change = 0;
-        y_change = 0;
-        
-        CreatorMouseListener mlistener = new CreatorMouseListener(
-                                            this, drawPane, x_change, y_change);
-        //TODO listener should be added to drawPane, remove x_change/y_change
-        this.addMouseListener(mlistener);
-        this.addMouseMotionListener(mlistener);
+        CreatorMouseListener mlistener = new CreatorMouseListener(this, drawPane);
+        drawPane.addMouseListener(mlistener);
+        drawPane.addMouseMotionListener(mlistener);
         
         ToolTipManager.sharedInstance().setInitialDelay(200);
         

@@ -5,7 +5,7 @@ package network.GUI;
  * 
  * @author Jaroslaw Pawlak
  */
-public class C {
+class C {
     /**
      * Oval sizes (diameter) of nodes drawn in network
      */
