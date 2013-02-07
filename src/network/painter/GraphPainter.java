@@ -1,10 +1,11 @@
-package network.creator;
+package network.painter;
 
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import network.creator.Network;
 
 /**
  * @author Jaroslaw Pawlak

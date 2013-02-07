@@ -1,4 +1,6 @@
-package network.creator;
+package network;
+
+import network.GUI.MainWindow;
 
 /**
  * @author Jaroslaw Pawlak
@@ -6,7 +8,7 @@ package network.creator;
 public class Main {
 
     public static void main(String[] args) {
-        new GUI();
+        new MainWindow();
     }
 
 }

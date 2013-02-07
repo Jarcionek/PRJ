@@ -4,6 +4,7 @@ package network.creator;
  * @author Jaroslaw Pawlak
  */
 public class Node {
+    
     int id;
     double x;
     double y;
@@ -14,6 +15,18 @@ public class Node {
         this.y = y;
     }
 
+    public int id() {
+        return id;
+    }
+
+    public double x() {
+        return x;
+    }
+
+    public double y() {
+        return y;
+    }
+    
     @Override
     public String toString() {
         return "" + id;
