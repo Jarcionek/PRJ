@@ -41,12 +41,14 @@ class CreatorMouseListener implements MouseListener, MouseMotionListener {
             if (n == null) {
                 x = Util.fixRange(x, size.width, C.S / 2);
                 y = Util.fixRange(y, size.height, C.S / 2);
-                double dx = (double) x / size.width;
-                double dy = (double) y / size.height;
-                window.network.addNode(dx, dy);
-                window.nodeColor = null;
-                window.updateTitle(true);
-                window.repaint();
+                if (Util.findClosestNode(window.network, size, x, y) == null) {
+                    double dx = (double) x / size.width;
+                    double dy = (double) y / size.height;
+                    window.network.addNode(dx, dy);
+                    window.nodeColor = null;
+                    window.networkModified();
+                    window.repaint();
+                }
             }
 
         // delete node
@@ -59,7 +61,7 @@ class CreatorMouseListener implements MouseListener, MouseMotionListener {
                 }
                 window.nodeColor = null;
                 window.selectionId = -1;
-                window.updateTitle(true);
+                window.networkModified();
                 window.repaint();
             }
 
@@ -122,7 +124,7 @@ class CreatorMouseListener implements MouseListener, MouseMotionListener {
                     window.network.connectNodes(window.selectionId, id);
                     window.selectionId = id;
                     window.nodeColor = null;
-                    window.updateTitle(true);
+                    window.networkModified();
                 }
                 
             //(dis)connect nodes
@@ -135,7 +137,7 @@ class CreatorMouseListener implements MouseListener, MouseMotionListener {
                     }
                     window.selectionId = n.id();
                     window.nodeColor = null;
-                    window.updateTitle(true);
+                    window.networkModified();
                 }
             }
             
@@ -209,7 +211,8 @@ class CreatorMouseListener implements MouseListener, MouseMotionListener {
         double dy = (double) y / size.height;
         
         window.network.moveNode(window.selectionId, dx, dy);
-        window.updateTitle(true);
+        window.networkModified();
+        window.updateTitle();
     }
 
     @Override
