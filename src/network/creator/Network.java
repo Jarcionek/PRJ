@@ -1,6 +1,8 @@
 package network.creator;
 
 import exceptions.ShouldNeverHappenException;
+import java.awt.Dimension;
+import java.awt.Point;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -183,9 +185,22 @@ public class Network implements Iterable<Node> {
         return nodeList.iterator();
     }
     
+    //TODO remove it, see usages
     public Node getNode(int id) {
         Node n = nodeList.get(id);
         return new Node(n.id, n.x, n.y);
+    }
+    
+    public Point getPosition(int id, Dimension size) {
+        return getPosition(id, size.width, size.height);
+    }
+    
+    public Point getPosition(int id, int width, int height) {
+        Node n = nodeList.get(id);
+        Point p = new Point();
+        p.x = (int) (width * n.x);
+        p.y = (int) (height * n.y);
+        return p;
     }
     
     public Integer[] adjacentTo(int id) {
@@ -205,7 +220,7 @@ public class Network implements Iterable<Node> {
     public boolean isConnected(int id1, int id2) {
         return adjacencyList.get(Math.min(id1, id2)).contains(Math.max(id1, id2));
     }
-    
+
     /**
      * If any coordinate is out of range [0, 1] it will be set to 0 if it was
      * negative or to 1 if it was greater than 1.

@@ -25,7 +25,7 @@ public class MainWindow extends JFrame {
     // main functionality
     private final DrawablePanel drawPane = new DrawablePanel();
     Network network = new Network();
-    Node selectedNode = null;
+    int selectionId = -1;
     
     // options
     private JCheckBoxMenuItem menuItemAntiAliasing;
@@ -133,7 +133,7 @@ public class MainWindow extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 network = new Network();
                 nodeColor = null;
-                selectedNode = null;
+                selectionId = -1;
                 location = null;
                 updateTitle(false);
                 MainWindow.this.repaint();
@@ -172,7 +172,7 @@ public class MainWindow extends JFrame {
                 
                 network = Network.generateRing(v);
                 nodeColor = null;
-                selectedNode = null;
+                selectionId = -1;
                 location = null;
                 updateTitle(true);
                 MainWindow.this.repaint();
@@ -211,7 +211,7 @@ public class MainWindow extends JFrame {
                 
                 network = Network.generateStar(v1);
                 nodeColor = null;
-                selectedNode = null;
+                selectionId = -1;
                 location = null;
                 updateTitle(true);
                 MainWindow.this.repaint();
@@ -277,7 +277,7 @@ public class MainWindow extends JFrame {
                 
                 network = Network.generateGrid(v1, v2);
                 nodeColor = null;
-                selectedNode = null;
+                selectionId = -1;
                 location = null;
                 updateTitle(true);
                 MainWindow.this.repaint();
@@ -359,7 +359,7 @@ public class MainWindow extends JFrame {
                 
                 network = Network.generateHex(v1, v2, more);
                 nodeColor = null;
-                selectedNode = null;
+                selectionId = -1;
                 location = null;
                 updateTitle(true);
                 MainWindow.this.repaint();
@@ -426,7 +426,7 @@ public class MainWindow extends JFrame {
                 
                 network = Network.generateFullTree(v1, v2);
                 nodeColor = null;
-                selectedNode = null;
+                selectionId = -1;
                 location = null;
                 updateTitle(true);
                 MainWindow.this.repaint();
@@ -465,7 +465,7 @@ public class MainWindow extends JFrame {
                 
                 network = Network.generateFullyConnectedMesh(v1);
                 nodeColor = null;
-                selectedNode = null;
+                selectionId = -1;
                 location = null;
                 updateTitle(true);
                 MainWindow.this.repaint();
@@ -569,13 +569,16 @@ public class MainWindow extends JFrame {
                         + "Double click with right mouse button.\n"
                         + "\n"
                         + "DELETE NODE - KEEP CONNECTIONS\n"
-                        + "Deletes node, however if any two nodes A and B\n"
-                        + "were connected via deleted node, after deletion\n"
+                        + "Ctrl + double right click.\n"
+                        + "Deletes node, however for each two nodes A and B\n"
+                        + "that were connected via deleted node, after deletion\n"
                         + "nodes A and B will be connected directly.\n"
                         + "\n"
                         + "(DIS)CONNECT TWO NODES\n"
                         + "Drag from one node to another while\n"
                         + "keeping left mouse button down.\n"
+                        + "If there is no node at the destination, a new one will\n"
+                        + "be created and connected to previously selected.\n"
                         + "\n"
                         + "MOVE NODE\n"
                         + "Press with right mouse button on the node\n"
@@ -674,7 +677,7 @@ public class MainWindow extends JFrame {
             } else {
                 network = loaded;
                 nodeColor = null;
-                selectedNode = null;
+                selectionId = -1;
                 location = jfc.getSelectedFile();
                 updateTitle(false);
                 MainWindow.this.repaint();
@@ -762,8 +765,8 @@ public class MainWindow extends JFrame {
             // draw edges
             g2d.setColor(Color.black);
             for (int i = 0; i < network.getNumberOfNodes(); i++) {
-                int x1 = (int) (network.getNode(i).x() * w);
-                int y1 = (int) (network.getNode(i).y() * h);
+                int x1 = (int) (network.getNode(i).x() * w); //TODO getNode is not optimal
+                int y1 = (int) (network.getNode(i).y() * h); //it should be replaced by iterator
                 for (Integer j : network.adjacentTo(i)) {
                     int x2 = (int) (network.getNode(j).x() * w);
                     int y2 = (int) (network.getNode(j).y() * h);
@@ -790,11 +793,10 @@ public class MainWindow extends JFrame {
             }
             
             // highlight selection
-            if (selectedNode != null) {
-                int rx = (int) (selectedNode.x() * w);
-                int ry = (int) (selectedNode.y() * h);
+            if (selectionId != -1) {
+                Point p = network.getPosition(selectionId, w, h);
                 g2d.setColor(Color.red);
-                g2d.drawOval(rx - C.S/2, ry - C.S/2, C.S, C.S);
+                g2d.drawOval(p.x - C.S/2, p.y - C.S/2, C.S, C.S);
             }
             
             super.paint(g2d);

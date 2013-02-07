@@ -58,7 +58,7 @@ class CreatorMouseListener implements MouseListener, MouseMotionListener {
                     window.network.removeNode(n.id());
                 }
                 window.nodeColor = null;
-                window.selectedNode = null;
+                window.selectionId = -1;
                 window.updateTitle(true);
                 window.repaint();
             }
@@ -73,20 +73,19 @@ class CreatorMouseListener implements MouseListener, MouseMotionListener {
         final int y = e.getY();
         lastX = e.getX();
         lastY = e.getY();
-        Node newSelection = Util.findClosestNode(window.network,
-                                                      drawPane.getSize(), x, y);
+        Node n = Util.findClosestNode(window.network, drawPane.getSize(), x, y);
 
         // just deselect
-        if (newSelection == null) {
-            if (window.selectedNode != null) {
-                window.selectedNode = null;
+        if (n == null) {
+            if (window.selectionId != -1) {
+                window.selectionId = -1;
                 window.repaint();
             }
 
         // select new (if new is different than currect)
         } else {
-            if (!newSelection.equals(window.selectedNode)) {
-                window.selectedNode = newSelection;
+            if (n.id() != window.selectionId) {
+                window.selectionId = n.id();
                 window.repaint();
             }
         }
@@ -96,26 +95,53 @@ class CreatorMouseListener implements MouseListener, MouseMotionListener {
     public void mouseReleased(MouseEvent e) {
         int x = e.getX();
         int y = e.getY();
+        
+        if (window.selectionId == -1) {
+            window.repaint(); // to remove drawn line
+            return;
+        }
 
         // connect/disconnect
         if (e.getButton() == MouseEvent.BUTTON1) {
-            Node n = Util.findClosestNode(window.network, drawPane.getSize(),
-                                                                          x, y);
-            
-            if (n != null && !n.equals(window.selectedNode)
-                                               && window.selectedNode != null) {
-                if (window.network.isConnected(window.selectedNode.id(), n.id())) {
-                    window.network.disconnectNodes(window.selectedNode.id(), n.id());
-                } else {
-                    window.network.connectNodes(window.selectedNode.id(), n.id());
-                }
-                window.nodeColor = null;
-                window.updateTitle(true);
-            }
+            Node n = Util.findClosestNode(window.network, drawPane.getSize(), x, y);
 
+            // create new node and connect to selected to it
+            if (n == null) {
+                Dimension size = drawPane.getSize();
+                x = Util.fixRange(x, size.width, C.S / 2);
+                y = Util.fixRange(y, size.height, C.S / 2);
+                n = Util.findClosestNode(window.network, drawPane.getSize(), x, y);
+                
+                // check whether there is no node at the position of a new one
+                // the previous check was for the mouse click position
+                if (n == null) {
+                    double dx = (double) x / size.width;
+                    double dy = (double) y / size.height;
+                    window.network.addNode(dx, dy);
+                    int id = window.network.getNumberOfNodes() - 1;
+                    window.network.connectNodes(window.selectionId, id);
+                    window.selectionId = id;
+                    window.nodeColor = null;
+                    window.updateTitle(true);
+                }
+                
+            //(dis)connect nodes
+            } else {
+                if (n.id() != window.selectionId) {
+                    if (window.network.isConnected(window.selectionId, n.id())) {
+                        window.network.disconnectNodes(window.selectionId, n.id());
+                    } else {
+                        window.network.connectNodes(window.selectionId, n.id());
+                    }
+                    window.selectionId = n.id();
+                    window.nodeColor = null;
+                    window.updateTitle(true);
+                }
+            }
+            
         // move node
         } else if (e.getButton() == MouseEvent.BUTTON3) {
-            if (window.selectedNode != null && !window.isAdvancedMovingEnabled()) {
+            if (!window.isAdvancedMovingEnabled()) {
                 moveNode(x, y);
             }
         }
@@ -125,7 +151,7 @@ class CreatorMouseListener implements MouseListener, MouseMotionListener {
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        if (window.selectedNode == null) {
+        if (window.selectionId == -1) {
             return;
         }
 
@@ -172,19 +198,17 @@ class CreatorMouseListener implements MouseListener, MouseMotionListener {
     }
     
     /**
-     * Position (after shift) on drawPane.
+     * Moves selected node to the given (x, y) position on a draw pane.
      */
     private void moveNode(int x, int y) {
         Dimension size = drawPane.getSize();
         x = Util.fixRange(x, size.width, C.S / 2);
         y = Util.fixRange(y, size.height, C.S / 2);
         
-        int id = window.selectedNode.id();
         double dx = (double) x / size.width;
         double dy = (double) y / size.height;
         
-        window.selectedNode = new Node(id, dx, dy);
-        window.network.moveNode(id, dx, dy);
+        window.network.moveNode(window.selectionId, dx, dy);
         window.updateTitle(true);
     }
 
