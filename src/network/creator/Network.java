@@ -185,10 +185,91 @@ public class Network implements Iterable<Node> {
         return nodeList.iterator();
     }
     
-    //TODO remove it, see usages
-    public Node getNode(int id) {
-        Node n = nodeList.get(id);
-        return new Node(n.id, n.x, n.y);
+    public Iterable<Edge> getEdges(Dimension size) {
+        return getEdges(size.width, size.height);
+    }
+    
+    public Iterable<Edge> getEdges(final int width, final int height) {
+        final Iterator<Edge> iterator = new Iterator<Edge>() {
+            
+            private int id = 0;
+            private int connectedTo = 0;
+            
+            private boolean hasNext = false;
+            private boolean initialised = false;
+            
+            @Override
+            public boolean hasNext() {
+                if (initialised) {
+                    return hasNext;
+                } else {
+                    while (id < getNumberOfNodes()) {
+                        if (adjacencyList.get(id).isEmpty()) {
+                            id++;
+                        } else {
+                            initialised = true;
+                            hasNext = true;
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            }
+
+            @Override
+            public Edge next() {
+                Node n1 = nodeList.get(id);
+                Node n2 = nodeList.get(adjacencyList.get(id).get(connectedTo));
+                /* //TODO drawing edges optimisation
+                 * GUI component could have its own representation of the network
+                 * with integer coordinates. It should be updating chosen nodes
+                 * on the fly rather then recalculating everything (calculations
+                 * below) every time the network is drawn.
+                 * Obviously, this method will have to be used when the window
+                 * sizes change.
+                 */
+                int x1 = (int) (n1.x * width);
+                int y1 = (int) (n1.y * height);
+                int x2 = (int) (n2.x * width);
+                int y2 = (int) (n2.y * height);
+                Edge edge = new Edge(x1, y1, x2, y2);
+                
+                boolean newFound = false;
+                for (int j = connectedTo + 1; j < adjacencyList.get(id).size(); j++) {
+                    if (adjacencyList.get(id).get(j) > id) {
+                        connectedTo = j;
+                        newFound = true;
+                        break;
+                    }
+                }
+                if (!newFound) {
+                    outer:
+                    for (int i = id + 1; i < getNumberOfNodes(); i++) {
+                        for (int j = 0; j < adjacencyList.get(i).size(); j++) {
+                            if (adjacencyList.get(i).get(j) > i) {
+                                id = i;
+                                connectedTo = j;
+                                newFound = true;
+                                break outer;
+                            }
+                        }
+                    }
+                }
+                hasNext = newFound;
+                
+                return edge;
+            }
+
+            @Override
+            public void remove() {}
+        };
+        
+        return new Iterable<Edge>() {
+            @Override
+            public Iterator<Edge> iterator() {
+                return iterator;
+            }
+        };
     }
     
     public Point getPosition(int id, Dimension size) {

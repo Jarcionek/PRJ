@@ -10,6 +10,7 @@ import java.io.File;
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
+import network.creator.Edge;
 import network.creator.Network;
 import network.creator.NetworkStats;
 import network.creator.Node;
@@ -764,14 +765,8 @@ public class MainWindow extends JFrame {
             
             // draw edges
             g2d.setColor(Color.black);
-            for (int i = 0; i < network.getNumberOfNodes(); i++) {
-                int x1 = (int) (network.getNode(i).x() * w); //TODO getNode is not optimal
-                int y1 = (int) (network.getNode(i).y() * h); //it should be replaced by iterator
-                for (Integer j : network.adjacentTo(i)) {
-                    int x2 = (int) (network.getNode(j).x() * w);
-                    int y2 = (int) (network.getNode(j).y() * h);
-                    g2d.drawLine(x1, y1, x2, y2);
-                }
+            for (Edge e : network.getEdges(w, h)) {
+                g2d.drawLine(e.x1, e.y1, e.x2, e.y2);
             }
             
             // draw nodes and their labels
