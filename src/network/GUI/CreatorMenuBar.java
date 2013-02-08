@@ -55,8 +55,6 @@ class CreatorMenuBar extends JMenuBar {
         createMenus();
         customiseMenus();
         addMenus();
-        
-
     }
     
     /**
