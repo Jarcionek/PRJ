@@ -38,6 +38,7 @@ class CreatorMenuBar extends JMenuBar {
         private JMenuItem menuItemStats;
         private JMenuItem menuItemPrint;
         private JMenuItem menuItemColor;
+        private JMenuItem menuItemInterest;
         private JMenuItem menuItemExit;
     private JMenu menuOptions;
         private JMenuItem menuItemAntiAliasing;
@@ -76,6 +77,7 @@ class CreatorMenuBar extends JMenuBar {
             menuItemStats = new JMenuItem("Show statistics");
             menuItemPrint = new JMenuItem("Print to console");
             menuItemColor = new JCheckBoxMenuItem("Color the network");
+            menuItemInterest = new JCheckBoxMenuItem("Show intersections");
             menuItemExit = new JMenuItem("Exit");
         menuOptions = new JMenu("Options");
             menuItemAntiAliasing = new JCheckBoxMenuItem("Anti-aliasing");
@@ -101,6 +103,7 @@ class CreatorMenuBar extends JMenuBar {
             menuNetwork.add(menuItemStats);
             menuNetwork.add(menuItemPrint);
             menuNetwork.add(menuItemColor);
+            menuNetwork.add(menuItemInterest);
             menuNetwork.add(new JSeparator());
             menuNetwork.add(menuItemExit);
         this.add(menuOptions);
@@ -554,6 +557,14 @@ class CreatorMenuBar extends JMenuBar {
             }
         });
         
+        menuItemInterest.setSelected(true);
+        menuItemInterest.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                window.repaint();
+            }
+        });
+        
         menuItemExit.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -741,5 +752,9 @@ class CreatorMenuBar extends JMenuBar {
     
     void setColoringEnabled(boolean enabled) {
         menuItemColor.setSelected(true);
+    }
+    
+    boolean isInterestctionsHighlightingEnabled() {
+        return menuItemInterest.isSelected();
     }
 }
