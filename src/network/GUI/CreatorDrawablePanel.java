@@ -65,7 +65,7 @@ class CreatorDrawablePanel extends JPanel {
         // draw edges
         g2d.setColor(Color.black);
         for (Edge e : window.network.getEdges(w, h)) {
-            g2d.drawLine(e.x1, e.y1, e.x2, e.y2);
+            g2d.drawLine(e.x1(), e.y1(), e.x2(), e.y2());
         }
 
         // draw nodes and their labels
@@ -95,11 +95,11 @@ class CreatorDrawablePanel extends JPanel {
 
         // show edges intersections
         if (creator.isInterestctionsHighlightingEnabled()) {
-            int s = 3;
+            int s = 7;
             g2d.setColor(Color.red);
             for (Edge e1 : window.network.getEdges(w, h)) {
                 for (Edge e2 : window.network.getEdges(w, h)) {
-                    if (!e1.equals(e2)) {
+                    if (!e1.equals(e2) && !Edge.arePolygonalChain(e1, e2)) {
                         Point p = Edge.intersect(e1, e2);
                         if (p != null) {
                             g2d.fillOval(p.x - s/2, p.y - s/2, s, s);
