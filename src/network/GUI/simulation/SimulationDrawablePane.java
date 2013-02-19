@@ -1,8 +1,9 @@
-package network.GUI;
+package network.GUI.simulation;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
+import network.creator.Network;
 import network.creator.Node;
 import network.graphUtil.Edge;
 import network.painter.GraphPainter;
@@ -14,7 +15,7 @@ import network.simulation.agents.RandomAgent;
  */
 class SimulationDrawablePane extends JPanel {
     
-    private final MainWindow window;
+    private final Network network;
     
     private Simulation simulation;
     
@@ -23,17 +24,17 @@ class SimulationDrawablePane extends JPanel {
     private BufferedImage edges;
     private BufferedImage labels;
     
-    SimulationDrawablePane(MainWindow window) {
+    SimulationDrawablePane(Network network) {
         super(null);
-        this.window = window;
+        this.network = network;
         
-        simulation = new Simulation(window.network, RandomAgent.class);
+        simulation = new Simulation(network, RandomAgent.class);
         simulation.nextRound();
         setOpaque(false);
     }
     
     void createNewPane() {
-        simulation = new Simulation(window.network, RandomAgent.class);
+        simulation = new Simulation(network, RandomAgent.class);
         simulation.nextRound();
         lastSize = null;
     }
@@ -54,7 +55,7 @@ class SimulationDrawablePane extends JPanel {
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                                  RenderingHints.VALUE_ANTIALIAS_ON);
             g2d.setColor(Color.black);
-            for (Edge e : window.network.getEdges(w, h)) {
+            for (Edge e : network.getEdges(w, h)) {
                 g2d.drawLine(e.x1(), e.y1(), e.x2(), e.y2());
             }
             
@@ -67,7 +68,7 @@ class SimulationDrawablePane extends JPanel {
             g2d.setColor(Color.black);
             g2d.setFont(new Font("Arial", Font.BOLD, 13));
             FontMetrics fm = this.getFontMetrics(g2d.getFont());
-            for (Node n : window.network) {
+            for (Node n : network) {
                 String id = "" + n.id();
                 g2d.drawString(id, (int) (n.x() * w) - fm.stringWidth(id) / 2,
                                (int) (n.y() * h) + g2d.getFont().getSize() / 2);
@@ -79,7 +80,7 @@ class SimulationDrawablePane extends JPanel {
         // colors
         BufferedImage flags = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = flags.createGraphics();
-        for (Node n : window.network) {
+        for (Node n : network) {
             g2d.setColor(GraphPainter.getColor(simulation.getFlag(n.id())));
             g2d.fillOval((int) (n.x() * w) - C.S / 2,
                          (int) (n.y() * h) - C.S / 2,

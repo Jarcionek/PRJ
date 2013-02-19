@@ -1,4 +1,4 @@
-package network.GUI;
+package network.GUI.creator;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -16,12 +16,10 @@ public class MainWindow extends JFrame {
     // main functionality
     Network network = new Network();
     int selectionId = -1;
-    private Mode mode = Mode.CREATOR;
     
     // creator
     private final CreatorMenuBar creator;
     private final CreatorDrawablePanel creatorDrawPanel;
-    private final SimulationDrawablePane simDrawPanel;
     int[] nodeColor = null; // graph painter
 
     public MainWindow() {
@@ -29,7 +27,6 @@ public class MainWindow extends JFrame {
 
         creator = new CreatorMenuBar(this);
         creatorDrawPanel = new CreatorDrawablePanel(this, creator);
-        simDrawPanel = new SimulationDrawablePane(this);
         
         this.setJMenuBar(creator);
         
@@ -50,10 +47,7 @@ public class MainWindow extends JFrame {
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                switch (mode) {
-                    case CREATOR: creator.exit(); break;
-                    default: MainWindow.this.dispose(); break;
-                }
+                creator.exit();
             }
         });
     }
@@ -68,39 +62,8 @@ public class MainWindow extends JFrame {
         this.updateTitle();
     }
     
-    final void setMode(Mode mode) {
-        if (this.mode == mode) {
-            return;
-        }
-        this.mode = mode;
-        
-        if (mode != Mode.CREATOR) {
-            this.setJMenuBar(null);
-        }
-        
-        if (mode != Mode.SIMULATION) {
-        }
-        
-        if (mode == Mode.CREATOR) {
-            this.setJMenuBar(creator);
-            this.setContentPane(creatorDrawPanel);
-        }
-        
-        if (mode == Mode.SIMULATION) {
-            simDrawPanel.createNewPane();
-            this.setContentPane(simDrawPanel);
-        }
-        
-        this.revalidate();
-        this.repaint();
-        updateTitle();
-    }
-    
     final void updateTitle() {
-        switch (mode) {
-            case CREATOR: this.setTitle(creator.getTitle()); break;
-            default: this.setTitle("no title provided for this mode"); break;
-        }
+        this.setTitle(creator.getTitle());
     }
     
     boolean isAntiAliasingEnabled() {

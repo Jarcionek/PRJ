@@ -1,4 +1,4 @@
-package network.GUI;
+package network.GUI.simulation;
 
 /**
  * Constants.

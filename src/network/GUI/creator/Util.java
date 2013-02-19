@@ -1,4 +1,4 @@
-package network.GUI;
+package network.GUI.creator;
 
 import java.awt.Dimension;
 import network.creator.Network;

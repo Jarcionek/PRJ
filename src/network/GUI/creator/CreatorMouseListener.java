@@ -1,4 +1,4 @@
-package network.GUI;
+package network.GUI.creator;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;

@@ -1,6 +1,6 @@
 package network;
 
-import network.GUI.MainWindow;
+import network.GUI.creator.MainWindow;
 
 /**
  * @author Jaroslaw Pawlak
