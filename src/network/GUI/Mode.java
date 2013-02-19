@@ -5,5 +5,5 @@ package network.GUI;
  */
 public enum Mode {
     CREATOR,
-//    SIMULATOR, //TODO
+    SIMULATION,
 }

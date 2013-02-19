@@ -45,6 +45,9 @@ class CreatorMenuBar extends JMenuBar {
         private JMenuItem menuItemAdvancedMoving;
     private JMenu menuAbout;
         private JMenuItem menuItemHelp;
+    private JMenu menuMode;
+        private JRadioButtonMenuItem menuItemCreator;
+        private JRadioButtonMenuItem menuItemSimulation;
 
     /**
      * Constructor.
@@ -84,6 +87,9 @@ class CreatorMenuBar extends JMenuBar {
             menuItemAdvancedMoving = new JCheckBoxMenuItem("Advanced nodes moving");
         menuAbout = new JMenu("About");
             menuItemHelp = new JMenuItem("Help");
+        menuMode = new JMenu("Mode");
+            menuItemCreator = new JRadioButtonMenuItem("Creator");
+            menuItemSimulation = new JRadioButtonMenuItem("Simulation");
     }
     
     private void addMenus() {
@@ -111,6 +117,10 @@ class CreatorMenuBar extends JMenuBar {
             menuOptions.add(menuItemAdvancedMoving);
         this.add(menuAbout);
             menuAbout.add(menuItemHelp);
+        this.add(Box.createHorizontalGlue());
+        this.add(menuMode);
+            menuMode.add(menuItemCreator);
+            menuMode.add(menuItemSimulation);
     }
     
     /**
@@ -610,6 +620,25 @@ class CreatorMenuBar extends JMenuBar {
             
                 JOptionPane.showMessageDialog(window, ta, "Help", JOptionPane.PLAIN_MESSAGE);
                 window.repaint();
+            }
+        });
+        
+        ButtonGroup bg = new ButtonGroup();
+        
+        bg.add(menuItemCreator);
+        menuItemCreator.setSelected(true);
+        menuItemCreator.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                window.setMode(Mode.CREATOR);
+            }
+        });
+        
+        bg.add(menuItemSimulation);
+        menuItemSimulation.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                window.setMode(Mode.SIMULATION);
             }
         });
     }

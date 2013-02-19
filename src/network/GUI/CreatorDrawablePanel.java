@@ -3,7 +3,6 @@ package network.GUI;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
-import network.creator.Network;
 import network.creator.Node;
 import network.graphUtil.Edge;
 import network.painter.GraphPainter;
@@ -56,7 +55,7 @@ class CreatorDrawablePanel extends JPanel {
         if (creator.isAntiAliasingEnabled()) {
             g2d.setStroke(new BasicStroke(1.5f));
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                                    RenderingHints.VALUE_ANTIALIAS_ON);
+                                 RenderingHints.VALUE_ANTIALIAS_ON);
         }
         // white background
         g2d.setColor(Color.white);
@@ -78,12 +77,12 @@ class CreatorDrawablePanel extends JPanel {
                 g2d.setColor(Color.green); 
             }
             g2d.fillOval((int) (n.x() * w) - C.S / 2,
-                            (int) (n.y() * h) - C.S / 2,
-                            C.S, C.S);
+                         (int) (n.y() * h) - C.S / 2,
+                         C.S, C.S);
             g2d.setColor(Color.black);
             String id = "" + n.id();
             g2d.drawString(id, (int) (n.x() * w) - fm.stringWidth(id) / 2,
-                            (int) (n.y() * h) + g2d.getFont().getSize() / 2);
+                               (int) (n.y() * h) + g2d.getFont().getSize() / 2);
         }
 
         // highlight selection
@@ -109,7 +108,6 @@ class CreatorDrawablePanel extends JPanel {
             }
         }
 
-        super.paint(g2d);
         g.drawImage(image, 0, 0, null);
     }
 }
