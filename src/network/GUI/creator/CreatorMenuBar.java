@@ -20,7 +20,6 @@ class CreatorMenuBar extends JMenuBar {
     
     // save/load
     private File location = null;
-    private boolean modified = false;
     
     // menu bar
     private JMenu menuNetwork;
@@ -86,6 +85,9 @@ class CreatorMenuBar extends JMenuBar {
             menuItemHelp = new JMenuItem("Help");
     }
     
+    /**
+     * Add all the menus, menu items etc. to 'this' JMenuBar
+     */
     private void addMenus() {
         this.add(menuNetwork);
             menuNetwork.add(menuItemNew);
@@ -146,7 +148,7 @@ class CreatorMenuBar extends JMenuBar {
                 window.nodeColor = null;
                 window.selectionId = -1;
                 location = null;
-                modified = false;
+                window.modified = false;
                 window.updateTitle();
                 window.repaint();
             }
@@ -186,7 +188,8 @@ class CreatorMenuBar extends JMenuBar {
                 window.nodeColor = null;
                 window.selectionId = -1;
                 location = null;
-                window.networkModified();
+                window.modified = true;
+                window.updateTitle();
                 window.repaint();
             }
         });
@@ -225,7 +228,8 @@ class CreatorMenuBar extends JMenuBar {
                 window.nodeColor = null;
                 window.selectionId = -1;
                 location = null;
-                window.networkModified();
+                window.modified = true;
+                window.updateTitle();
                 window.repaint();
             }
         });
@@ -291,7 +295,8 @@ class CreatorMenuBar extends JMenuBar {
                 window.nodeColor = null;
                 window.selectionId = -1;
                 location = null;
-                window.networkModified();
+                window.modified = true;
+                window.updateTitle();
                 window.repaint();
             }
         });
@@ -373,7 +378,8 @@ class CreatorMenuBar extends JMenuBar {
                 window.nodeColor = null;
                 window.selectionId = -1;
                 location = null;
-                window.networkModified();
+                window.modified = true;
+                window.updateTitle();
                 window.repaint();
             }
         });
@@ -440,7 +446,8 @@ class CreatorMenuBar extends JMenuBar {
                 window.nodeColor = null;
                 window.selectionId = -1;
                 location = null;
-                window.networkModified();
+                window.modified = true;
+                window.updateTitle();
                 window.repaint();
             }
         });
@@ -479,7 +486,8 @@ class CreatorMenuBar extends JMenuBar {
                 window.nodeColor = null;
                 window.selectionId = -1;
                 location = null;
-                window.networkModified();
+                window.modified = true;
+                window.updateTitle();
                 window.repaint();
             }
         });
@@ -629,7 +637,7 @@ class CreatorMenuBar extends JMenuBar {
             }
             if (window.network.save(f)) {
                 location = f;
-                modified = false;
+                window.modified = false;
                 window.updateTitle();
                 return true;
             } else {
@@ -649,7 +657,7 @@ class CreatorMenuBar extends JMenuBar {
     private boolean save() {
         if (location != null) {
             if (window.network.save(location)) {
-                modified = false;
+                window.modified = false;
                 window.updateTitle();
                 return true;
             } else {
@@ -664,7 +672,7 @@ class CreatorMenuBar extends JMenuBar {
     }
     
     /**
-     * Loads the network from file.
+     * Loads the network from file - prompts user with JFileChooser.
      */
     private void load() {
         JFileChooser jfc = new JFileChooser();
@@ -681,7 +689,7 @@ class CreatorMenuBar extends JMenuBar {
                 window.nodeColor = null;
                 window.selectionId = -1;
                 location = jfc.getSelectedFile();
-                modified = false;
+                window.modified = false;
                 window.updateTitle();
                 window.repaint();
             }
@@ -694,7 +702,7 @@ class CreatorMenuBar extends JMenuBar {
      * If no, just disposes the frame.
      */
     void exit() {
-        if (!modified) {
+        if (!window.modified) {
             window.dispose();
             return;
         }
@@ -728,14 +736,16 @@ class CreatorMenuBar extends JMenuBar {
                 newTitle += location.getName();
             }
         }
-        if (modified) {
-            newTitle += "*";
-        }
         return newTitle;
     }
     
-    void networkModified() {
-        modified = true;
+    private void newNetworkGenerated() {
+        window.nodeColor = null;
+        window.selectionId = -1;
+        location = null;
+        window.modified = true;
+        window.updateTitle();
+        window.repaint();
     }
     
     boolean isAntiAliasingEnabled() {

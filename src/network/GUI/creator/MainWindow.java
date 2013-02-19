@@ -21,6 +21,8 @@ public class MainWindow extends JFrame {
     private final CreatorMenuBar creator;
     private final CreatorDrawablePanel creatorDrawPanel;
     int[] nodeColor = null; // graph painter
+    
+    boolean modified = false;
 
     public MainWindow() {
         super();
@@ -52,18 +54,12 @@ public class MainWindow extends JFrame {
         });
     }
     
-    /**
-     * To be called whenever a network is modified. This will update
-     * CreatorMenuBar 'modified' state and will cause the window
-     * to request new window title from CreatorMenuBar.
-     */
-    void networkModified() {
-        creator.networkModified();
-        this.updateTitle();
-    }
-    
     final void updateTitle() {
-        this.setTitle(creator.getTitle());
+        String title = creator.getTitle();
+        if (modified) {
+            title += "*";
+        }
+        this.setTitle(title);
     }
     
     boolean isAntiAliasingEnabled() {

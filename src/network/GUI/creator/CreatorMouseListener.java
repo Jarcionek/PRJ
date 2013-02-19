@@ -19,7 +19,7 @@ class CreatorMouseListener implements MouseListener, MouseMotionListener {
     private int lastX;
     private int lastY;
     
-    public CreatorMouseListener(MainWindow window, JPanel drawPane) {
+    CreatorMouseListener(MainWindow window, JPanel drawPane) {
         this.window = window;
         this.drawPane = drawPane;
     }
@@ -46,7 +46,8 @@ class CreatorMouseListener implements MouseListener, MouseMotionListener {
                     double dy = (double) y / size.height;
                     window.network.addNode(dx, dy);
                     window.nodeColor = null;
-                    window.networkModified();
+                    window.modified = true;
+                    window.updateTitle();
                     window.repaint();
                 }
             }
@@ -61,7 +62,8 @@ class CreatorMouseListener implements MouseListener, MouseMotionListener {
                 }
                 window.nodeColor = null;
                 window.selectionId = -1;
-                window.networkModified();
+                window.modified = true;
+                window.updateTitle();
                 window.repaint();
             }
 
@@ -124,7 +126,8 @@ class CreatorMouseListener implements MouseListener, MouseMotionListener {
                     window.network.connectNodes(window.selectionId, id);
                     window.selectionId = id;
                     window.nodeColor = null;
-                    window.networkModified();
+                    window.modified = true;
+                    window.updateTitle();
                 }
                 
             //(dis)connect nodes
@@ -137,7 +140,8 @@ class CreatorMouseListener implements MouseListener, MouseMotionListener {
                     }
                     window.selectionId = n.id();
                     window.nodeColor = null;
-                    window.networkModified();
+                    window.modified = true;
+                    window.updateTitle();
                 }
             }
             
@@ -211,7 +215,7 @@ class CreatorMouseListener implements MouseListener, MouseMotionListener {
         double dy = (double) y / size.height;
         
         window.network.moveNode(window.selectionId, dx, dy);
-        window.networkModified();
+        window.modified = true;
         window.updateTitle();
     }
 
