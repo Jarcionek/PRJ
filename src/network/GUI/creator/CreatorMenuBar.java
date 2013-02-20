@@ -148,7 +148,7 @@ class CreatorMenuBar extends JMenuBar {
                 window.nodeColor = null;
                 window.selectionId = -1;
                 location = null;
-                window.modified = false;
+                window.modified = false; // in newNetworkGenerated() it is true
                 window.updateTitle();
                 window.repaint();
             }
@@ -185,12 +185,7 @@ class CreatorMenuBar extends JMenuBar {
                 }
                 
                 window.network = Network.generateRing(v);
-                window.nodeColor = null;
-                window.selectionId = -1;
-                location = null;
-                window.modified = true;
-                window.updateTitle();
-                window.repaint();
+                newNetworkGenerated();
             }
         });
 
@@ -225,12 +220,7 @@ class CreatorMenuBar extends JMenuBar {
                 }
                 
                 window.network = Network.generateStar(v1);
-                window.nodeColor = null;
-                window.selectionId = -1;
-                location = null;
-                window.modified = true;
-                window.updateTitle();
-                window.repaint();
+                newNetworkGenerated();
             }
         });
         
@@ -292,12 +282,7 @@ class CreatorMenuBar extends JMenuBar {
                 }
                 
                 window.network = Network.generateGrid(v1, v2);
-                window.nodeColor = null;
-                window.selectionId = -1;
-                location = null;
-                window.modified = true;
-                window.updateTitle();
-                window.repaint();
+                newNetworkGenerated();
             }
         });
         
@@ -375,12 +360,7 @@ class CreatorMenuBar extends JMenuBar {
                 }
                 
                 window.network = Network.generateHex(v1, v2, more);
-                window.nodeColor = null;
-                window.selectionId = -1;
-                location = null;
-                window.modified = true;
-                window.updateTitle();
-                window.repaint();
+                newNetworkGenerated();
             }
         });
         
@@ -443,12 +423,7 @@ class CreatorMenuBar extends JMenuBar {
                 }
                 
                 window.network = Network.generateFullTree(v1, v2);
-                window.nodeColor = null;
-                window.selectionId = -1;
-                location = null;
-                window.modified = true;
-                window.updateTitle();
-                window.repaint();
+                newNetworkGenerated();
             }
         });
         
@@ -483,12 +458,7 @@ class CreatorMenuBar extends JMenuBar {
                 }
                 
                 window.network = Network.generateFullyConnectedMesh(v1);
-                window.nodeColor = null;
-                window.selectionId = -1;
-                location = null;
-                window.modified = true;
-                window.updateTitle();
-                window.repaint();
+                newNetworkGenerated();
             }
         });
         
@@ -721,22 +691,21 @@ class CreatorMenuBar extends JMenuBar {
     }
 
     /**
-     * Return a new title for main window.
+     * Returns a network name (without file extension) or "unnamed" if network
+     * was never saved.
      */
-    String getTitle() {
-        String newTitle = MainWindow.TITLE + ": ";
+    String getNetworkName() {
         if (location == null) {
-            newTitle += "unnamed";
+            return "unnamed";
         } else {
             if (location.getName().contains(".")) {
                 // remove extension
-                newTitle += location.getName()
+                return location.getName()
                              .substring(0, location.getName().lastIndexOf('.'));
             } else {
-                newTitle += location.getName();
+                return location.getName();
             }
         }
-        return newTitle;
     }
     
     private void newNetworkGenerated() {

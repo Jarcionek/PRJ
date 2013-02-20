@@ -9,6 +9,8 @@ import network.creator.Node;
  */
 class Util {
 
+    private Util() {}
+    
     /**
      * @param network network
      * @param size sizes of a drawable panel where the network is drawn

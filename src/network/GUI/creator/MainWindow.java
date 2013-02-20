@@ -55,11 +55,11 @@ public class MainWindow extends JFrame {
     }
     
     final void updateTitle() {
-        String title = creator.getTitle();
+        String title = creator.getNetworkName();
         if (modified) {
             title += "*";
         }
-        this.setTitle(title);
+        this.setTitle(TITLE + ": " + title);
     }
     
     boolean isAntiAliasingEnabled() {
