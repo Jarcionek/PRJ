@@ -8,7 +8,6 @@ import network.creator.Node;
 import network.graphUtil.Edge;
 import network.painter.GraphPainter;
 import network.simulation.Simulation;
-import network.simulation.agents.RandomAgent;
 
 /**
  * @author Jaroslaw Pawlak
@@ -16,27 +15,22 @@ import network.simulation.agents.RandomAgent;
 class SimulationDrawablePane extends JPanel {
     
     private final Network network;
-    
-    private Simulation simulation;
+    private final Simulation simulation;
     
     // buffers
     private Dimension lastSize;
     private BufferedImage edges;
     private BufferedImage labels;
     
-    SimulationDrawablePane(Network network) {
+    SimulationDrawablePane(Simulation simulation, Network network) {
         super(null);
+        this.simulation = simulation;
         this.network = network;
-        
-        simulation = new Simulation(network, RandomAgent.class);
-        simulation.nextRound();
-        setOpaque(false);
-    }
-    
-    void createNewPane() {
-        simulation = new Simulation(network, RandomAgent.class);
-        simulation.nextRound();
         lastSize = null;
+        
+        simulation.nextRound();
+        
+        setOpaque(false);
     }
     
     @Override

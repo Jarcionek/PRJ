@@ -8,9 +8,13 @@ import network.simulation.AbstractAgent;
  */
 public class RandomAgent extends AbstractAgent {
 
+    public RandomAgent(int maxFlags) {
+        super(maxFlags);
+    }
+    
     @Override
     public int getNewFlag(int round) {
-        return new Random().nextInt(4); //TODO how many flags are there?
+        return new Random().nextInt(maxFlags);
     }
 
 }

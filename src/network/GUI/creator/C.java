@@ -6,6 +6,9 @@ package network.GUI.creator;
  * @author Jaroslaw Pawlak
  */
 class C {
+    
+    private C() {}
+    
     /**
      * Oval sizes (diameter) of nodes drawn in network
      */

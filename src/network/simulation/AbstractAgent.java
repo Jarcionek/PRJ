@@ -13,6 +13,12 @@ public abstract class AbstractAgent implements AgentDelegate {
      */
     private int flag = -1;    
     
+    protected final int maxFlags;
+            
+    public AbstractAgent(int maxFlags) {
+        this.maxFlags = maxFlags;
+    }
+    
     /**
      * This agent's neighbours (should not contain this agent).
      */

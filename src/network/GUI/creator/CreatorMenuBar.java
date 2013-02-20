@@ -7,6 +7,7 @@ import java.io.File;
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
+import network.GUI.simulation.SimulationWindow;
 import network.creator.Network;
 import network.creator.NetworkStats;
 import network.painter.GraphPainter;
@@ -39,6 +40,8 @@ class CreatorMenuBar extends JMenuBar {
         private JMenuItem menuItemColor;
         private JMenuItem menuItemInterest;
         private JMenuItem menuItemExit;
+    private JMenu menuSimulation;
+        private JMenuItem menuItemSimulationStart;
     private JMenu menuOptions;
         private JMenuItem menuItemAntiAliasing;
         private JMenuItem menuItemAdvancedMoving;
@@ -78,6 +81,8 @@ class CreatorMenuBar extends JMenuBar {
             menuItemColor = new JCheckBoxMenuItem("Color the network");
             menuItemInterest = new JCheckBoxMenuItem("Show intersections");
             menuItemExit = new JMenuItem("Exit");
+        menuSimulation = new JMenu("Simulation");
+            menuItemSimulationStart = new JMenuItem("Start");
         menuOptions = new JMenu("Options");
             menuItemAntiAliasing = new JCheckBoxMenuItem("Anti-aliasing");
             menuItemAdvancedMoving = new JCheckBoxMenuItem("Advanced nodes moving");
@@ -108,6 +113,8 @@ class CreatorMenuBar extends JMenuBar {
             menuNetwork.add(menuItemInterest);
             menuNetwork.add(new JSeparator());
             menuNetwork.add(menuItemExit);
+        this.add(menuSimulation);
+            menuSimulation.add(menuItemSimulationStart);
         this.add(menuOptions);
             menuOptions.add(menuItemAntiAliasing);
             menuOptions.add(menuItemAdvancedMoving);
@@ -136,6 +143,7 @@ class CreatorMenuBar extends JMenuBar {
         };
         menuNetwork.addMenuListener(menuListener);
         menuGenerate.addMenuListener(menuListener);
+        menuSimulation.addMenuListener(menuListener);
         menuOptions.addMenuListener(menuListener);
         menuAbout.addMenuListener(menuListener);
         
@@ -547,6 +555,13 @@ class CreatorMenuBar extends JMenuBar {
             @Override
             public void actionPerformed(ActionEvent e) {
                 exit();
+            }
+        });
+        
+        menuItemSimulationStart.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new SimulationWindow(window.network, getNetworkName());
             }
         });
         

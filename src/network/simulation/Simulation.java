@@ -11,7 +11,7 @@ public class Simulation {
     
     private int round = 0;
 
-    public Simulation(Network network, Class agentClass) {
+    public Simulation(Network network, Class agentClass, int maxFlags) {
         // check if given class is descended of AbstractAgent
         boolean ok = false;
         Class superClass = agentClass.getSuperclass();
@@ -34,7 +34,8 @@ public class Simulation {
         for (int i = 0; i < agents.length; i++) {
             AbstractAgent agent;
             try {
-                agent = (AbstractAgent) agentClass.getConstructor().newInstance();
+                agent = (AbstractAgent) agentClass.getConstructor(int.class)
+                                                         .newInstance(maxFlags);
             } catch (Exception ex) {
                 throw new IllegalArgumentException("Could not create an agent "
                         + "of " + agentClass + ": " + ex);
