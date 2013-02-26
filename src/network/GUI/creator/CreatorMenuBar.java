@@ -523,22 +523,7 @@ class CreatorMenuBar extends JMenuBar {
         menuItemColor.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (menuItemColor.isSelected()) {
-                    window.nodeColor = GraphPainter.paint(window.network);
-                    int maxFlag = -1;
-                    for (int i : window.nodeColor) {
-                        if (i > maxFlag) {
-                            maxFlag = i;
-                        }
-                    }
-                    if (maxFlag >= GraphPainter.getNumberOfDefinedColors()) {
-                        menuItemColor.setSelected(false);
-                        JOptionPane.showMessageDialog(window,
-                                "There are not enough color definitions "
-                                + "to color this graph!",
-                                "Color the graph - error", JOptionPane.WARNING_MESSAGE);
-                    }
-                }
+                checkColors();
                 window.repaint();
             }
         });
@@ -561,7 +546,14 @@ class CreatorMenuBar extends JMenuBar {
         menuItemSimulationStart.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new SimulationWindow(window.network, getNetworkName());
+                if (window.network.getNumberOfNodes() == 0) {
+                    //TODO or if network is disjoint
+                    JOptionPane.showMessageDialog(window, "You should create "
+                            + "the network first!", MainWindow.TITLE + " - error",
+                            JOptionPane.ERROR_MESSAGE);
+                } else {
+                    new SimulationWindow(window.network, getNetworkName());
+                }
             }
         });
         
@@ -728,8 +720,28 @@ class CreatorMenuBar extends JMenuBar {
         window.selectionId = -1;
         location = null;
         window.modified = true;
+        checkColors();
         window.updateTitle();
         window.repaint();
+    }
+
+    private void checkColors() {
+        if (menuItemColor.isSelected()) {
+            window.nodeColor = GraphPainter.paint(window.network);
+            int maxFlag = -1;
+            for (int i : window.nodeColor) {
+                if (i > maxFlag) {
+                    maxFlag = i;
+                }
+            }
+            if (maxFlag >= GraphPainter.getNumberOfDefinedColors()) {
+                menuItemColor.setSelected(false);
+                JOptionPane.showMessageDialog(window,
+                        "There are not enough color definitions "
+                        + "to color this graph!",
+                        "Color the graph - error", JOptionPane.WARNING_MESSAGE);
+            }
+        }
     }
     
     boolean isAntiAliasingEnabled() {

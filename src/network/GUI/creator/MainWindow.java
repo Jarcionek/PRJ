@@ -35,6 +35,7 @@ public class MainWindow extends JFrame {
         updateTitle();
         
         this.setContentPane(creatorDrawPanel);
+        this.setLocationByPlatform(true);
         this.setSize(800, 600);
         this.setVisible(true);
         
