@@ -761,7 +761,7 @@ class CreatorMenuBar extends JMenuBar {
         menuItemColor.setSelected(true);
     }
     
-    boolean isInterestctionsHighlightingEnabled() {
+    boolean isIntersectionsHighlightingEnabled() {
         return menuItemInterest.isSelected();
     }
 }

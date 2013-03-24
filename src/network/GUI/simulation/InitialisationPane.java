@@ -12,6 +12,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import network.creator.Node;
 import network.graphUtil.Edge;
+import network.painter.GraphPainter;
 import network.simulation.agents.LCFAgentND;
 import network.simulation.agents.LeastCommonFlagAgent;
 import network.simulation.agents.RandomAgent;
@@ -59,7 +60,19 @@ class InitialisationPane extends JPanel {
         for (int i = C.MIN_FLAG; i <= C.MAX_FLAG; i++) {
             listFlags.addItem("" + i);
         }
-        listFlags.setSelectedItem("4");
+        
+        int flags = GraphPainter.getRequiredColors(window.network);
+        if (!window.network.containsEdgesInteresctions()) {
+            listFlags.setSelectedItem("" + Math.min(4, flags));
+        } else {
+            if (flags > C.MAX_FLAG) {
+                //TODO some information that consensus may not be achievable?
+                // GraphPainter is not perfect so it does not have to be true
+                listFlags.setSelectedItem("" + C.MAX_FLAG);
+            } else {
+                listFlags.setSelectedItem("" + flags);
+            }
+        }
         listFlags.setMaximumRowCount(10);
         
         buttonStart.addActionListener(new ActionListener() {

@@ -404,6 +404,19 @@ public class Network implements Iterable<Node> {
                                 degreeMean, degreeMedian, degreeMode);
     }
     
+    public boolean containsEdgesInteresctions() {
+        for (Edge e1 : getEdges(800, 600)) {
+            for (Edge e2 : getEdges(800, 600)) {
+                if (!e1.equals(e2) && !Edge.arePolygonalChain(e1, e2)) {
+                    if (Edge.intersect(e1, e2) != null) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    
     /**
      * Returns true if saved successfully.
      */
@@ -462,7 +475,7 @@ public class Network implements Iterable<Node> {
             return null;
         }
     }
-    
+
     
     // GENERATORS
     

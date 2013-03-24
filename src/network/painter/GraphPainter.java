@@ -82,6 +82,10 @@ public class GraphPainter {
         }
     }
     
+    public static int getRequiredColors(Network network) {
+        return getSmallestNumberNotInArray(paint(network));
+    }
+    
     /**
      * Returns the smallest non-negative number that is not in the array.
      */

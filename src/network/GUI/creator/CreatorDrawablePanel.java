@@ -93,7 +93,7 @@ class CreatorDrawablePanel extends JPanel {
         }
 
         // show edges intersections
-        if (creator.isInterestctionsHighlightingEnabled()) {
+        if (creator.isIntersectionsHighlightingEnabled()) {
             int s = 7;
             g2d.setColor(Color.red);
             for (Edge e1 : window.network.getEdges(w, h)) {
