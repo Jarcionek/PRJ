@@ -28,8 +28,6 @@ class SimulationDrawablePane extends JPanel {
         this.network = network;
         lastSize = null;
         
-        simulation.nextRound();
-        
         setOpaque(false);
     }
     
@@ -74,6 +72,9 @@ class SimulationDrawablePane extends JPanel {
         // colors
         BufferedImage flags = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = flags.createGraphics();
+        g2d.setStroke(new BasicStroke(1.5f));
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                                RenderingHints.VALUE_ANTIALIAS_ON);
         for (Node n : network) {
             g2d.setColor(GraphPainter.getColor(simulation.getFlag(n.id())));
             g2d.fillOval((int) (n.x() * w) - C.S / 2,

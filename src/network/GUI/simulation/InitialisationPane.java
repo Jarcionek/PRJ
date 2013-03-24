@@ -20,7 +20,7 @@ import network.simulation.agents.RandomAgent;
  */
 class InitialisationPane extends JPanel {
     
-    //TODO find all classes withing a package or all subclasses of a class
+    //TODO find all classes within a package or all subclasses of a class
     //     This is not possible in standard Java Reflections API
     private static final Class[] agentClasses = new Class[] {
         LeastCommonFlagAgent.class,

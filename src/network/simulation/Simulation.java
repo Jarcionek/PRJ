@@ -9,6 +9,9 @@ public class Simulation {
     
     private AgentInfo[] agents;
     
+    /**
+     * This shows the number of the next round.
+     */
     private int round = 0;
 
     public Simulation(Network network, Class agentClass, int maxFlags) {
@@ -51,9 +54,11 @@ public class Simulation {
                 agents[i].agent.neighbours[j] = agents[neighbours[j]].agent;
             }
         }
+        
+        nextRound();
     }
     
-    private boolean isConsensus() {
+    public boolean isConsensus() {
         for (AgentInfo ai : agents) {
             for (AgentDelegate neighbour : ai.agent.neighbours) {
                 if (ai.agent.getFlag() == neighbour.getFlag()) {
@@ -86,6 +91,14 @@ public class Simulation {
         }
         
         return agents[id].agent.getFlag();
+    }
+    
+    /**
+     * Returns the number of last round played. Initialisation round has number 0.
+     * This is in fact a number of normal rounds played.
+     */
+    public final int getRound() {
+        return round - 1;
     }
     
 }

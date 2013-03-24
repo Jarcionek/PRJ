@@ -1,5 +1,6 @@
 package network.GUI.simulation;
 
+import java.awt.Dimension;
 import javax.swing.JFrame;
 import network.creator.Network;
 import network.simulation.Simulation;
@@ -28,7 +29,15 @@ public class SimulationWindow extends JFrame {
 
     void startSimulation(Class[] agents, int flags) {
         simulation = new Simulation(network, agents[0], flags);
-        this.setContentPane(new ContentPane(this));
+        
+        ContentPane contentPane = new ContentPane(this);
+        this.setContentPane(contentPane);
+        
+        Dimension size = this.getSize();
+        size.width += contentPane.getExtraWidth();
+        size.height += contentPane.getExtraHeight();
+        this.setSize(size);
+        
         this.revalidate();
         this.repaint();
     }

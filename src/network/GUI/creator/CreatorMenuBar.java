@@ -508,7 +508,8 @@ class CreatorMenuBar extends JMenuBar {
                 ta.setEditable(false);
                 ta.setBackground(new JPanel().getBackground());
             
-                JOptionPane.showMessageDialog(window, ta, "Help", JOptionPane.PLAIN_MESSAGE);
+                JOptionPane.showMessageDialog(window, ta, "Network Statistics",
+                        JOptionPane.PLAIN_MESSAGE);
                 window.repaint();
             }
         });
