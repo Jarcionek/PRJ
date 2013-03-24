@@ -8,7 +8,8 @@ import network.simulation.AgentDelegate;
  * Deterministic Agent that raises random flag from among those flags
  * that was raised the least number of times by its neighbours in the previous
  * round. For example:
- * 
+ * <p>
+ * <pre>
  * maximum number of different flags is 4
  * agent A has 3 neighbours who raised flags 0, 1, 2
  * agent B has 2 neighbours who raised flags 0, 3
@@ -17,6 +18,7 @@ import network.simulation.AgentDelegate;
  * agent A will raise flag 3
  * agent B will raise flag 1 or 2
  * agent C will raise flag 0, 1, 2 or 3
+ * </pre>
  * 
  * @author Jaroslaw Pawlak
  */

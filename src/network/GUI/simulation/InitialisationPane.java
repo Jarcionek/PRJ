@@ -12,6 +12,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import network.creator.Node;
 import network.graphUtil.Edge;
+import network.simulation.agents.LCFAgentND;
 import network.simulation.agents.LeastCommonFlagAgent;
 import network.simulation.agents.RandomAgent;
 
@@ -23,6 +24,7 @@ class InitialisationPane extends JPanel {
     //TODO find all classes within a package or all subclasses of a class
     //     This is not possible in standard Java Reflections API
     private static final Class[] agentClasses = new Class[] {
+        LCFAgentND.class,
         LeastCommonFlagAgent.class,
         RandomAgent.class,
     };
