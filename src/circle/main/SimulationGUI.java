@@ -36,7 +36,7 @@ public class SimulationGUI extends JFrame {
     private JCheckBox idsCheckBox;
     private JCheckBox stateCheckBox;
     private HistoryPanel historyPanel;
-    private MemoryAccessor memoryAccessor;
+    private AgentMemoryAccessor memoryAccessor;
     
     private AgentLabel[] agentLabels;
     
@@ -232,7 +232,7 @@ public class SimulationGUI extends JFrame {
         historyPanel = new HistoryPanel();
         
         if (Main.MEMORY_ACCESSOR_ENABLED) {
-            memoryAccessor = new MemoryAccessor(sim.getAgentInfo(0));
+            memoryAccessor = new AgentMemoryAccessor(sim.getAgentInfo(0));
         }
     }
     

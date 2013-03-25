@@ -1,7 +1,5 @@
-package circle.main;
+package util;
 
-import circle.agents.AbstractAgent;
-import circle.agents.AgentInfo;
 import exceptions.ShouldNeverHappenException;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
@@ -16,24 +14,27 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 /**
- * Allows to access and modify agent's internal memory (unless access modifiers
- * of the fields prevent it) in runtime.
+ * Allows to access and modify object's fields in runtime
+ * (unless access modifiers prevent it).
  * 
  * @author Jaroslaw Pawlak
  */
-public final class MemoryAccessor extends JPanel {
+public class MemoryAccessor extends JPanel {
 
     private JComponent[][] component;
 
-    private AgentInfo agentInfo;
+    private Object object;
 
-    public MemoryAccessor(AgentInfo ai) {
+    public MemoryAccessor() {
         super(new GridBagLayout());
-        setAgent(ai);
-        createLayout();
+    }
+    
+    public MemoryAccessor(Object object) {
+        super(new GridBagLayout());
+        setObject(object);
     }
 
-    final public void createLayout() {
+    private void createLayout() {
         this.removeAll();
         
         GridBagConstraints c = new GridBagConstraints();
@@ -54,26 +55,24 @@ public final class MemoryAccessor extends JPanel {
         }
     }
 
-    /* //TODO
-     * It should take an object and check its class (and superclasses) -
-     * if it is AgentInfo, then the title should be set accordingly,
-     * otherwise it should be just a name of the class.
+    /**
+     * Sets the object and recreates layout.
      */
-    public void setAgent(AgentInfo ai) {
+    public final void setObject(Object object) {
 
-        agentInfo = ai;
-        AbstractAgent a = ai.agent;
+        this.object = object;
         
-        setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.RAISED),
-                "Agent " + ai.id + " memory "
-                + "(" + a.getClass().getSimpleName() + ")",
+        String title = getTitle() != null? getTitle()
+                                            : object.getClass().getSimpleName();
+        
+        setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.RAISED), title,
                 TitledBorder.CENTER, TitledBorder.TOP));
 
-        Field[] fields = a.getClass().getDeclaredFields();
+        Field[] fields = object.getClass().getDeclaredFields();
         component = new JComponent[fields.length][];
         for (int i = 0; i < fields.length; i++) {
             try {
-                component[i] = processField(fields[i], a);
+                component[i] = processField(fields[i], object);
             } catch (IllegalAccessException ex) {
                 System.out.println("This shouldn't happen: " + ex);
                 // unless handling protected and friendly access modifiers
@@ -85,13 +84,25 @@ public final class MemoryAccessor extends JPanel {
     }
 
     /**
+     * Defines a title of this JPanel's titled border. Override it to customise
+     * a title. Object's class' simple name will be used if it returns null
+     * (default behaviour).
+     * <p>
+     * If you override this method, you may need to use a default constructor
+     * (with no arguments) and then call setObject(Object).
+     */
+    public String getTitle() {
+        return null;
+    }
+
+    /**
      * //TODO handle other keywords (at least final & static)
      * 
      * @throws IllegalAccessException 
      *         protected and friendly (no-modifier) access modifiers are
      *         not supported, hence this exception should never be thrown
      */
-    private JComponent[] processField(final Field field, final AbstractAgent a)
+    private JComponent[] processField(final Field field, final Object object)
                                                 throws IllegalAccessException {
         int arrayLength = -1;
         boolean isArray = false;
@@ -124,7 +135,7 @@ public final class MemoryAccessor extends JPanel {
 
             isArray = true;
             if (isPublic) {
-                arrayLength = getArrayLength(field.get(a));
+                arrayLength = getArrayLength(field.get(object));
             }
             type = field.getType().getComponentType().toString()
                     + "[" + (arrayLength >= 0? arrayLength : "") + "]";
@@ -157,7 +168,7 @@ public final class MemoryAccessor extends JPanel {
         if (isPublic && isArray) {
 
             for (int i = 3; i < result.length; i++) {
-                Object o = field.get(a);
+                Object o = field.get(object);
 
                 if (o instanceof boolean[]) {
                     result[i] = new JButton("" + ((boolean[]) o)[i - 3]);
@@ -199,7 +210,7 @@ public final class MemoryAccessor extends JPanel {
                         String value = JOptionPane.showInputDialog(null);
                         boolean ok = true;
                         try {
-                            setArrayValue(field.get(a), fi - 3, value);
+                            setArrayValue(field.get(object), fi - 3, value);
                         } catch (Exception ex) {
                             ok = false;
                             JOptionPane.showMessageDialog(null, ex, null,
@@ -215,7 +226,7 @@ public final class MemoryAccessor extends JPanel {
 
         // fill single value
         } else if (isPublic) {
-            result[3] = new JButton(field.get(a).toString());
+            result[3] = new JButton(field.get(object).toString());
             final JButton fButton = (JButton) result[3];
 
             fButton.addActionListener(new ActionListener() {
@@ -224,7 +235,7 @@ public final class MemoryAccessor extends JPanel {
                     String value = JOptionPane.showInputDialog(null);
                     boolean ok = true;
                     try {
-                        setValue(field, a, value);
+                        setValue(field, object, value);
                     } catch (Exception ex) {
                         ok = false;
                         JOptionPane.showMessageDialog(null, ex, null,
@@ -372,12 +383,8 @@ public final class MemoryAccessor extends JPanel {
         }
     }
 
-    public int getAgentID() {
-        return agentInfo.id;
-    }
-    
     public void update() {
-        setAgent(agentInfo);
+        setObject(object);
     }
 
     @Override
