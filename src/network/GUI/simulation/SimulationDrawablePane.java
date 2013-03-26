@@ -22,6 +22,8 @@ class SimulationDrawablePane extends JPanel {
     private BufferedImage edges;
     private BufferedImage labels;
     
+    private int selectionID = -1;
+    
     SimulationDrawablePane(Simulation simulation, Network network) {
         super(null);
         this.simulation = simulation;
@@ -82,11 +84,23 @@ class SimulationDrawablePane extends JPanel {
                          C.S, C.S);
         }
         
+        // selection
+        if (selectionID >= 0) {
+            g2d.setColor(Color.red);
+            Point p = network.getPosition(selectionID, size);
+            g2d.drawOval(p.x - C.S / 2, p.y - C.S / 2, C.S, C.S);
+        }
+        
         // finalise
         g.setColor(Color.white);
         g.fillRect(0, 0, w, h);
         g.drawImage(edges, 0, 0, null);
         g.drawImage(flags, 0, 0, null);
         g.drawImage(labels, 0, 0, null);
+    }
+    
+    public void setSelectionID(int id) {
+        selectionID = id;
+        repaint();
     }
 }

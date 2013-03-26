@@ -1,13 +1,18 @@
 package network.GUI.simulation;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import network.GUI.creator.Util;
+import network.creator.Node;
 
 /**
  * @author Jaroslaw Pawlak
@@ -24,6 +29,8 @@ class ContentPane extends JPanel {
     private final JButton nextRoundButton;
     private final JButton untilConsensusButton;
     
+    private final AgentMemoryAccessor agentMemoryAccessor;
+    
     ContentPane(SimulationWindow window) {
         super(new BorderLayout());
         this.window = window;
@@ -36,32 +43,59 @@ class ContentPane extends JPanel {
         nextRoundButton = new JButton("Next round");
         untilConsensusButton = new JButton("Play until consensus");
         
+        agentMemoryAccessor = new AgentMemoryAccessor(
+                                             window.simulation.getAgentInfo(0));
+        
         customiseComponents();
         createLayout();
     }
     
     private void customiseComponents() {
+        drawPane.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                Dimension size = drawPane.getSize();
+                int x = e.getX();
+                int y = e.getY();
+
+                Node n = Util.findClosestNode(window.network, size, x, y);
+                if (n != null) {
+                    drawPane.setSelectionID(n.id());
+                    agentMemoryAccessor.setAgent(window.simulation.getAgentInfo(n.id()));
+                    agentMemoryAccessor.revalidate();
+                }
+            }
+            
+        });
+        
         nextRoundButton.addActionListener(new ActionListener() {
+            
             @Override
             public void actionPerformed(ActionEvent e) {
                 window.simulation.nextRound();
                 update();
             }
+            
         });
+        
         untilConsensusButton.addActionListener(new ActionListener() {
+            
+            private static final long TIMEOUT = 5000;
+            
             @Override
             public void actionPerformed(ActionEvent e) {
                 long start = System.currentTimeMillis();
-                final long timeout = 5000;
                 do {
                     window.simulation.nextRound();
-                    if (System.currentTimeMillis() - start > timeout) {
+                    if (System.currentTimeMillis() - start > TIMEOUT) {
                         //TODO popup message?
                         break;
                     }
                 } while (!window.simulation.isConsensus()); 
                 update();
             }
+            
         });
     }
 
@@ -78,6 +112,7 @@ class ContentPane extends JPanel {
         
         add(drawPane, BorderLayout.CENTER);
         add(eastPanel, BorderLayout.EAST);
+        add(agentMemoryAccessor, BorderLayout.SOUTH);
     }
     
     private void update() {
@@ -101,9 +136,8 @@ class ContentPane extends JPanel {
     
     /**
      * Returns a heigh of side panels.
-     * @return 
      */
     int getExtraHeight() {
-        return 0;
+        return agentMemoryAccessor.getPreferredSize().height;
     }
 }

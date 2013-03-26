@@ -7,7 +7,7 @@ import network.creator.Node;
 /**
  * @author Jaroslaw Pawlak
  */
-class Util {
+public class Util {
 
     private Util() {}
     
@@ -18,7 +18,7 @@ class Util {
      * @param y position of mouse click on a drawable pane (in pixels)
      * @return closest node or null if there or null if not found
      */
-    static Node findClosestNode(Network network, Dimension size, int x, int y) {
+    public static Node findClosestNode(Network network, Dimension size, int x, int y) {
         Node best = null;
         double bestDist = Double.MAX_VALUE;
         
@@ -46,7 +46,7 @@ class Util {
      * @param margin margin
      * @return the closest integer to 'value' in [margin; size - margin]
      */
-    static int fixRange(int value, int size, int margin) {
+    public static int fixRange(int value, int size, int margin) {
         return Math.max(margin, Math.min(value, size - margin));
     }
 }

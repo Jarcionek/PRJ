@@ -101,4 +101,8 @@ public class Simulation {
         return round - 1;
     }
     
+    public AgentInfo getAgentInfo(int i) {
+        return agents[i];
+    }
+    
 }
