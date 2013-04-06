@@ -3,6 +3,8 @@ package network.GUI.simulation;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -38,7 +40,7 @@ class InitialisationPane extends JPanel {
     }
     
     private final SimulationWindow window;
-    private final boolean[] selection; //TODO implement multiple-node selection
+    private final boolean[] selection;
     
     private final JLabel labelAgent = new JLabel("Agent behaviour:");
     private final JComboBox<String> listAgent = new JComboBox<String>(agentNames);
@@ -79,20 +81,26 @@ class InitialisationPane extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Class[] agents = new Class[selection.length];
+                boolean anythingSelected = false;
+                
                 for (int i = 0; i < selection.length; i++) {
                     if (selection[i]) {
+                        anythingSelected = true;
                         agents[i] = agentClasses[listInfected.getSelectedIndex()];
                     } else {
                         agents[i] = agentClasses[listAgent.getSelectedIndex()];
                     }
                 }
-                window.startSimulation(agents, listFlags.getSelectedIndex() + C.MIN_FLAG);
+                
+                if (anythingSelected) {
+                    window.startSimulationWithVariousAgents(agents, selection,
+                                     listFlags.getSelectedIndex() + C.MIN_FLAG);
+                } else {
+                    window.startSimulationWithAllAgentsTheSame(agents[0],
+                                     listFlags.getSelectedIndex() + C.MIN_FLAG);
+                }
             }
         });
-        
-        //TODO implement infected behaviours handling
-        labelInfected.setEnabled(false);
-        listInfected.setEnabled(false);
         
         // LAYOUT
         JPanel topPanel = new JPanel(new GridLayout(2, 1));
@@ -127,6 +135,21 @@ class InitialisationPane extends JPanel {
     }
     
     private class InitDrawablePane extends JPanel {
+        
+        {
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    Dimension size = InitDrawablePane.this.getSize();
+                    Node n = window.network
+                                .findClosestNode(size, e.getX(), e.getY(), C.S);
+                    if (n != null) {
+                        selection[n.id()] = !selection[n.id()];
+                        InitDrawablePane.this.repaint();
+                    }
+                }
+            });
+        }
         
         @Override
         public void paint(Graphics g) {
@@ -163,7 +186,7 @@ class InitialisationPane extends JPanel {
                                (int) (n.y() * h) + g2d.getFont().getSize() / 2);
                 // selection
                 if (selection[n.id()]) {
-                    g2d.setColor(Color.red);
+                    g2d.setColor(Color.blue);
                     g2d.drawOval((int) (n.x() * w) - C.S/2,
                                  (int) (n.y() * h) - C.S/2, C.S, C.S);
                 }

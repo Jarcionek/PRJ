@@ -27,10 +27,21 @@ public class SimulationWindow extends JFrame {
         this.setVisible(true);
     }
 
-    void startSimulation(Class[] agents, int flags) {
-        simulation = new Simulation(network, agents[0], flags);
+    void startSimulationWithVariousAgents(Class[] agents, boolean[] infected,
+                                                                    int flags) {
+        simulation = new Simulation(network, agents, infected, flags);
         
-        ContentPane contentPane = new ContentPane(this);
+        startSimulation(infected);
+    }
+
+    void startSimulationWithAllAgentsTheSame(Class agent, int flags) {
+        simulation = new Simulation(network, agent, flags);
+        
+        startSimulation(null);
+    }
+    
+    private void startSimulation(boolean[] infected) {
+        ContentPane contentPane = new ContentPane(this, infected);
         this.setContentPane(contentPane);
         
         Dimension size = this.getSize();

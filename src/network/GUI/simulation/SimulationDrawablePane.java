@@ -16,6 +16,7 @@ class SimulationDrawablePane extends JPanel {
     
     private final Network network;
     private final Simulation simulation;
+    private final boolean[] infected;
     
     // buffers
     private Dimension lastSize;
@@ -24,10 +25,13 @@ class SimulationDrawablePane extends JPanel {
     
     private int selectionID = -1;
     
-    SimulationDrawablePane(Simulation simulation, Network network) {
+    SimulationDrawablePane(Simulation simulation, Network network, boolean[] infected) {
         super(null);
+        
         this.simulation = simulation;
         this.network = network;
+        this.infected = infected;
+        
         lastSize = null;
         
         setOpaque(false);
@@ -82,6 +86,18 @@ class SimulationDrawablePane extends JPanel {
             g2d.fillOval((int) (n.x() * w) - C.S / 2,
                          (int) (n.y() * h) - C.S / 2,
                          C.S, C.S);
+        }
+        
+        // highlight infected
+        if (infected != null) {
+            g2d.setColor(Color.blue);
+            for (Node n : network) {
+                if (infected[n.id()]) {
+                    g2d.drawOval((int) (n.x() * w) - C.S / 2,
+                                (int) (n.y() * h) - C.S / 2,
+                                C.S, C.S);
+                }
+            }
         }
         
         // selection
