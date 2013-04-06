@@ -7,7 +7,7 @@ import circle.main.Flag;
  * Agent number four.
  * 
  * This agent remembers flags raised in one previous round by all its neighbours
- * at calculates their consistency. Then it should try to adjust to whatever
+ * and calculates their consistency. Then it should try to adjust to whatever
  * state is larger and more consistent. It also prefers to keep raising the
  * same flag every round.
  * 

@@ -21,12 +21,12 @@ public abstract class AbstractAgent implements AgentDelegate {
      * Subclass of this class should not call this method.
      * This method should be called only by the simulation.
      */
-    public void setFlag(int flag) {
+    public final void setFlag(int flag) {
         this.flag = flag;
     }
 
     @Override
-    public int getFlag() {
+    public final int getFlag() {
         return flag;
     }
 }
