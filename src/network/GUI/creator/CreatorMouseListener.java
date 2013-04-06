@@ -1,9 +1,8 @@
 package network.GUI.creator;
 
 import java.awt.*;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
 import network.creator.Node;
@@ -11,7 +10,7 @@ import network.creator.Node;
 /**
  * @author Jaroslaw Pawlak
  */
-class CreatorMouseListener implements MouseListener, MouseMotionListener {
+class CreatorMouseListener extends MouseAdapter {
     
     private final MainWindow window;
     private final JPanel drawPane;
@@ -34,14 +33,14 @@ class CreatorMouseListener implements MouseListener, MouseMotionListener {
         int x = e.getX();
         int y = e.getY();
 
-        Node n = Util.findClosestNode(window.network, size, x, y);
+        Node n = window.network.findClosestNode(size, x, y, C.S);
 
         // add new node
         if (e.getButton() == MouseEvent.BUTTON1) {
             if (n == null) {
-                x = Util.fixRange(x, size.width, C.S / 2);
-                y = Util.fixRange(y, size.height, C.S / 2);
-                if (Util.findClosestNode(window.network, size, x, y) == null) {
+                x = fixRange(x, size.width, C.S / 2);
+                y = fixRange(y, size.height, C.S / 2);
+                if (window.network.findClosestNode(size, x, y, C.S) == null) {
                     double dx = (double) x / size.width;
                     double dy = (double) y / size.height;
                     window.network.addNode(dx, dy);
@@ -77,7 +76,7 @@ class CreatorMouseListener implements MouseListener, MouseMotionListener {
         final int y = e.getY();
         lastX = e.getX();
         lastY = e.getY();
-        Node n = Util.findClosestNode(window.network, drawPane.getSize(), x, y);
+        Node n = window.network.findClosestNode(drawPane.getSize(), x, y, C.S);
 
         // just deselect
         if (n == null) {
@@ -107,14 +106,14 @@ class CreatorMouseListener implements MouseListener, MouseMotionListener {
 
         // connect/disconnect
         if (e.getButton() == MouseEvent.BUTTON1) {
-            Node n = Util.findClosestNode(window.network, drawPane.getSize(), x, y);
+            Node n = window.network.findClosestNode(drawPane.getSize(), x, y, C.S);
 
             // create new node and connect to selected to it
             if (n == null) {
                 Dimension size = drawPane.getSize();
-                x = Util.fixRange(x, size.width, C.S / 2);
-                y = Util.fixRange(y, size.height, C.S / 2);
-                n = Util.findClosestNode(window.network, drawPane.getSize(), x, y);
+                x = fixRange(x, size.width, C.S / 2);
+                y = fixRange(y, size.height, C.S / 2);
+                n = window.network.findClosestNode(drawPane.getSize(), x, y, C.S);
                 
                 // check whether there is no node at the position of a new one
                 // the previous check was for the mouse click position
@@ -208,8 +207,8 @@ class CreatorMouseListener implements MouseListener, MouseMotionListener {
      */
     private void moveNode(int x, int y) {
         Dimension size = drawPane.getSize();
-        x = Util.fixRange(x, size.width, C.S / 2);
-        y = Util.fixRange(y, size.height, C.S / 2);
+        x = fixRange(x, size.width, C.S / 2);
+        y = fixRange(y, size.height, C.S / 2);
         
         double dx = (double) x / size.width;
         double dy = (double) y / size.height;
@@ -219,12 +218,16 @@ class CreatorMouseListener implements MouseListener, MouseMotionListener {
         window.updateTitle();
     }
 
-    @Override
-    public void mouseMoved(MouseEvent e) {}
-
-    @Override
-    public void mouseEntered(MouseEvent e) {}
-
-    @Override
-    public void mouseExited(MouseEvent e) {}
+    /**
+     * Returns the closest integer value in range [margin; size - margin].
+     * If margin > size / 2, this method's behaviour is unknown, no exception
+     * will be thrown.
+     * @param value value to check
+     * @param size range
+     * @param margin margin
+     * @return the closest integer to 'value' in [margin; size - margin]
+     */
+    private static int fixRange(int value, int size, int margin) {
+        return Math.max(margin, Math.min(value, size - margin));
+    }
 }

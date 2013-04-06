@@ -33,8 +33,17 @@ public class Network implements Iterable<Node> {
         }
     };
     
-    private final List<Node> nodeList = new LinkedList<Node>();
-    private final List<List<Integer>> adjacencyList = new LinkedList<List<Integer>>();
+    private final List<Node> nodeList;
+    private final List<List<Integer>> adjacencyList;
+
+    public Network() {
+        nodeList = new LinkedList<Node>();
+        adjacencyList = new LinkedList<List<Integer>>();
+    }
+    
+////////////////////////////////////////////////////////////////////////////////
+////// PUBLIC METHODS //////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////    
     
     public void addNode(double x, double y) {
         if (x < 0 || x > 1 || y < 0 || y > 1) {
@@ -126,24 +135,6 @@ public class Network implements Iterable<Node> {
         
         adjacencyList.get(id1).remove((Integer) id2);
         adjacencyList.get(id2).remove((Integer) id1);
-    }
-    
-    private void insertSorted(List<Integer> list, int value) {
-        if (list.isEmpty()) {
-            list.add(value);
-            return;
-        }
-        if (list.get(0) > value) {
-            list.add(0, value);
-            return;
-        }
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i) > value) {
-                list.add(i - 1, value);
-                return;
-            }
-        }
-        list.add(value);
     }
 
     @Override
@@ -418,6 +409,32 @@ public class Network implements Iterable<Node> {
     }
     
     /**
+     * @param size sizes of a drawable panel where the network is drawn
+     * @param x position of mouse click on a drawable pane (in pixels)
+     * @param y position of mouse click on a drawable pane (in pixels)
+     * @param s size (diameter) of the node
+     * @return closest node or null if not found within radius s
+     */
+    public Node findClosestNode(Dimension size, int x, int y, int s) {
+        Node best = null;
+        double bestDist = Double.MAX_VALUE;
+        
+        for (Node n : this) {
+            int nx = (int) (n.x() * size.width);
+            int ny = (int) (n.y() * size.height);
+            if (Math.abs(nx - x) < s && Math.abs(ny - y) < s) {
+                double newDist = (nx-x)*(nx-x) + (ny-y)*(ny-y);
+                if (newDist < bestDist) {
+                    bestDist = newDist;
+                    best = n;
+                }
+            }
+        }
+        
+        return best;
+    }
+    
+    /**
      * Returns true if saved successfully.
      */
     public boolean save(File file) {
@@ -476,8 +493,10 @@ public class Network implements Iterable<Node> {
         }
     }
 
-    
-    // GENERATORS
+
+////////////////////////////////////////////////////////////////////////////////
+////// GENERATORS //////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
     
     public static Network generateGrid(int width, int height) {
         if (width <= 0 || height <= 0) {
@@ -650,7 +669,27 @@ public class Network implements Iterable<Node> {
         return n;
     }
     
-    // UTILITIES
+////////////////////////////////////////////////////////////////////////////////
+////// PRIVATE UTILITIES ///////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+    
+    private void insertSorted(List<Integer> list, int value) {
+        if (list.isEmpty()) {
+            list.add(value);
+            return;
+        }
+        if (list.get(0) > value) {
+            list.add(0, value);
+            return;
+        }
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i) > value) {
+                list.add(i - 1, value);
+                return;
+            }
+        }
+        list.add(value);
+    }
     
     private static int pow(int base, int exponent) {
         if (exponent < 0) {

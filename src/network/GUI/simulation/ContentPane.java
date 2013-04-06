@@ -11,7 +11,6 @@ import java.awt.event.MouseEvent;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import network.GUI.creator.Util;
 import network.creator.Node;
 
 /**
@@ -59,7 +58,7 @@ class ContentPane extends JPanel {
                 int x = e.getX();
                 int y = e.getY();
 
-                Node n = Util.findClosestNode(window.network, size, x, y);
+                Node n = window.network.findClosestNode(size, x, y, C.S);
                 if (n != null) {
                     drawPane.setSelectionID(n.id());
                     agentMemoryAccessor.setAgent(window.simulation.getAgentInfo(n.id()));
