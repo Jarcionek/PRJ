@@ -28,7 +28,7 @@ public abstract class AbstractAgent implements AgentDelegate {
      * Should be called only be the simulation and not by the agent.
      * @param agents 
      */
-    public final void setVisibleAgents(AgentDelegate[] agents) {
+    final void setVisibleAgents(AgentDelegate[] agents) {
         neighbours = agents;
     }
 
@@ -42,7 +42,7 @@ public abstract class AbstractAgent implements AgentDelegate {
      * Subclass of this class should not call this method.
      * This method should be called only by the simulation.
      */
-    public final void setFlag(int flag) {
+    final void setFlag(int flag) {
         this.flag = flag;
     }
 

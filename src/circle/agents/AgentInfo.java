@@ -22,7 +22,7 @@ public class AgentInfo {
         this.id = id;
     }
     
-    public void setVisibleAgents(AgentInfo[] visibleAgents) {
+    public final void setVisibleAgents(AgentInfo[] visibleAgents) {
         this.visibleAgents = visibleAgents;
         AgentDelegate[] ad = new AgentDelegate[visibleAgents.length];
         for (int i = 0; i < ad.length; i++) {
@@ -31,9 +31,12 @@ public class AgentInfo {
         this.agent.setVisibleAgents(ad);
     }
 
-    public AgentInfo[] getVisibleAgents() {
+    public final AgentInfo[] getVisibleAgents() {
         return visibleAgents;
     }
     
+    public final void setFlag(int flag) {
+        agent.setFlag(flag);
+    }
 }
 

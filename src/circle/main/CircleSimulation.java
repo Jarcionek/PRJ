@@ -135,7 +135,7 @@ public class CircleSimulation {
         
         // apply
         for (int i = 0; i < flags.length; i++) {
-            agents[i].agent.setFlag(flags[i]);
+            agents[i].setFlag(flags[i]);
         }
         round++;
     }
@@ -158,7 +158,7 @@ public class CircleSimulation {
         }
         
         for (int i = 0; i < agents.length; i++) {
-            agents[i].agent.setFlag(newFlags[i]);
+            agents[i].setFlag(newFlags[i]);
         }
         round++;
         

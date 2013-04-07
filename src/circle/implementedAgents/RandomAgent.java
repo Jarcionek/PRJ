@@ -1,5 +1,6 @@
-package circle.agents;
+package circle.implementedAgents;
 
+import circle.agents.AbstractAgent;
 import java.util.Random;
 import circle.main.Flag;
 

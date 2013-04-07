@@ -11,17 +11,13 @@ public abstract class AbstractAgent implements AgentDelegate {
     
     protected AgentDelegate[] visibleAgents;
     
-    public final void setVisibleAgents(AgentDelegate[] agents) {
+    final void setVisibleAgents(AgentDelegate[] agents) {
         visibleAgents = agents;
     }
 
     public abstract int getNewFlag(int round);
     
-    /**
-     * Subclass of this class should not call this method.
-     * This method should be called only by the simulation.
-     */
-    public final void setFlag(int flag) {
+    final void setFlag(int flag) {
         this.flag = flag;
     }
 

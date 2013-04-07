@@ -121,7 +121,7 @@ public class SimulationGUI extends JFrame {
                         menuItem.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
-                                sim.getAgentInfo(fi).agent.setFlag(fj);
+                                sim.getAgentInfo(fi).setFlag(fj);
                                 sim.historyModifyLastRound(fi, fj);
                                 drawablePanel.repaint();
                             }
