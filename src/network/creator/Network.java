@@ -669,6 +669,69 @@ public class Network implements Iterable<Node> {
         return n;
     }
     
+    /**
+     * Creates a random network with the maximum number of given nodes
+     * and edges. Algorithm does not avoid edges intersections, however does not
+     * place nodes one on the other or too close to the sides of the area
+     * (as defined by the epsilon). The algorithm uses timeout to break all
+     * computations and return what was generated so far. In case of large
+     * epsilon and large number of nodes it is possible that the number of nodes
+     * will be less than requested (in this case no edges will be generated).
+     * It is guaranteed that if at least one edge was generated, the requested
+     * number of nodes was generated. Finally, if algorithm breaks due to timeout
+     * while generating edges, their number may be lower than requested.
+     * @param nodes maximum number of nodes
+     * @param edges maximum number of edges
+     * @param eps epsilon to avoid overlapping nodes - range [0,1]
+     * @param timeout timeout in milliseconds
+     * @return a new network
+     */
+    public static Network generateRandom(int nodes, int edges, final double eps,
+                                                           final long timeout) {
+        if (nodes <= 0 || edges <= 0) {
+            throw new IllegalArgumentException("Both values must be positive");
+        }
+        if (eps < 0 || eps > 1) {
+            throw new IllegalArgumentException("Epsilon has to be in range [0,1]");
+        }
+        
+        Random r = new Random();
+        Network n = new Network();
+        
+        long start = System.currentTimeMillis();
+        
+        createNodes:
+        for (int i = 0; i < nodes; i++) {
+            if (System.currentTimeMillis() - start > timeout) {
+                return n;
+            }
+            double x = r.nextDouble() * (1 - 2 * eps) + eps;
+            double y = r.nextDouble() * (1 - 2 * eps) + eps;
+            for (Node node : n) {
+                if (Math.abs(node.x - x) < eps && Math.abs(node.y - y) < eps) {
+                    i--;
+                    continue createNodes;
+                }
+            }
+            n.addNode(x, y);
+        }
+        
+        for (int i = 0; i < edges; i++) {
+            if (System.currentTimeMillis() - start > timeout) {
+                return n;
+            }
+            int one = r.nextInt(nodes);
+            int two = r.nextInt(nodes);
+            if (one == two || n.isConnected(one, two)) {
+                i--;
+                continue;
+            }
+            n.connectNodes(one, two);
+        }
+        
+        return n;
+    }
+    
 ////////////////////////////////////////////////////////////////////////////////
 ////// PRIVATE UTILITIES ///////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

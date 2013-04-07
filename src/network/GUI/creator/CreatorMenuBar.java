@@ -32,6 +32,7 @@ class CreatorMenuBar extends JMenuBar {
             private JMenuItem menuItemHex;
             private JMenuItem menuItemTree;
             private JMenuItem menuItemAllToAll;
+            private JMenuItem menuItemRandom;
         private JMenuItem menuItemSave;
         private JMenuItem menuItemSaveAs;
         private JMenuItem menuItemLoad;
@@ -73,6 +74,7 @@ class CreatorMenuBar extends JMenuBar {
                 menuItemHex = new JMenuItem("Hex");
                 menuItemTree = new JMenuItem("Tree");
                 menuItemAllToAll = new JMenuItem("All-to-all");
+                menuItemRandom = new JMenuItem("Random");
             menuItemSave = new JMenuItem("Save");
             menuItemSaveAs = new JMenuItem("Save as");
             menuItemLoad = new JMenuItem("Load");
@@ -103,6 +105,7 @@ class CreatorMenuBar extends JMenuBar {
                 menuGenerate.add(menuItemHex);
                 menuGenerate.add(menuItemTree);
                 menuGenerate.add(menuItemAllToAll);
+                menuGenerate.add(menuItemRandom);
             menuNetwork.add(menuItemSave);
             menuNetwork.add(menuItemSaveAs);
             menuNetwork.add(menuItemLoad);
@@ -402,8 +405,7 @@ class CreatorMenuBar extends JMenuBar {
                     return;
                 }
                 
-                String s2 = JOptionPane.showInputDialog(window,
-                        "Levels:",
+                String s2 = JOptionPane.showInputDialog(window, "Levels:",
                         "Create Tree Network", JOptionPane.PLAIN_MESSAGE);
                 
                 if (s2 == null) {
@@ -466,6 +468,68 @@ class CreatorMenuBar extends JMenuBar {
                 }
                 
                 window.network = Network.generateFullyConnectedMesh(v1);
+                newNetworkGenerated();
+            }
+        });
+        
+        menuItemRandom.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String s1 = JOptionPane.showInputDialog(window, "Nodes:",
+                        "Create Random Network", JOptionPane.PLAIN_MESSAGE);
+                
+                if (s1 == null) {
+                    window.repaint();
+                    return;
+                }
+                
+                int v1;
+                try {
+                    v1 = Integer.parseInt(s1);
+                    if (v1 < 1) {
+                        JOptionPane.showMessageDialog(window,
+                                "Nodes has to be positive", 
+                                "Create Random Network - Error",
+                                JOptionPane.ERROR_MESSAGE);
+                        window.repaint();
+                        return;
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(window, "Not a number", 
+                            "Create Random Network - Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    window.repaint();
+                    return;
+                }
+                
+                String s2 = JOptionPane.showInputDialog(window, "Edges:",
+                        "Create Random Network", JOptionPane.PLAIN_MESSAGE);
+                
+                if (s2 == null) {
+                    window.repaint();
+                    return;
+                }
+                
+                int v2;
+                try {
+                    v2 = Integer.parseInt(s2);
+                    if (v2 < 1) {
+                        JOptionPane.showMessageDialog(window,
+                                "Edges has to be positive", 
+                                "Create Random Network - Error",
+                                JOptionPane.ERROR_MESSAGE);
+                        window.repaint();
+                        return;
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(window, "Not a number", 
+                            "Create Random Network - Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    window.repaint();
+                    return;
+                }
+                
+                window.network = Network.generateRandom(v1, v2, 0.01d, 1000);
                 newNetworkGenerated();
             }
         });
