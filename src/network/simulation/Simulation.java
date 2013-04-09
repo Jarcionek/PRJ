@@ -1,5 +1,6 @@
 package network.simulation;
 
+import java.util.LinkedList;
 import network.creator.Network;
 
 /**
@@ -122,6 +123,12 @@ public class Simulation {
     
 ////// PUBLIC METHODS //////////////////////////////////////////////////////////
     
+    /**
+     * Checks if the network differentiation is valid. Includes infected
+     * agents (if any).
+     * @return true if there are no two adjacent agents with the same flag raise
+     *         in the last round, false otherwise
+     */
     public boolean isConsensus() {
         for (AgentInfo ai : agentsInfo) {
             for (AgentDelegate neighbour : ai.agent.neighbours) {
@@ -133,6 +140,11 @@ public class Simulation {
         return true;
     }
     
+    /**
+     * As {@link #isConsensus()}, but ignores agents marked as infected.
+     * @return true if there are no two adjacent not-infected agents with
+     *         the same flag raise in the last round, false otherwise
+     */
     public boolean isConsensusIgnoreInfected() {
         if (infected == null) {
             return isConsensus();
@@ -154,10 +166,37 @@ public class Simulation {
         return true;
     }
     
+    /**
+     * Returns {@link #isConsensus()} or {@link #isConsensusIgnoreInfected()}
+     * depending on <tt>includeInfected</tt> value.
+     * @param includeInfected whether to include infected agents or not
+     * @return {@link #isConsensus()} or {@link #isConsensusIgnoreInfected()}
+     */
     public boolean isConsensus(boolean includeInfected) {
         return includeInfected? isConsensus() : isConsensusIgnoreInfected();
     }
     
+    /**
+     * Checks if the network colouring is valid (i.e. if all agents have raised
+     * the same flag in the last round).
+     * @return true if all agents have raised the same flag, false otherwise
+     */
+    public boolean isColoured() {
+        for (AgentInfo ai : agentsInfo) {
+            for (AgentDelegate neighbour : ai.agent.neighbours) {
+                if (ai.agent.getFlag() != neighbour.getFlag()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * Returns true if and only if at least one agent has been marked
+     * as infected.
+     * @return true if simulation contains infections, false otherwise
+     */
     public boolean containsInfection() {
         if (infected != null) {
             for (boolean b : infected) {
@@ -168,6 +207,8 @@ public class Simulation {
         }
         return false;
     }
+    
+    
     
     public final void nextRound() {
         int[] newFlags = new int[agentsInfo.length];
