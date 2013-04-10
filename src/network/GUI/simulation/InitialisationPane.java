@@ -5,10 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
@@ -49,6 +46,9 @@ class InitialisationPane extends JPanel {
     private final JButton buttonStart = new JButton("Start");
     private final JLabel labelFlags = new JLabel("Number of flags:");
     private final JComboBox<String> listFlags = new JComboBox<String>();
+    private final JLabel labelConsensus = new JLabel("Consensus:");
+    private final JComboBox<String> listConsensus = new JComboBox<String>();
+    private final JCheckBox checkboxConsiderInfected = new JCheckBox("Include infections", false);
     
     private final InitDrawablePane drawPane = new InitDrawablePane();
     
@@ -94,13 +94,20 @@ class InitialisationPane extends JPanel {
                 
                 if (anythingSelected) {
                     window.startSimulationWithVariousAgents(agents, selection,
-                                     listFlags.getSelectedIndex() + C.MIN_FLAG);
+                                     listFlags.getSelectedIndex() + C.MIN_FLAG,
+                                     listConsensus.getSelectedIndex(),
+                                     checkboxConsiderInfected.isSelected());
                 } else {
                     window.startSimulationWithAllAgentsTheSame(agents[0],
-                                     listFlags.getSelectedIndex() + C.MIN_FLAG);
+                                     listFlags.getSelectedIndex() + C.MIN_FLAG,
+                                     listConsensus.getSelectedIndex(),
+                                     checkboxConsiderInfected.isSelected());
                 }
             }
         });
+        
+        listConsensus.addItem("Differentiation");
+        listConsensus.addItem("Colouring");
         
         // LAYOUT
         JPanel topPanel = new JPanel(new GridLayout(2, 1));
@@ -126,6 +133,11 @@ class InitialisationPane extends JPanel {
         c.insets = new Insets(0, 5, 0, 0);
         bottom.add(listFlags, c);
         c.insets = new Insets(0, 25, 0, 0);
+        bottom.add(labelConsensus, c);
+        c.insets = new Insets(0, 5, 0, 0);
+        bottom.add(listConsensus, c);
+        c.insets = new Insets(0, 25, 0, 0);
+        bottom.add(checkboxConsiderInfected, c);
         bottom.add(buttonStart, c);
         topPanel.add(bottom);
         
@@ -133,6 +145,25 @@ class InitialisationPane extends JPanel {
         this.add(topPanel, BorderLayout.NORTH);
         this.add(drawPane, BorderLayout.CENTER);
     }
+    
+    public InitialisationSettings getSettings() {
+        return new InitialisationSettings(listAgent.getSelectedIndex(),
+                listInfected.getSelectedIndex(), listFlags.getSelectedIndex(),
+                listConsensus.getSelectedIndex(), checkboxConsiderInfected.isSelected());
+    }
+    
+    public void setSettings(InitialisationSettings settings) {
+        if (settings == null) {
+            return;
+        }
+        listAgent.setSelectedIndex(settings.indexAgent);
+        listInfected.setSelectedIndex(settings.indexInfected);
+        listFlags.setSelectedIndex(settings.indexFlags);
+        listConsensus.setSelectedIndex(settings.indexConsensus);
+        checkboxConsiderInfected.setSelected(settings.checkboxIncludeInfected);
+    }
+    
+    
     
     private class InitDrawablePane extends JPanel {
         

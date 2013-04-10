@@ -1,6 +1,5 @@
 package network.simulation;
 
-import java.util.LinkedList;
 import network.creator.Network;
 
 /**
@@ -8,14 +7,21 @@ import network.creator.Network;
  */
 public class Simulation {
     
+    public final int CONSENSUS_DIFFERENTIATION = 0;
+    public final int CONSENSUS_COLOURING = 1;
+    
     private final AgentInfo[] agentsInfo;
     private final boolean[] infected;
+//    private final boolean historyEnabled; //TODO history
+    
+    private int consensus = CONSENSUS_DIFFERENTIATION;
+    private boolean includeInfected = false;
     
     /**
      * This shows the number of the next round.
      */
     private int round = 0;
-
+    
     public Simulation(Network network, Class agentClass, int maxFlags) {
         checkAgentClass(agentClass);
         
@@ -84,7 +90,42 @@ public class Simulation {
         nextRound();
     }
     
-////// INITIALISATION //////////////////////////////////////////////////////////
+    public Simulation(Network network, Class agentClass, int maxFlags,
+                                                                int consensus) {
+        this(network, agentClass, maxFlags);
+        setConsensus(consensus);
+    }
+    
+    public Simulation(Network network, Class[] agentsClass, boolean infected[],
+                                                  int maxFlags, int consensus) {
+        this(network, agentsClass, infected, maxFlags);
+        setConsensus(consensus);
+    }
+    
+    public Simulation(Network network, Class agentClass, int maxFlags,
+                                       int consensus, boolean includeInfected) {
+        this(network, agentClass, maxFlags, consensus);
+        this.includeInfected = includeInfected;
+    }
+    
+    public Simulation(Network network, Class[] agentsClass, boolean infected[],
+                         int maxFlags, int consensus, boolean includeInfected) {
+        this(network, agentsClass, infected, maxFlags, consensus);
+        this.includeInfected = includeInfected;
+    }
+    
+////// INITIALISATION (PRIVATE METHODS CALLED ONLY IN CONSTRUCTORS) ////////////
+
+    private void setConsensus(int mode) {
+        switch (mode) {
+            case CONSENSUS_COLOURING:
+            case CONSENSUS_DIFFERENTIATION:
+                consensus = mode;
+                break;
+            default:
+                throw new IllegalArgumentException("Illegal value: " + mode);
+        }
+    }
     
     /**
      * Checks if given class is descended of AbstractAgent.
@@ -121,15 +162,20 @@ public class Simulation {
         }
     }
     
-////// PUBLIC METHODS //////////////////////////////////////////////////////////
+////// PRIVATE METHODS /////////////////////////////////////////////////////////
     
-    /**
-     * Checks if the network differentiation is valid. Includes infected
-     * agents (if any).
-     * @return true if there are no two adjacent agents with the same flag raise
-     *         in the last round, false otherwise
-     */
-    public boolean isConsensus() {
+    private boolean isColouredIncludeInfected() {
+        for (AgentInfo ai : agentsInfo) {
+            for (AgentDelegate neighbour : ai.agent.neighbours) {
+                if (ai.agent.getFlag() != neighbour.getFlag()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    
+    private boolean isDifferentiatedIncludeInfected() {
         for (AgentInfo ai : agentsInfo) {
             for (AgentDelegate neighbour : ai.agent.neighbours) {
                 if (ai.agent.getFlag() == neighbour.getFlag()) {
@@ -140,14 +186,30 @@ public class Simulation {
         return true;
     }
     
-    /**
-     * As {@link #isConsensus()}, but ignores agents marked as infected.
-     * @return true if there are no two adjacent not-infected agents with
-     *         the same flag raise in the last round, false otherwise
-     */
-    public boolean isConsensusIgnoreInfected() {
+    private boolean isColouredIgnoreInfected() {
         if (infected == null) {
-            return isConsensus();
+            return isColouredIncludeInfected();
+        }
+        
+        for (AgentInfo ai : agentsInfo) {
+            if (infected[ai.id]) {
+                continue;
+            }
+            for (AgentInfo neighbour : ai.neighbours) {
+                if (infected[neighbour.id]) {
+                    continue;
+                }
+                if (ai.agent.getFlag() != neighbour.agent.getFlag()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    
+    private boolean isDifferentiatedIgnoreInfected() {
+        if (infected == null) {
+            return isDifferentiatedIncludeInfected();
         }
         
         for (AgentInfo ai : agentsInfo) {
@@ -165,31 +227,17 @@ public class Simulation {
         }
         return true;
     }
+
+////// PUBLIC METHODS //////////////////////////////////////////////////////////
     
-    /**
-     * Returns {@link #isConsensus()} or {@link #isConsensusIgnoreInfected()}
-     * depending on <tt>includeInfected</tt> value.
-     * @param includeInfected whether to include infected agents or not
-     * @return {@link #isConsensus()} or {@link #isConsensusIgnoreInfected()}
-     */
-    public boolean isConsensus(boolean includeInfected) {
-        return includeInfected? isConsensus() : isConsensusIgnoreInfected();
-    }
-    
-    /**
-     * Checks if the network colouring is valid (i.e. if all agents have raised
-     * the same flag in the last round).
-     * @return true if all agents have raised the same flag, false otherwise
-     */
-    public boolean isColoured() {
-        for (AgentInfo ai : agentsInfo) {
-            for (AgentDelegate neighbour : ai.agent.neighbours) {
-                if (ai.agent.getFlag() != neighbour.getFlag()) {
-                    return false;
-                }
-            }
+    public boolean isConsensus() {
+        if (consensus == CONSENSUS_COLOURING) {
+            return includeInfected? isColouredIncludeInfected()
+                                  : isColouredIgnoreInfected();
+        } else { // consensus == CONSENSUS_DIFFERENTIATION
+            return includeInfected? isDifferentiatedIncludeInfected()
+                                  : isDifferentiatedIgnoreInfected();
         }
-        return true;
     }
     
     /**
@@ -207,8 +255,6 @@ public class Simulation {
         }
         return false;
     }
-    
-    
     
     public final void nextRound() {
         int[] newFlags = new int[agentsInfo.length];

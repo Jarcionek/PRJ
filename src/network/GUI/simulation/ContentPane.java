@@ -9,7 +9,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import network.creator.Node;
@@ -28,7 +27,6 @@ class ContentPane extends JPanel {
     private final JLabel firstConsensusLabel;
     private final JButton nextRoundButton;
     private final JButton untilConsensusButton;
-    private final JCheckBox includeInfectedCheckBox;
     
     private final AgentMemoryAccessor agentMemoryAccessor;
     
@@ -36,8 +34,7 @@ class ContentPane extends JPanel {
         super(new BorderLayout());
         this.window = window;
         
-        boolean isConsensus = window.simulation
-                    .isConsensus(C.INCLUDE_INFECTED_IN_CONSENSUS_DEFAULT_VALUE);
+        boolean isConsensus = window.simulation.isConsensus();
                 
         drawPane = new SimulationDrawablePane(window.simulation, window.network, infected);
         
@@ -47,8 +44,6 @@ class ContentPane extends JPanel {
                                                   + (isConsensus? "0" : "N/A"));
         nextRoundButton = new JButton("Next round");
         untilConsensusButton = new JButton("Play until consensus");
-        includeInfectedCheckBox = new JCheckBox("Include infections in consensus",
-                                 C.INCLUDE_INFECTED_IN_CONSENSUS_DEFAULT_VALUE);
         
         agentMemoryAccessor = new AgentMemoryAccessor(
                                              window.simulation.getAgentInfo(0));
@@ -106,17 +101,6 @@ class ContentPane extends JPanel {
             }
             
         });
-        
-        if (!window.simulation.containsInfection()) {
-            includeInfectedCheckBox.setEnabled(false);
-            includeInfectedCheckBox.setToolTipText("There are no infected agents");
-        }
-        includeInfectedCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                update();
-            }
-        });
     }
 
     private void createLayout() {
@@ -126,7 +110,6 @@ class ContentPane extends JPanel {
         simulationButtons.add(firstConsensusLabel);
         simulationButtons.add(nextRoundButton);
         simulationButtons.add(untilConsensusButton);
-        simulationButtons.add(includeInfectedCheckBox);
         
         JPanel eastPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         eastPanel.add(simulationButtons);
@@ -138,10 +121,10 @@ class ContentPane extends JPanel {
     
     private void update() {
         roundLabel.setText("Round: " + window.simulation.getRound());
-        isConsensusLabel.setText("Consensus: " + (window.simulation
-                .isConsensus(includeInfectedCheckBox.isSelected())? "YES" : "NO"));
-        if (firstConsensusLabel.getText().contains("N/A") && window.simulation
-                .isConsensus(includeInfectedCheckBox.isSelected())) {
+        isConsensusLabel.setText("Consensus: "
+                             + (window.simulation.isConsensus()? "YES" : "NO"));
+        if (firstConsensusLabel.getText().contains("N/A")
+                                           && window.simulation.isConsensus()) {
             firstConsensusLabel.setText("First consensus at round: "
                     + window.simulation.getRound());
         }
