@@ -25,7 +25,8 @@ class NormalExperiment extends AbstractExperiment {
     
     @Override
     protected Simulation createSimulation() {
-        return new Simulation(network, agentClass, maxFlags);
+        return new Simulation(network, agentClass, maxFlags,
+                Simulation.DIFFERENTIATION, false);
     }
 
     @Override

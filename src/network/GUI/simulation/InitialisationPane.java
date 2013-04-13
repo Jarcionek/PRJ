@@ -12,6 +12,7 @@ import javax.swing.border.EtchedBorder;
 import network.creator.Node;
 import network.graphUtil.Edge;
 import network.painter.GraphPainter;
+import network.simulation.Simulation;
 import network.simulation.agents.LCFAgentND;
 import network.simulation.agents.LeastCommonFlagAgent;
 import network.simulation.agents.RandomAgent;
@@ -94,14 +95,12 @@ class InitialisationPane extends JPanel {
                 
                 if (anythingSelected) {
                     window.startSimulationWithVariousAgents(agents, selection,
-                                     listFlags.getSelectedIndex() + C.MIN_FLAG,
-                                     listConsensus.getSelectedIndex(),
-                                     checkboxConsiderInfected.isSelected());
+                            listFlags.getSelectedIndex() + C.MIN_FLAG,
+                            consensus(), checkboxConsiderInfected.isSelected());
                 } else {
                     window.startSimulationWithAllAgentsTheSame(agents[0],
-                                     listFlags.getSelectedIndex() + C.MIN_FLAG,
-                                     listConsensus.getSelectedIndex(),
-                                     checkboxConsiderInfected.isSelected());
+                            listFlags.getSelectedIndex() + C.MIN_FLAG,
+                            consensus());
                 }
             }
         });
@@ -161,6 +160,14 @@ class InitialisationPane extends JPanel {
         listFlags.setSelectedIndex(settings.indexFlags);
         listConsensus.setSelectedIndex(settings.indexConsensus);
         checkboxConsiderInfected.setSelected(settings.checkboxIncludeInfected);
+    }
+    
+    
+    
+    private boolean consensus() {
+        // 0 is differentiation, 1 is colouring
+        return listConsensus.getSelectedIndex() == 0?
+                Simulation.DIFFERENTIATION : Simulation.COLOURING;
     }
     
     

@@ -13,9 +13,14 @@ import network.simulation.Simulation;
  */
 public class SimulationWindow extends JFrame {
 
+    //TODO add InitialisationWindow and extract it from SimulationWindow
+    //     so the simulation GUI can be started by providing just Simulation
+    
     private static final String TITLE = "Simulation";
     
     private static InitialisationSettings settings = null;
+    private static int lastX = Integer.MIN_VALUE;
+    private static int lastY = 0;
     
     final Network network;
     Simulation simulation;
@@ -30,29 +35,38 @@ public class SimulationWindow extends JFrame {
         
         this.addWindowListener(new WindowAdapter() {
             @Override
-            public void windowClosed(WindowEvent e) {
+            public void windowClosing(WindowEvent e) {
+                lastX = getX();
+                lastY = getY();
                 saveInitialisationSettings();
             }
         });
         
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setSize(800, 600);
-        this.setLocationByPlatform(true);
+        
+        if (lastX == Integer.MIN_VALUE) {
+            this.setLocationByPlatform(true);
+        } else {
+            this.setLocation(lastX, lastY);
+        }
+        
         this.setVisible(true);
     }
 
     void startSimulationWithVariousAgents(Class[] agents, boolean[] infected,
-                            int flags, int consensus, boolean includeInfected) {
-        simulation = new Simulation(network, agents, infected, flags, consensus,
-                                                               includeInfected);
+            int flags, boolean consensus, boolean includeInfected) {
+        
+        simulation = new Simulation(network, agents, infected, flags,
+                includeInfected, consensus, true);
         
         startSimulation(infected);
     }
 
     void startSimulationWithAllAgentsTheSame(Class agent, int flags,
-                                       int consensus, boolean includeInfected) {
-        simulation = new Simulation(network, agent, flags, consensus,
-                                                               includeInfected);
+            boolean consensus) {
+        
+        simulation = new Simulation(network, agent, flags, consensus, true);
         
         startSimulation(null);
     }

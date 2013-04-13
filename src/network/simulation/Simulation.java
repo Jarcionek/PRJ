@@ -1,5 +1,7 @@
 package network.simulation;
 
+import java.util.LinkedList;
+import java.util.List;
 import network.creator.Network;
 
 /**
@@ -7,33 +9,36 @@ import network.creator.Network;
  */
 public class Simulation {
     
-    public final int CONSENSUS_DIFFERENTIATION = 0;
-    public final int CONSENSUS_COLOURING = 1;
+    public final static boolean DIFFERENTIATION = false;
+    public final static boolean COLOURING = true;
     
     private final AgentInfo[] agentsInfo;
     private final boolean[] infected;
-//    private final boolean historyEnabled; //TODO history
-    
-    private int consensus = CONSENSUS_DIFFERENTIATION;
-    private boolean includeInfected = false;
+    private final boolean consensus;
+    private final boolean includeInfected;
+    private final List<int[]> history;
     
     /**
      * This shows the number of the next round.
      */
     private int round = 0;
     
-    public Simulation(Network network, Class agentClass, int maxFlags) {
+    public Simulation(Network network, Class agentClass, int maxFlags,
+                boolean consensus, int[] initialRound, boolean history) {
         checkAgentClass(agentClass);
         
-        agentsInfo = new AgentInfo[network.getNumberOfNodes()];
-        infected = null;
+        this.agentsInfo = new AgentInfo[network.getNumberOfNodes()];
+        this.infected = null;
+        this.includeInfected = true; // this value doesn't really matter
+        this.consensus = consensus;
+        this.history = history? new LinkedList<int[]>() : null;
         
         // create agents
         for (int i = 0; i < agentsInfo.length; i++) {
             AbstractAgent agent;
             try {
                 agent = (AbstractAgent) agentClass.getConstructor(int.class)
-                                                         .newInstance(maxFlags);
+                        .newInstance(maxFlags);
             } catch (Exception ex) {
                 throw new IllegalArgumentException("Could not create an agent "
                         + "of " + agentClass + ": " + ex);
@@ -43,11 +48,17 @@ public class Simulation {
         
         connectAgents(network);
         
-        nextRound();
+        doInitialisationRound(initialRound, maxFlags);
+    }
+    
+    public Simulation(Network network, Class agentClass, int maxFlags,
+                boolean consensus, boolean history) {
+        this(network, agentClass, maxFlags, consensus, null, history);
     }
     
     public Simulation(Network network, Class[] agentsClass, boolean infected[],
-                                                                 int maxFlags) {
+                int maxFlags, boolean includeInfected, boolean consensus,
+                int[] initialRound, boolean history) {
         if (agentsClass == null) {
             throw new NullPointerException("agentsClass array is null");
         }
@@ -69,15 +80,18 @@ public class Simulation {
             checkAgentClass(c);
         }
         
-        agentsInfo = new AgentInfo[network.getNumberOfNodes()];
+        this.agentsInfo = new AgentInfo[network.getNumberOfNodes()];
         this.infected = infected;
+        this.includeInfected = includeInfected;
+        this.consensus = consensus;
+        this.history = history? new LinkedList<int[]>() : null;
         
         // create agents
         for (int i = 0; i < agentsInfo.length; i++) {
             AbstractAgent agent;
             try {
                 agent = (AbstractAgent) agentsClass[i].getConstructor(int.class)
-                                                         .newInstance(maxFlags);
+                        .newInstance(maxFlags);
             } catch (Exception ex) {
                 throw new IllegalArgumentException("Could not create an agent "
                         + "of " + agentsClass[i] + ": " + ex);
@@ -87,44 +101,46 @@ public class Simulation {
         
         connectAgents(network);
         
-        nextRound();
-    }
-    
-    public Simulation(Network network, Class agentClass, int maxFlags,
-                                                                int consensus) {
-        this(network, agentClass, maxFlags);
-        setConsensus(consensus);
+        doInitialisationRound(initialRound, maxFlags);
     }
     
     public Simulation(Network network, Class[] agentsClass, boolean infected[],
-                                                  int maxFlags, int consensus) {
-        this(network, agentsClass, infected, maxFlags);
-        setConsensus(consensus);
-    }
-    
-    public Simulation(Network network, Class agentClass, int maxFlags,
-                                       int consensus, boolean includeInfected) {
-        this(network, agentClass, maxFlags, consensus);
-        this.includeInfected = includeInfected;
-    }
-    
-    public Simulation(Network network, Class[] agentsClass, boolean infected[],
-                         int maxFlags, int consensus, boolean includeInfected) {
-        this(network, agentsClass, infected, maxFlags, consensus);
-        this.includeInfected = includeInfected;
+                int maxFlags, boolean includeInfected, boolean consensus,
+                boolean history) {
+        this(network, agentsClass, infected, maxFlags, includeInfected,
+                consensus, null, history);
     }
     
 ////// INITIALISATION (PRIVATE METHODS CALLED ONLY IN CONSTRUCTORS) ////////////
-
-    private void setConsensus(int mode) {
-        switch (mode) {
-            case CONSENSUS_COLOURING:
-            case CONSENSUS_DIFFERENTIATION:
-                consensus = mode;
-                break;
-            default:
-                throw new IllegalArgumentException("Illegal value: " + mode);
+    
+    private void doInitialisationRound(int[] initialRound, int maxFlags) {
+        if (initialRound == null) {
+            nextRound();
+            return;
         }
+        
+        // check length
+        if (agentsInfo.length != initialRound.length) {
+            throw new IllegalArgumentException("Number of flags for initial "
+                    + "round is different than number of agents. Agents = "
+                    + agentsInfo.length + ", initialRound.length = "
+                    + initialRound.length);
+        }
+
+        // check values
+        for (int i : initialRound) {
+            if (i < 0 || i > maxFlags) {
+                throw new IllegalArgumentException("Illegal flag value = " + i);
+            }
+        }
+
+        // assign values
+        for (int i = 0; i < initialRound.length; i++) {
+            agentsInfo[i].agent.setFlag(initialRound[i]);
+        }
+        round = 1;
+        
+        addCurrentRoundToHistory();
     }
     
     /**
@@ -227,14 +243,26 @@ public class Simulation {
         }
         return true;
     }
+    
+    private void addCurrentRoundToHistory() {
+        if (history == null) {
+            return;
+        }
+        
+        int[] current = new int[agentsInfo.length];
+        for (int i = 0; i < current.length; i++) {
+            current[i] = agentsInfo[i].agent.getFlag();
+        }
+        history.add(current);
+    }
 
 ////// PUBLIC METHODS //////////////////////////////////////////////////////////
     
     public boolean isConsensus() {
-        if (consensus == CONSENSUS_COLOURING) {
+        if (consensus == COLOURING) {
             return includeInfected? isColouredIncludeInfected()
                                   : isColouredIgnoreInfected();
-        } else { // consensus == CONSENSUS_DIFFERENTIATION
+        } else { // consensus == DIFFERENTIATION
             return includeInfected? isDifferentiatedIncludeInfected()
                                   : isDifferentiatedIgnoreInfected();
         }
@@ -267,9 +295,7 @@ public class Simulation {
         }
         round++;
         
-//        if (HISTORY_ENABLED) {
-//            history.add(newFlags);
-//        }
+        addCurrentRoundToHistory();
     }
     
     public final int getFlag(int id) {
