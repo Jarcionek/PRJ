@@ -1,5 +1,6 @@
 package network.simulation;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import network.creator.Network;
@@ -12,6 +13,7 @@ public class Simulation {
     public final static boolean DIFFERENTIATION = false;
     public final static boolean COLOURING = true;
     
+    private final Network network;
     private final AgentInfo[] agentsInfo;
     private final boolean[] infected;
     private final boolean consensus;
@@ -27,6 +29,7 @@ public class Simulation {
                 boolean consensus, int[] initialRound, boolean history) {
         checkAgentClass(agentClass);
         
+        this.network = network;
         this.agentsInfo = new AgentInfo[network.getNumberOfNodes()];
         this.infected = null;
         this.includeInfected = true; // this value doesn't really matter
@@ -80,6 +83,7 @@ public class Simulation {
             checkAgentClass(c);
         }
         
+        this.network = network;
         this.agentsInfo = new AgentInfo[network.getNumberOfNodes()];
         this.infected = infected;
         this.includeInfected = includeInfected;
@@ -258,6 +262,13 @@ public class Simulation {
 
 ////// PUBLIC METHODS //////////////////////////////////////////////////////////
     
+    /**
+     * Returns the network (not a copy).
+     */
+    public Network getNetwork() {
+        return network;
+    }
+    
     public boolean isConsensus() {
         if (consensus == COLOURING) {
             return includeInfected? isColouredIncludeInfected()
@@ -282,6 +293,13 @@ public class Simulation {
             }
         }
         return false;
+    }
+    
+    /**
+     * Returns a copy. May be null if there are no infections.
+     */
+    public boolean[] getInfected() {
+        return infected == null? null : Arrays.copyOf(infected, infected.length);
     }
     
     public final void nextRound() {

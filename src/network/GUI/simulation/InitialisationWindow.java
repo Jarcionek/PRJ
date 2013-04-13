@@ -1,14 +1,12 @@
 package network.GUI.simulation;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
+import network.creator.Network;
 import network.creator.Node;
 import network.graphUtil.Edge;
 import network.painter.GraphPainter;
@@ -20,8 +18,8 @@ import network.simulation.agents.RandomAgent;
 /**
  * @author Jaroslaw Pawlak
  */
-class InitialisationWindow extends JPanel {
-    
+public class InitialisationWindow extends JFrame {
+
     //TODO find all classes within a package or all subclasses of a class
     //     This is not possible in standard Java Reflections API
     private static final Class[] agentClasses = new Class[] {
@@ -29,7 +27,7 @@ class InitialisationWindow extends JPanel {
         LeastCommonFlagAgent.class,
         RandomAgent.class,
     };
-    
+
     private static final String[] agentNames = new String[agentClasses.length];
     static {
         for (int i = 0; i < agentNames.length; i++) {
@@ -37,137 +35,180 @@ class InitialisationWindow extends JPanel {
         }
     }
     
-    private final SimulationWindow window;
+    
+    
+    private static InitialisationSettings settings = null;
+    
+    private final String networkName;
+    private final Network network;
     private final boolean[] selection;
     
-    private final JLabel labelAgent = new JLabel("Agent behaviour:");
-    private final JComboBox<String> listAgent = new JComboBox<String>(agentNames);
-    private final JLabel labelInfected = new JLabel("Infected agent behaviour:");
-    private final JComboBox<String> listInfected = new JComboBox<String>(agentNames);
-    private final JButton buttonStart = new JButton("Start");
-    private final JLabel labelFlags = new JLabel("Number of flags:");
-    private final JComboBox<String> listFlags = new JComboBox<String>();
-    private final JLabel labelConsensus = new JLabel("Consensus:");
-    private final JComboBox<String> listConsensus = new JComboBox<String>();
-    private final JCheckBox checkboxConsiderInfected = new JCheckBox("Include infections", false);
-    
-    private final InitDrawablePane drawPane = new InitDrawablePane();
-    
-    InitialisationWindow(final SimulationWindow window) {
-        super(new BorderLayout());
+    public InitialisationWindow(Network network, String networkName) {
+        super("Simulation initialisation: " + networkName);
         
-        this.window = window;
-        selection = new boolean[window.network.getNumberOfNodes()];
+        this.networkName = networkName;
+        this.network = network;
+        this.selection = new boolean[network.getNumberOfNodes()];
         
-        // COMPONENTS
-        for (int i = C.MIN_FLAG; i <= C.MAX_FLAG; i++) {
-            listFlags.addItem("" + i);
-        }
+        final InitialisationPane initPane = new InitialisationPane();
+        initPane.setSettings(settings);
+        this.setContentPane(initPane);
         
-        int flags = GraphPainter.getRequiredColors(window.network);
-        if (!window.network.containsEdgesInteresctions()) {
-            listFlags.setSelectedItem("" + Math.min(4, flags));
-        } else {
-            if (flags > C.MAX_FLAG) {
-                //TODO some information that consensus may not be achievable?
-                // GraphPainter is not perfect so it does not have to be true
-                listFlags.setSelectedItem("" + C.MAX_FLAG);
-            } else {
-                listFlags.setSelectedItem("" + flags);
-            }
-        }
-        listFlags.setMaximumRowCount(10);
-        
-        buttonStart.addActionListener(new ActionListener() {
+        this.addWindowListener(new WindowAdapter() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                Class[] agents = new Class[selection.length];
-                boolean anythingSelected = false;
-                
-                for (int i = 0; i < selection.length; i++) {
-                    if (selection[i]) {
-                        anythingSelected = true;
-                        agents[i] = agentClasses[listInfected.getSelectedIndex()];
-                    } else {
-                        agents[i] = agentClasses[listAgent.getSelectedIndex()];
-                    }
-                }
-                
-                if (anythingSelected) {
-                    window.startSimulationWithVariousAgents(agents, selection,
-                            listFlags.getSelectedIndex() + C.MIN_FLAG,
-                            consensus(), checkboxConsiderInfected.isSelected());
-                } else {
-                    window.startSimulationWithAllAgentsTheSame(agents[0],
-                            listFlags.getSelectedIndex() + C.MIN_FLAG,
-                            consensus());
-                }
+            public void windowClosing(WindowEvent e) {
+                settings = initPane.getSettings();
             }
         });
         
-        listConsensus.addItem("Differentiation");
-        listConsensus.addItem("Colouring");
-        
-        // LAYOUT
-        JPanel topPanel = new JPanel(new GridLayout(2, 1));
-        topPanel.setBorder(new CompoundBorder(new BottomBorder(),
-                                              new EmptyBorder(3, 3, 3, 3)));
-        
-        JPanel top = new JPanel(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.gridy = 0;
-        top.add(labelAgent, c);
-        c.insets = new Insets(0, 5, 0, 0);
-        top.add(listAgent, c);
-        c.insets = new Insets(0, 25, 0, 0);
-        top.add(labelInfected, c);
-        c.insets = new Insets(0, 5, 0, 0);
-        top.add(listInfected, c);
-        topPanel.add(top);
-        
-        JPanel bottom = new JPanel(new GridBagLayout());
-        c = new GridBagConstraints();
-        c.gridy = 1;
-        bottom.add(labelFlags, c);
-        c.insets = new Insets(0, 5, 0, 0);
-        bottom.add(listFlags, c);
-        c.insets = new Insets(0, 25, 0, 0);
-        bottom.add(labelConsensus, c);
-        c.insets = new Insets(0, 5, 0, 0);
-        bottom.add(listConsensus, c);
-        c.insets = new Insets(0, 25, 0, 0);
-        bottom.add(checkboxConsiderInfected, c);
-        bottom.add(buttonStart, c);
-        topPanel.add(bottom);
-        
-        
-        this.add(topPanel, BorderLayout.NORTH);
-        this.add(drawPane, BorderLayout.CENTER);
+        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        this.setSize(800, 600);
+        this.setLocationRelativeTo(null);
+        this.setVisible(true);
     }
     
-    public InitialisationSettings getSettings() {
-        return new InitialisationSettings(listAgent.getSelectedIndex(),
-                listInfected.getSelectedIndex(), listFlags.getSelectedIndex(),
-                listConsensus.getSelectedIndex(), checkboxConsiderInfected.isSelected());
-    }
+////// CLASSES /////////////////////////////////////////////////////////////////
     
-    public void setSettings(InitialisationSettings settings) {
-        if (settings == null) {
-            return;
+    private class InitialisationPane extends JPanel {
+
+        private final JLabel labelAgent = new JLabel("Agent behaviour:");
+        private final JComboBox<String> listAgent = new JComboBox<String>(agentNames);
+        private final JLabel labelInfected = new JLabel("Infected agent behaviour:");
+        private final JComboBox<String> listInfected = new JComboBox<String>(agentNames);
+        private final JButton buttonStart = new JButton("Start");
+        private final JLabel labelFlags = new JLabel("Number of flags:");
+        private final JComboBox<String> listFlags = new JComboBox<String>();
+        private final JLabel labelConsensus = new JLabel("Consensus:");
+        private final JComboBox<String> listConsensus = new JComboBox<String>();
+        private final JCheckBox checkboxConsiderInfected = new JCheckBox("Include infections", false);
+
+        private final InitDrawablePane drawPane = new InitDrawablePane();
+
+        InitialisationPane() {
+            super(new BorderLayout());
+
+            // COMPONENTS
+            for (int i = C.MIN_FLAG; i <= C.MAX_FLAG; i++) {
+                listFlags.addItem("" + i);
+            }
+
+            int flags = GraphPainter.getRequiredColors(network);
+            if (!network.containsEdgesInteresctions()) {
+                listFlags.setSelectedItem("" + Math.min(4, flags));
+            } else {
+                if (flags > C.MAX_FLAG) {
+                    //TODO some information that consensus may not be achievable?
+                    // GraphPainter is not perfect so it does not have to be true
+                    listFlags.setSelectedItem("" + C.MAX_FLAG);
+                } else {
+                    listFlags.setSelectedItem("" + flags);
+                }
+            }
+            listFlags.setMaximumRowCount(10);
+
+            buttonStart.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    Class[] agents = new Class[selection.length];
+                    boolean anythingSelected = false;
+
+                    for (int i = 0; i < selection.length; i++) {
+                        if (selection[i]) {
+                            anythingSelected = true;
+                            agents[i] = agentClasses[listInfected.getSelectedIndex()];
+                        } else {
+                            agents[i] = agentClasses[listAgent.getSelectedIndex()];
+                        }
+                    }
+
+                    int flags = listFlags.getSelectedIndex() + C.MIN_FLAG;
+                    Simulation simulation;
+                    
+                    if (anythingSelected) {
+                        boolean includeInfected = checkboxConsiderInfected.isSelected();
+                        simulation = new Simulation(network, agents, selection,
+                                flags, includeInfected, consensus(), true);
+                    } else {
+                        simulation = new Simulation(network, agents[0], flags,
+                                consensus(), true);
+                    }
+                    
+                    settings = getSettings();
+                    startSimulation(simulation);
+                }
+            });
+
+            listConsensus.addItem("Differentiation");
+            listConsensus.addItem("Colouring");
+
+            // LAYOUT
+            JPanel topPanel = new JPanel(new GridLayout(2, 1));
+            topPanel.setBorder(new CompoundBorder(new BottomBorder(),
+                                                new EmptyBorder(3, 3, 3, 3)));
+
+            JPanel top = new JPanel(new GridBagLayout());
+            GridBagConstraints c = new GridBagConstraints();
+            c.gridy = 0;
+            top.add(labelAgent, c);
+            c.insets = new Insets(0, 5, 0, 0);
+            top.add(listAgent, c);
+            c.insets = new Insets(0, 25, 0, 0);
+            top.add(labelInfected, c);
+            c.insets = new Insets(0, 5, 0, 0);
+            top.add(listInfected, c);
+            topPanel.add(top);
+
+            JPanel bottom = new JPanel(new GridBagLayout());
+            c = new GridBagConstraints();
+            c.gridy = 1;
+            bottom.add(labelFlags, c);
+            c.insets = new Insets(0, 5, 0, 0);
+            bottom.add(listFlags, c);
+            c.insets = new Insets(0, 25, 0, 0);
+            bottom.add(labelConsensus, c);
+            c.insets = new Insets(0, 5, 0, 0);
+            bottom.add(listConsensus, c);
+            c.insets = new Insets(0, 25, 0, 0);
+            bottom.add(checkboxConsiderInfected, c);
+            bottom.add(buttonStart, c);
+            topPanel.add(bottom);
+
+
+            this.add(topPanel, BorderLayout.NORTH);
+            this.add(drawPane, BorderLayout.CENTER);
         }
-        listAgent.setSelectedIndex(settings.indexAgent);
-        listInfected.setSelectedIndex(settings.indexInfected);
-        listFlags.setSelectedIndex(settings.indexFlags);
-        listConsensus.setSelectedIndex(settings.indexConsensus);
-        checkboxConsiderInfected.setSelected(settings.checkboxIncludeInfected);
-    }
-    
-    
-    
-    private boolean consensus() {
-        // 0 is differentiation, 1 is colouring
-        return listConsensus.getSelectedIndex() == 0?
-                Simulation.DIFFERENTIATION : Simulation.COLOURING;
+
+        private InitialisationSettings getSettings() {
+            return new InitialisationSettings(listAgent.getSelectedIndex(),
+                    listInfected.getSelectedIndex(), listFlags.getSelectedIndex(),
+                    listConsensus.getSelectedIndex(), checkboxConsiderInfected.isSelected());
+        }
+
+        private void setSettings(InitialisationSettings settings) {
+            if (settings == null) {
+                return;
+            }
+            listAgent.setSelectedIndex(settings.indexAgent);
+            listInfected.setSelectedIndex(settings.indexInfected);
+            listFlags.setSelectedIndex(settings.indexFlags);
+            listConsensus.setSelectedIndex(settings.indexConsensus);
+            checkboxConsiderInfected.setSelected(settings.checkboxIncludeInfected);
+        }
+
+        private boolean consensus() {
+            // 0 is differentiation, 1 is colouring
+            return listConsensus.getSelectedIndex() == 0?
+                    Simulation.DIFFERENTIATION : Simulation.COLOURING;
+        }
+
+        private void startSimulation(Simulation simulation) {
+            settings = getSettings();
+            
+            new SimulationWindow(simulation, networkName);
+            
+            InitialisationWindow.this.dispose();
+        }
+        
     }
     
     
@@ -179,8 +220,7 @@ class InitialisationWindow extends JPanel {
                 @Override
                 public void mousePressed(MouseEvent e) {
                     Dimension size = InitDrawablePane.this.getSize();
-                    Node n = window.network
-                                .findClosestNode(size, e.getX(), e.getY(), C.S);
+                    Node n = network.findClosestNode(size, e.getX(), e.getY(), C.S);
                     if (n != null) {
                         selection[n.id()] = !selection[n.id()];
                         InitDrawablePane.this.repaint();
@@ -205,14 +245,14 @@ class InitialisationWindow extends JPanel {
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                                 RenderingHints.VALUE_ANTIALIAS_ON);
             g2d.setColor(Color.black);
-            for (Edge e : window.network.getEdges(w, h)) {
+            for (Edge e : network.getEdges(w, h)) {
                 g2d.drawLine(e.x1(), e.y1(), e.x2(), e.y2());
             }
             
             // nodes
             g2d.setFont(new Font("Arial", Font.BOLD, 13));
             FontMetrics fm = this.getFontMetrics(g2d.getFont());
-            for (Node n : window.network) {
+            for (Node n : network) {
                 // ovals
                 g2d.setColor(Color.lightGray);
                 g2d.fillOval((int) (n.x() * w) - C.S / 2,
@@ -232,6 +272,8 @@ class InitialisationWindow extends JPanel {
         }
         
     }
+    
+    
     
     private class BottomBorder extends EtchedBorder {
         

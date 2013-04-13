@@ -16,7 +16,7 @@ import network.creator.Node;
 /**
  * @author Jaroslaw Pawlak
  */
-class ContentPane extends JPanel {
+class SimulationContentPane extends JPanel {
 
     private final SimulationWindow window;
     
@@ -30,13 +30,42 @@ class ContentPane extends JPanel {
     
     private final AgentMemoryAccessor agentMemoryAccessor;
     
-    ContentPane(SimulationWindow window, boolean[] infected) {
+    private int selectionID = -1;
+    
+    SimulationContentPane(SimulationWindow window) {
         super(new BorderLayout());
         this.window = window;
         
         boolean isConsensus = window.simulation.isConsensus();
-                
-        drawPane = new AbstractDrawablePane(window.simulation, window.network, infected);
+        
+        drawPane = new AbstractDrawablePane(window.network) {
+
+            private final boolean[] infected;
+            
+            {
+                infected = SimulationContentPane.this.window.simulation.getInfected();
+            }
+            
+            @Override
+            int getFlag(int id) {
+                return SimulationContentPane.this.window.simulation.getFlag(id);
+            }
+
+            @Override
+            boolean containsInfections() {
+                return SimulationContentPane.this.window.simulation.containsInfection();
+            }
+
+            @Override
+            boolean isInfected(int id) {
+                return infected[id];
+            }
+
+            @Override
+            int getSelectionID() {
+                return selectionID;
+            }
+        };
         
         roundLabel = new JLabel("Round: " + window.simulation.getRound());
         isConsensusLabel = new JLabel("Consensus: " + (isConsensus? "YES" : "NO"));
@@ -62,12 +91,19 @@ class ContentPane extends JPanel {
                 int y = e.getY();
 
                 Node n = window.network.findClosestNode(size, x, y, C.S);
+                
+                int lastSelectionID = selectionID;
+                
                 if (n != null) {
-                    drawPane.setSelectionID(n.id());
+                    selectionID = n.id();
                     agentMemoryAccessor.setAgent(window.simulation.getAgentInfo(n.id()));
                     agentMemoryAccessor.revalidate();
                 } else {
-                    drawPane.setSelectionID(-1);
+                    selectionID = -1;
+                }
+                
+                if (lastSelectionID != selectionID) {
+                    repaint();
                 }
             }
             
@@ -93,7 +129,7 @@ class ContentPane extends JPanel {
                 do {
                     window.simulation.nextRound();
                     if (System.currentTimeMillis() - start > TIMEOUT) {
-                        //TODO popup message?
+                        //TODO popup message? timeout
                         break;
                     }
                 } while (!window.simulation.isConsensus()); 

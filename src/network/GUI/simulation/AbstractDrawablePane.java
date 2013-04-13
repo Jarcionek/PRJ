@@ -7,43 +7,35 @@ import network.creator.Network;
 import network.creator.Node;
 import network.graphUtil.Edge;
 import network.painter.GraphPainter;
-import network.simulation.Simulation;
 
 /**
  * @author Jaroslaw Pawlak
  */
-class AbstractDrawablePane extends JPanel {
+abstract class AbstractDrawablePane extends JPanel {
     
     private final Network network;
-    private final Simulation simulation;
-    private final boolean[] infected;
     
     // buffers
     private Dimension lastSize;
     private BufferedImage edges;
     private BufferedImage labels;
     
-    private int selectionID = -1;
-    
-    AbstractDrawablePane(Simulation simulation, Network network, boolean[] infected) {
+    AbstractDrawablePane(Network network) {
         super(null);
         
-        this.simulation = simulation;
         this.network = network;
-        this.infected = infected;
-        
         lastSize = null;
         
         setOpaque(false);
     }
     
-//    abstract int getFlag(int id);
-//    
-//    abstract boolean containsInfections();
-//    
-//    abstract boolean isInfected(int id);
-//    
-//    abstract int getSelectionID();
+    abstract int getFlag(int id);
+    
+    abstract boolean containsInfections();
+    
+    abstract boolean isInfected(int id);
+    
+    abstract int getSelectionID();
     
     @Override
     public void paint(Graphics g) {
@@ -90,17 +82,17 @@ class AbstractDrawablePane extends JPanel {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                                 RenderingHints.VALUE_ANTIALIAS_ON);
         for (Node n : network) {
-            g2d.setColor(GraphPainter.getColor(simulation.getFlag(n.id())));
+            g2d.setColor(GraphPainter.getColor(getFlag(n.id())));
             g2d.fillOval((int) (n.x() * w) - C.S / 2,
                          (int) (n.y() * h) - C.S / 2,
                          C.S, C.S);
         }
         
         // highlight infected
-        if (infected != null) {
+        if (containsInfections()) {
             g2d.setColor(Color.blue);
             for (Node n : network) {
-                if (infected[n.id()]) {
+                if (isInfected(n.id())) {
                     g2d.drawOval((int) (n.x() * w) - C.S / 2,
                                 (int) (n.y() * h) - C.S / 2,
                                 C.S, C.S);
@@ -109,9 +101,9 @@ class AbstractDrawablePane extends JPanel {
         }
         
         // selection
-        if (selectionID >= 0) {
+        if (getSelectionID() >= 0) {
             g2d.setColor(Color.red);
-            Point p = network.getPosition(selectionID, size);
+            Point p = network.getPosition(getSelectionID(), size);
             g2d.drawOval(p.x - C.S / 2, p.y - C.S / 2, C.S, C.S);
         }
         
@@ -123,8 +115,4 @@ class AbstractDrawablePane extends JPanel {
         g.drawImage(labels, 0, 0, null);
     }
     
-    public void setSelectionID(int id) {
-        selectionID = id;
-        repaint();
-    }
 }

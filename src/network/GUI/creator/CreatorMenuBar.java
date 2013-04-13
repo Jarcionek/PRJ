@@ -7,7 +7,7 @@ import java.io.File;
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
-import network.GUI.simulation.SimulationWindow;
+import network.GUI.simulation.InitialisationWindow;
 import network.creator.Network;
 import network.creator.NetworkStats;
 import network.painter.GraphPainter;
@@ -42,7 +42,7 @@ class CreatorMenuBar extends JMenuBar {
         private JMenuItem menuItemInterest;
         private JMenuItem menuItemExit;
     private JMenu menuSimulation;
-        private JMenuItem menuItemSimulationStart;
+        private JMenuItem menuItemSimulationInit;
     private JMenu menuOptions;
         private JMenuItem menuItemAntiAliasing;
         private JMenuItem menuItemAdvancedMoving;
@@ -84,7 +84,7 @@ class CreatorMenuBar extends JMenuBar {
             menuItemInterest = new JCheckBoxMenuItem("Show intersections");
             menuItemExit = new JMenuItem("Exit");
         menuSimulation = new JMenu("Simulation");
-            menuItemSimulationStart = new JMenuItem("Start");
+            menuItemSimulationInit = new JMenuItem("Initialise");
         menuOptions = new JMenu("Options");
             menuItemAntiAliasing = new JCheckBoxMenuItem("Anti-aliasing");
             menuItemAdvancedMoving = new JCheckBoxMenuItem("Advanced nodes moving");
@@ -117,7 +117,7 @@ class CreatorMenuBar extends JMenuBar {
             menuNetwork.add(new JSeparator());
             menuNetwork.add(menuItemExit);
         this.add(menuSimulation);
-            menuSimulation.add(menuItemSimulationStart);
+            menuSimulation.add(menuItemSimulationInit);
         this.add(menuOptions);
             menuOptions.add(menuItemAntiAliasing);
             menuOptions.add(menuItemAdvancedMoving);
@@ -608,7 +608,7 @@ class CreatorMenuBar extends JMenuBar {
             }
         });
         
-        menuItemSimulationStart.addActionListener(new ActionListener() {
+        menuItemSimulationInit.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (window.network.getNumberOfNodes() == 0) {
@@ -617,7 +617,9 @@ class CreatorMenuBar extends JMenuBar {
                             + "the network first!", MainWindow.TITLE + " - error",
                             JOptionPane.ERROR_MESSAGE);
                 } else {
-                    new SimulationWindow(window.network, getNetworkName());
+                    JFrame f = new InitialisationWindow(window.network, getNetworkName());
+                    f.setSize(window.getSize());
+                    f.setLocationRelativeTo(window);
                 }
             }
         });

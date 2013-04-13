@@ -1,6 +1,5 @@
 package network.GUI.simulation;
 
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -12,38 +11,34 @@ import network.simulation.Simulation;
  * @author Jaroslaw Pawlak
  */
 public class SimulationWindow extends JFrame {
-
-    //TODO add InitialisationWindow and extract it from SimulationWindow
-    //     so the simulation GUI can be started by providing just Simulation
     
-    private static final String TITLE = "Simulation";
-    
-    private static InitialisationSettings settings = null;
     private static int lastX = Integer.MIN_VALUE;
     private static int lastY = 0;
     
     final Network network;
-    Simulation simulation;
+    final Simulation simulation;
     
-    public SimulationWindow(Network network, String networkName) {
-        super(TITLE + ": " + networkName);
-        this.network = network;
+    public SimulationWindow(Simulation simulation, String networkName) {
+        super("Simulation: " + networkName);
         
-        InitialisationWindow initPane = new InitialisationWindow(this);
-        initPane.setSettings(settings);
-        this.setContentPane(initPane);
+        this.network = simulation.getNetwork();
+        this.simulation = simulation;
+        
+        SimulationContentPane contentPane = new SimulationContentPane(this);
+        this.setContentPane(contentPane);
         
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
                 lastX = getX();
                 lastY = getY();
-                saveInitialisationSettings();
             }
         });
         
-        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        this.setSize(800, 600);
+        Dimension size = new Dimension(800, 600);
+        size.width += contentPane.getExtraWidth();
+        size.height += contentPane.getExtraHeight();
+        this.setSize(size);
         
         if (lastX == Integer.MIN_VALUE) {
             this.setLocationByPlatform(true);
@@ -51,46 +46,8 @@ public class SimulationWindow extends JFrame {
             this.setLocation(lastX, lastY);
         }
         
+        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setVisible(true);
     }
 
-    void startSimulationWithVariousAgents(Class[] agents, boolean[] infected,
-            int flags, boolean consensus, boolean includeInfected) {
-        
-        simulation = new Simulation(network, agents, infected, flags,
-                includeInfected, consensus, true);
-        
-        startSimulation(infected);
-    }
-
-    void startSimulationWithAllAgentsTheSame(Class agent, int flags,
-            boolean consensus) {
-        
-        simulation = new Simulation(network, agent, flags, consensus, true);
-        
-        startSimulation(null);
-    }
-    
-    private void startSimulation(boolean[] infected) {
-        saveInitialisationSettings();
-        
-        ContentPane contentPane = new ContentPane(this, infected);
-        this.setContentPane(contentPane);
-        
-        Dimension size = this.getSize();
-        size.width += contentPane.getExtraWidth();
-        size.height += contentPane.getExtraHeight();
-        this.setSize(size);
-        
-        this.revalidate();
-        this.repaint();
-    }
-    
-    private void saveInitialisationSettings() {
-        Container c = getContentPane();
-        if (c != null && c.getClass() == InitialisationWindow.class) {
-            settings = ((InitialisationWindow) c).getSettings();
-        }
-    }
-    
 }
