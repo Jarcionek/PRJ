@@ -29,7 +29,7 @@ public class SimulationWindow extends JFrame {
         super(TITLE + ": " + networkName);
         this.network = network;
         
-        InitialisationPane initPane = new InitialisationPane(this);
+        InitialisationWindow initPane = new InitialisationWindow(this);
         initPane.setSettings(settings);
         this.setContentPane(initPane);
         
@@ -88,8 +88,8 @@ public class SimulationWindow extends JFrame {
     
     private void saveInitialisationSettings() {
         Container c = getContentPane();
-        if (c != null && c.getClass() == InitialisationPane.class) {
-            settings = ((InitialisationPane) c).getSettings();
+        if (c != null && c.getClass() == InitialisationWindow.class) {
+            settings = ((InitialisationWindow) c).getSettings();
         }
     }
     

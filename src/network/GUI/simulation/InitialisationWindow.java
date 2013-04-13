@@ -20,7 +20,7 @@ import network.simulation.agents.RandomAgent;
 /**
  * @author Jaroslaw Pawlak
  */
-class InitialisationPane extends JPanel {
+class InitialisationWindow extends JPanel {
     
     //TODO find all classes within a package or all subclasses of a class
     //     This is not possible in standard Java Reflections API
@@ -53,7 +53,7 @@ class InitialisationPane extends JPanel {
     
     private final InitDrawablePane drawPane = new InitDrawablePane();
     
-    InitialisationPane(final SimulationWindow window) {
+    InitialisationWindow(final SimulationWindow window) {
         super(new BorderLayout());
         
         this.window = window;

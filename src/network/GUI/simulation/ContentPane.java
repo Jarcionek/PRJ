@@ -20,7 +20,7 @@ class ContentPane extends JPanel {
 
     private final SimulationWindow window;
     
-    private final SimulationDrawablePane drawPane;
+    private final AbstractDrawablePane drawPane;
     
     private final JLabel roundLabel;
     private final JLabel isConsensusLabel;
@@ -36,7 +36,7 @@ class ContentPane extends JPanel {
         
         boolean isConsensus = window.simulation.isConsensus();
                 
-        drawPane = new SimulationDrawablePane(window.simulation, window.network, infected);
+        drawPane = new AbstractDrawablePane(window.simulation, window.network, infected);
         
         roundLabel = new JLabel("Round: " + window.simulation.getRound());
         isConsensusLabel = new JLabel("Consensus: " + (isConsensus? "YES" : "NO"));

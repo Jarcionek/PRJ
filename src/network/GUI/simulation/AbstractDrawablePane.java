@@ -12,7 +12,7 @@ import network.simulation.Simulation;
 /**
  * @author Jaroslaw Pawlak
  */
-class SimulationDrawablePane extends JPanel {
+class AbstractDrawablePane extends JPanel {
     
     private final Network network;
     private final Simulation simulation;
@@ -25,7 +25,7 @@ class SimulationDrawablePane extends JPanel {
     
     private int selectionID = -1;
     
-    SimulationDrawablePane(Simulation simulation, Network network, boolean[] infected) {
+    AbstractDrawablePane(Simulation simulation, Network network, boolean[] infected) {
         super(null);
         
         this.simulation = simulation;
@@ -36,6 +36,14 @@ class SimulationDrawablePane extends JPanel {
         
         setOpaque(false);
     }
+    
+//    abstract int getFlag(int id);
+//    
+//    abstract boolean containsInfections();
+//    
+//    abstract boolean isInfected(int id);
+//    
+//    abstract int getSelectionID();
     
     @Override
     public void paint(Graphics g) {
