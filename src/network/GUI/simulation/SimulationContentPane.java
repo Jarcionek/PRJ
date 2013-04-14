@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import network.creator.Node;
@@ -27,6 +28,7 @@ class SimulationContentPane extends JPanel {
     private final JLabel firstConsensusLabel;
     private final JButton nextRoundButton;
     private final JButton untilConsensusButton;
+    private final JButton historyButton;
     
     private final AgentMemoryAccessor agentMemoryAccessor;
     
@@ -73,6 +75,7 @@ class SimulationContentPane extends JPanel {
                                                   + (isConsensus? "0" : "N/A"));
         nextRoundButton = new JButton("Next round");
         untilConsensusButton = new JButton("Play until consensus");
+        historyButton = new JButton("History");
         
         agentMemoryAccessor = new AgentMemoryAccessor(
                                              window.simulation.getAgentInfo(0));
@@ -137,6 +140,19 @@ class SimulationContentPane extends JPanel {
             }
             
         });
+        
+        historyButton.setEnabled(window.simulation.isHistoryEnabled());
+        historyButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFrame f = new HistoryWindow(window.network,
+                        window.simulation.getInfected(),
+                        window.simulation.getHistoryRound(),
+                        "History: " + window.networkName);
+                f.setSize(window.getSize());
+                f.setLocationRelativeTo(window);
+            }
+        });
     }
 
     private void createLayout() {
@@ -146,6 +162,7 @@ class SimulationContentPane extends JPanel {
         simulationButtons.add(firstConsensusLabel);
         simulationButtons.add(nextRoundButton);
         simulationButtons.add(untilConsensusButton);
+        simulationButtons.add(historyButton);
         
         JPanel eastPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         eastPanel.add(simulationButtons);

@@ -1,6 +1,8 @@
 package network.simulation;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import network.creator.Network;
@@ -334,6 +336,17 @@ public class Simulation {
     
     public AgentInfo getAgentInfo(int i) {
         return agentsInfo[i];
+    }
+    
+    public boolean isHistoryEnabled() {
+        return history != null;
+    }
+    
+    /**
+     * Returns an unmodifiable history.
+     */
+    public List<int[]> getHistoryRound() {
+        return Collections.unmodifiableList(history);
     }
     
 }

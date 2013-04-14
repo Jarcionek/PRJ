@@ -15,12 +15,14 @@ public class SimulationWindow extends JFrame {
     private static int lastX = Integer.MIN_VALUE;
     private static int lastY = 0;
     
+    final String networkName;
     final Network network;
     final Simulation simulation;
     
     public SimulationWindow(Simulation simulation, String networkName) {
         super("Simulation: " + networkName);
         
+        this.networkName = networkName;
         this.network = simulation.getNetwork();
         this.simulation = simulation;
         
