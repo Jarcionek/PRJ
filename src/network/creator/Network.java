@@ -181,6 +181,15 @@ public class Network implements Iterable<Node> {
         return getEdges(size.width, size.height);
     }
     
+    /**
+     * Nodes positions are saved as double value [0, 1] which represent a position
+     * proportionally to the current sizes of the window where the network
+     * is displayed. Since Edge contains integer coordinates, double values
+     * have to be converted into actual integer pixel positions.
+     * @param width width of the panel where network is drawn
+     * @param height height of the panel where network is drawn
+     * @return 
+     */
     public Iterable<Edge> getEdges(final int width, final int height) {
         final Iterator<Edge> iterator = new Iterator<Edge>() {
             
