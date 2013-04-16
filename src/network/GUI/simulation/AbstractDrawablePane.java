@@ -3,6 +3,7 @@ package network.GUI.simulation;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
+import network.GUI.Constants;
 import network.creator.Network;
 import network.creator.Node;
 import network.graphUtil.Edge;
@@ -10,7 +11,7 @@ import network.graphUtil.Edge;
 /**
  * @author Jaroslaw Pawlak
  */
-abstract class AbstractDrawablePane extends JPanel {
+abstract class AbstractDrawablePane extends JPanel implements Constants {
     
     private final Network network;
     
@@ -82,28 +83,28 @@ abstract class AbstractDrawablePane extends JPanel {
                                 RenderingHints.VALUE_ANTIALIAS_ON);
         for (Node n : network) {
             g2d.setColor(getFlag(n.id()));
-            g2d.fillOval((int) (n.x() * w) - C.S / 2,
-                         (int) (n.y() * h) - C.S / 2,
-                         C.S, C.S);
+            g2d.fillOval((int) (n.x() * w) - D / 2,
+                         (int) (n.y() * h) - D / 2,
+                         D, D);
         }
         
         // highlight infected
         if (containsInfections()) {
-            g2d.setColor(Color.blue);
+            g2d.setColor(INFECTED);
             for (Node n : network) {
                 if (isInfected(n.id())) {
-                    g2d.drawOval((int) (n.x() * w) - C.S / 2,
-                                (int) (n.y() * h) - C.S / 2,
-                                C.S, C.S);
+                    g2d.drawOval((int) (n.x() * w) - D / 2,
+                                (int) (n.y() * h) - D / 2,
+                                D, D);
                 }
             }
         }
         
         // selection
         if (getSelectionID() >= 0) {
-            g2d.setColor(Color.red);
+            g2d.setColor(SELECTION);
             Point p = network.getPosition(getSelectionID(), size);
-            g2d.drawOval(p.x - C.S / 2, p.y - C.S / 2, C.S, C.S);
+            g2d.drawOval(p.x - D / 2, p.y - D / 2, D, D);
         }
         
         // finalise

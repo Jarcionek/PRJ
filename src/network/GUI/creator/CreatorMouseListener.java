@@ -5,12 +5,13 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
+import network.GUI.Constants;
 import network.creator.Node;
 
 /**
  * @author Jaroslaw Pawlak
  */
-class CreatorMouseListener extends MouseAdapter {
+class CreatorMouseListener extends MouseAdapter implements Constants {
     
     private final MainWindow window;
     private final JPanel drawPane;
@@ -33,14 +34,14 @@ class CreatorMouseListener extends MouseAdapter {
         int x = e.getX();
         int y = e.getY();
 
-        Node n = window.network.findClosestNode(size, x, y, C.S);
+        Node n = window.network.findClosestNode(size, x, y, D);
 
         // add new node
         if (e.getButton() == MouseEvent.BUTTON1) {
             if (n == null) {
-                x = fixRange(x, size.width, C.S / 2);
-                y = fixRange(y, size.height, C.S / 2);
-                if (window.network.findClosestNode(size, x, y, C.S) == null) {
+                x = fixRange(x, size.width, D / 2);
+                y = fixRange(y, size.height, D / 2);
+                if (window.network.findClosestNode(size, x, y, D) == null) {
                     double dx = (double) x / size.width;
                     double dy = (double) y / size.height;
                     window.network.addNode(dx, dy);
@@ -76,7 +77,7 @@ class CreatorMouseListener extends MouseAdapter {
         final int y = e.getY();
         lastX = e.getX();
         lastY = e.getY();
-        Node n = window.network.findClosestNode(drawPane.getSize(), x, y, C.S);
+        Node n = window.network.findClosestNode(drawPane.getSize(), x, y, D);
 
         // just deselect
         if (n == null) {
@@ -106,14 +107,14 @@ class CreatorMouseListener extends MouseAdapter {
 
         // connect/disconnect
         if (e.getButton() == MouseEvent.BUTTON1) {
-            Node n = window.network.findClosestNode(drawPane.getSize(), x, y, C.S);
+            Node n = window.network.findClosestNode(drawPane.getSize(), x, y, D);
 
             // create new node and connect to selected to it
             if (n == null) {
                 Dimension size = drawPane.getSize();
-                x = fixRange(x, size.width, C.S / 2);
-                y = fixRange(y, size.height, C.S / 2);
-                n = window.network.findClosestNode(drawPane.getSize(), x, y, C.S);
+                x = fixRange(x, size.width, D / 2);
+                y = fixRange(y, size.height, D / 2);
+                n = window.network.findClosestNode(drawPane.getSize(), x, y, D);
                 
                 // check whether there is no node at the position of a new one
                 // the previous check was for the mouse click position
@@ -174,7 +175,7 @@ class CreatorMouseListener extends MouseAdapter {
                 moveNode(x, y);
                 window.repaint();
             } else {
-                color = Color.red;
+                color = PATH;
             }
         }
 
@@ -207,8 +208,8 @@ class CreatorMouseListener extends MouseAdapter {
      */
     private void moveNode(int x, int y) {
         Dimension size = drawPane.getSize();
-        x = fixRange(x, size.width, C.S / 2);
-        y = fixRange(y, size.height, C.S / 2);
+        x = fixRange(x, size.width, D / 2);
+        y = fixRange(y, size.height, D / 2);
         
         double dx = (double) x / size.width;
         double dy = (double) y / size.height;

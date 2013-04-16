@@ -3,6 +3,7 @@ package network.GUI.creator;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
+import network.GUI.Constants;
 import network.creator.Node;
 import network.graphUtil.Edge;
 import network.painter.GraphPainter;
@@ -10,7 +11,7 @@ import network.painter.GraphPainter;
 /**
  * @author Jaroslaw Pawlak
  */
-class CreatorDrawablePanel extends JPanel {
+class CreatorDrawablePanel extends JPanel implements Constants {
 
     private final MainWindow window;
     private final CreatorMenuBar creator;
@@ -29,7 +30,7 @@ class CreatorDrawablePanel extends JPanel {
             if (window.nodeColor == null) {
                 window.nodeColor = GraphPainter.paint(window.network);
             }
-
+            
             // if more colors required than defined
             int maxFlag = -1;
             for (int i : window.nodeColor) {
@@ -76,9 +77,9 @@ class CreatorDrawablePanel extends JPanel {
             } else {
                 g2d.setColor(Color.green); 
             }
-            g2d.fillOval((int) (n.x() * w) - C.S / 2,
-                         (int) (n.y() * h) - C.S / 2,
-                         C.S, C.S);
+            g2d.fillOval((int) (n.x() * w) - D / 2,
+                         (int) (n.y() * h) - D / 2,
+                         D, D);
             g2d.setColor(Color.black);
             String id = "" + n.id();
             g2d.drawString(id, (int) (n.x() * w) - fm.stringWidth(id) / 2,
@@ -88,14 +89,14 @@ class CreatorDrawablePanel extends JPanel {
         // highlight selection
         if (window.selectionId != -1) {
             Point p = window.network.getPosition(window.selectionId, w, h);
-            g2d.setColor(Color.red);
-            g2d.drawOval(p.x - C.S/2, p.y - C.S/2, C.S, C.S);
+            g2d.setColor(SELECTION);
+            g2d.drawOval(p.x - D/2, p.y - D/2, D, D);
         }
 
         // show edges intersections
         if (creator.isIntersectionsHighlightingEnabled()) {
             int s = 7;
-            g2d.setColor(Color.red);
+            g2d.setColor(INTERSECTIONS);
             for (Edge e1 : window.network.getEdges(w, h)) {
                 for (Edge e2 : window.network.getEdges(w, h)) {
                     if (!e1.equals(e2) && !Edge.arePolygonalChain(e1, e2)) {

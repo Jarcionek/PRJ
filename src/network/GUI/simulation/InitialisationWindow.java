@@ -6,6 +6,7 @@ import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
+import network.GUI.Constants;
 import network.creator.Network;
 import network.creator.Node;
 import network.painter.GraphPainter;
@@ -17,7 +18,7 @@ import network.simulation.agents.RandomAgent;
 /**
  * @author Jaroslaw Pawlak
  */
-public class InitialisationWindow extends JFrame {
+public class InitialisationWindow extends JFrame implements Constants {
 
     //TODO find all classes within a package or all subclasses of a class
     //     This is not possible in standard Java Reflections API
@@ -88,7 +89,7 @@ public class InitialisationWindow extends JFrame {
                     @Override
                     public void mousePressed(MouseEvent e) {
                         Dimension size = drawPane.getSize();
-                        Node n = network.findClosestNode(size, e.getX(), e.getY(), C.S);
+                        Node n = network.findClosestNode(size, e.getX(), e.getY(), D);
                         if (n != null) {
                             selection[n.id()] = !selection[n.id()];
                             drawPane.repaint();
@@ -123,7 +124,7 @@ public class InitialisationWindow extends JFrame {
             super(new BorderLayout());
 
             // COMPONENTS
-            for (int i = C.MIN_FLAG; i <= C.MAX_FLAG; i++) {
+            for (int i = MIN_FLAG; i <= MAX_FLAG; i++) {
                 listFlags.addItem("" + i);
             }
 
@@ -131,10 +132,10 @@ public class InitialisationWindow extends JFrame {
             if (!network.containsEdgesInteresctions()) {
                 listFlags.setSelectedItem("" + Math.min(4, flags));
             } else {
-                if (flags > C.MAX_FLAG) {
+                if (flags > MAX_FLAG) {
                     //TODO some information that consensus may not be achievable?
                     // GraphPainter is not perfect so it does not have to be true
-                    listFlags.setSelectedItem("" + C.MAX_FLAG);
+                    listFlags.setSelectedItem("" + MAX_FLAG);
                 } else {
                     listFlags.setSelectedItem("" + flags);
                 }
@@ -156,7 +157,7 @@ public class InitialisationWindow extends JFrame {
                         }
                     }
 
-                    int flags = listFlags.getSelectedIndex() + C.MIN_FLAG;
+                    int flags = listFlags.getSelectedIndex() + MIN_FLAG;
                     Simulation simulation;
                     
                     if (anythingSelected) {

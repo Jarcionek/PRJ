@@ -9,13 +9,14 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import network.GUI.Constants;
 import network.creator.Node;
 import network.painter.GraphPainter;
 
 /**
  * @author Jaroslaw Pawlak
  */
-class SimulationContentPane extends JPanel {
+class SimulationContentPane extends JPanel implements Constants {
 
     private final SimulationWindow window;
     
@@ -94,7 +95,7 @@ class SimulationContentPane extends JPanel {
                 int x = e.getX();
                 int y = e.getY();
 
-                Node n = window.network.findClosestNode(size, x, y, C.S);
+                Node n = window.network.findClosestNode(size, x, y, D);
                 
                 int lastSelectionID = selectionID;
                 
