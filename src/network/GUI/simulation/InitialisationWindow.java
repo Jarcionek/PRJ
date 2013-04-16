@@ -8,7 +8,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import network.creator.Network;
 import network.creator.Node;
-import network.graphUtil.Edge;
 import network.painter.GraphPainter;
 import network.simulation.Simulation;
 import network.simulation.agents.LCFAgentND;
@@ -82,7 +81,43 @@ public class InitialisationWindow extends JFrame {
         private final JComboBox<String> listConsensus = new JComboBox<String>();
         private final JCheckBox checkboxConsiderInfected = new JCheckBox("Include infections", false);
 
-        private final InitDrawablePane drawPane = new InitDrawablePane();
+        private final AbstractDrawablePane drawPane = new AbstractDrawablePane(network) {
+
+            {
+                addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        Dimension size = drawPane.getSize();
+                        Node n = network.findClosestNode(size, e.getX(), e.getY(), C.S);
+                        if (n != null) {
+                            selection[n.id()] = !selection[n.id()];
+                            drawPane.repaint();
+                        }
+                    }
+                });
+            }
+            
+            @Override
+            Color getFlag(int id) {
+                return Color.lightGray;
+            }
+
+            @Override
+            boolean containsInfections() {
+                return true;
+            }
+
+            @Override
+            boolean isInfected(int id) {
+                return selection[id];
+            }
+
+            @Override
+            int getSelectionID() {
+                return -1;
+            }
+            
+        };
 
         InitialisationPane() {
             super(new BorderLayout());
@@ -207,68 +242,6 @@ public class InitialisationWindow extends JFrame {
             new SimulationWindow(simulation, networkName);
             
             InitialisationWindow.this.dispose();
-        }
-        
-    }
-    
-    
-    
-    private class InitDrawablePane extends JPanel {
-        
-        {
-            addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    Dimension size = InitDrawablePane.this.getSize();
-                    Node n = network.findClosestNode(size, e.getX(), e.getY(), C.S);
-                    if (n != null) {
-                        selection[n.id()] = !selection[n.id()];
-                        InitDrawablePane.this.repaint();
-                    }
-                }
-            });
-        }
-        
-        @Override
-        public void paint(Graphics g) {
-            Dimension size = this.getBounds().getSize();
-            int w = size.width;
-            int h = size.height;
-
-            Graphics2D g2d = (Graphics2D) g;
-            
-            g2d.setColor(Color.white);
-            g2d.fillRect(0, 0, w, h);
-            
-            // edges
-            g2d.setStroke(new BasicStroke(1.5f));
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                                RenderingHints.VALUE_ANTIALIAS_ON);
-            g2d.setColor(Color.black);
-            for (Edge e : network.getEdges(w, h)) {
-                g2d.drawLine(e.x1(), e.y1(), e.x2(), e.y2());
-            }
-            
-            // nodes
-            g2d.setFont(new Font("Arial", Font.BOLD, 13));
-            FontMetrics fm = this.getFontMetrics(g2d.getFont());
-            for (Node n : network) {
-                // ovals
-                g2d.setColor(Color.lightGray);
-                g2d.fillOval((int) (n.x() * w) - C.S / 2,
-                             (int) (n.y() * h) - C.S / 2, C.S, C.S);
-                // labels
-                g2d.setColor(Color.black);
-                String id = "" + n.id();
-                g2d.drawString(id, (int) (n.x() * w) - fm.stringWidth(id) / 2,
-                               (int) (n.y() * h) + g2d.getFont().getSize() / 2);
-                // selection
-                if (selection[n.id()]) {
-                    g2d.setColor(Color.blue);
-                    g2d.drawOval((int) (n.x() * w) - C.S/2,
-                                 (int) (n.y() * h) - C.S/2, C.S, C.S);
-                }
-            }
         }
         
     }

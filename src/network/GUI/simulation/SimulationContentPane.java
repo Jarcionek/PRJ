@@ -1,9 +1,6 @@
 package network.GUI.simulation;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -13,6 +10,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import network.creator.Node;
+import network.painter.GraphPainter;
 
 /**
  * @author Jaroslaw Pawlak
@@ -45,17 +43,20 @@ class SimulationContentPane extends JPanel {
             private final boolean[] infected;
             
             {
-                infected = SimulationContentPane.this.window.simulation.getInfected();
+                infected = SimulationContentPane.this.window.simulation
+                        .getInfected();
             }
             
             @Override
-            int getFlag(int id) {
-                return SimulationContentPane.this.window.simulation.getFlag(id);
+            Color getFlag(int id) {
+                return GraphPainter.getColor(SimulationContentPane.this.window
+                        .simulation.getFlag(id));
             }
 
             @Override
             boolean containsInfections() {
-                return SimulationContentPane.this.window.simulation.containsInfection();
+                return SimulationContentPane.this.window.simulation
+                        .containsInfection();
             }
 
             @Override

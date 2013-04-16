@@ -6,7 +6,6 @@ import javax.swing.JPanel;
 import network.creator.Network;
 import network.creator.Node;
 import network.graphUtil.Edge;
-import network.painter.GraphPainter;
 
 /**
  * @author Jaroslaw Pawlak
@@ -29,7 +28,7 @@ abstract class AbstractDrawablePane extends JPanel {
         setOpaque(false);
     }
     
-    abstract int getFlag(int id);
+    abstract Color getFlag(int id);
     
     abstract boolean containsInfections();
     
@@ -82,7 +81,7 @@ abstract class AbstractDrawablePane extends JPanel {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                                 RenderingHints.VALUE_ANTIALIAS_ON);
         for (Node n : network) {
-            g2d.setColor(GraphPainter.getColor(getFlag(n.id())));
+            g2d.setColor(getFlag(n.id()));
             g2d.fillOval((int) (n.x() * w) - C.S / 2,
                          (int) (n.y() * h) - C.S / 2,
                          C.S, C.S);

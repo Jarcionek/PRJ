@@ -1,6 +1,7 @@
 package network.GUI.simulation;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
@@ -8,6 +9,7 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import network.creator.Network;
+import network.painter.GraphPainter;
 
 /**
  * @author Jaroslaw Pawlak
@@ -29,8 +31,8 @@ public class HistoryWindow extends JFrame {
         drawPane = new AbstractDrawablePane(network) {
 
             @Override
-            int getFlag(int id) {
-                return history.get(currentRound)[id];
+            Color getFlag(int id) {
+                return GraphPainter.getColor(history.get(currentRound)[id]);
             }
 
             @Override
