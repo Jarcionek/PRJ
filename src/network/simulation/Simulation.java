@@ -1,6 +1,5 @@
 package network.simulation;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -345,7 +344,7 @@ public class Simulation {
     /**
      * Returns an unmodifiable history.
      */
-    public List<int[]> getHistoryRound() {
+    public List<int[]> getHistory() {
         return Collections.unmodifiableList(history);
     }
     

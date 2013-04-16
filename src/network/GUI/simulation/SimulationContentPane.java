@@ -147,7 +147,7 @@ class SimulationContentPane extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 JFrame f = new HistoryWindow(window.network,
                         window.simulation.getInfected(),
-                        window.simulation.getHistoryRound(),
+                        window.simulation.getHistory(),
                         "History: " + window.networkName);
                 f.setSize(window.getSize());
                 f.setLocationRelativeTo(window);

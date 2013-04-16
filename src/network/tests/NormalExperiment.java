@@ -5,6 +5,8 @@ import network.creator.Network;
 import network.simulation.Simulation;
 
 /**
+ * Differentiation. No infections.
+ * 
  * @author Jaroslaw Pawlak
  */
 class NormalExperiment extends AbstractExperiment {

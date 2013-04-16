@@ -23,14 +23,6 @@ public abstract class AbstractAgent implements AgentDelegate {
      * This agent's neighbours (should not contain this agent).
      */
     protected AgentDelegate[] neighbours;
-    
-    /**
-     * Should be called only be the simulation and not by the agent.
-     * @param agents 
-     */
-    final void setVisibleAgents(AgentDelegate[] agents) {
-        neighbours = agents;
-    }
 
     /**
      * Simulation calls this method to ask the agent what flag it wants

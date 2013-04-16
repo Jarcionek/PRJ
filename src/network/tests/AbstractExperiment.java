@@ -107,12 +107,12 @@ public abstract class AbstractExperiment {
     
     /**
      * This method should return information about simulation to be saved into
-     * logs such as network file path, agents class and whose are infected,
+     * logs such as network file path, agents class and which are infected,
      * number of flags etc.
      */
     protected abstract String getSimulationInformation();
     
-    
+////////////////////////////////////////////////////////////////////////////////
     
     private static String getCurrentTime() {
         String result = "";        
