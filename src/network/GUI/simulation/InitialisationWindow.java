@@ -130,7 +130,8 @@ public class InitialisationWindow extends JFrame implements Constants {
 
             int flags = GraphPainter.getRequiredColors(network);
             if (!network.containsEdgesInteresctions()) {
-                listFlags.setSelectedItem("" + Math.min(4, flags));
+                flags = Math.min(4, flags);
+                listFlags.setSelectedItem("" + flags);
             } else {
                 if (flags > MAX_FLAG) {
                     //TODO some information that consensus may not be achievable?
@@ -140,6 +141,7 @@ public class InitialisationWindow extends JFrame implements Constants {
                     listFlags.setSelectedItem("" + flags);
                 }
             }
+            listFlags.setToolTipText("recommended: " + flags);
             listFlags.setMaximumRowCount(10);
 
             buttonStart.addActionListener(new ActionListener() {
@@ -217,7 +219,8 @@ public class InitialisationWindow extends JFrame implements Constants {
         private InitialisationSettings getSettings() {
             return new InitialisationSettings(listAgent.getSelectedIndex(),
                     listInfected.getSelectedIndex(), listFlags.getSelectedIndex(),
-                    listConsensus.getSelectedIndex(), checkboxConsiderInfected.isSelected());
+                    listConsensus.getSelectedIndex(), checkboxConsiderInfected.isSelected(),
+                    selection);
         }
 
         private void setSettings(InitialisationSettings settings) {
@@ -229,6 +232,12 @@ public class InitialisationWindow extends JFrame implements Constants {
             listFlags.setSelectedIndex(settings.indexFlags);
             listConsensus.setSelectedIndex(settings.indexConsensus);
             checkboxConsiderInfected.setSelected(settings.checkboxIncludeInfected);
+            for (Integer i : settings.getSelected()) {
+                if (i >= network.getNumberOfNodes()) {
+                    break;
+                }
+                selection[i] = true;
+            }
         }
 
         private boolean consensus() {

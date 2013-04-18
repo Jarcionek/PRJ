@@ -475,7 +475,7 @@ class CreatorMenuBar extends JMenuBar {
         menuItemRandom.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String s1 = JOptionPane.showInputDialog(window, "Nodes:",
+                String s1 = JOptionPane.showInputDialog(window, "Maximum nodes:",
                         "Create Random Network", JOptionPane.PLAIN_MESSAGE);
                 
                 if (s1 == null) {
@@ -502,7 +502,7 @@ class CreatorMenuBar extends JMenuBar {
                     return;
                 }
                 
-                String s2 = JOptionPane.showInputDialog(window, "Edges:",
+                String s2 = JOptionPane.showInputDialog(window, "Maximum edges:",
                         "Create Random Network", JOptionPane.PLAIN_MESSAGE);
                 
                 if (s2 == null) {

@@ -150,7 +150,7 @@ class SimulationContentPane extends JPanel implements Constants {
                 JFrame f = new HistoryWindow(window.network,
                         window.simulation.getInfected(),
                         window.simulation.getHistory(),
-                        "History: " + window.networkName);
+                        window.networkName);
                 f.setSize(window.getSize());
                 f.setLocationRelativeTo(window);
             }
