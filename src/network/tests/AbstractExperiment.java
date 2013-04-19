@@ -16,6 +16,8 @@ public abstract class AbstractExperiment {
     private final ExperimentScheduler scheduler;
     private final int runs;
     private final String name;
+    
+    private int fails = 0;
 
     /**
      * @param scheduler ExperimentSchduler to be notified on experiment finish
@@ -65,13 +67,15 @@ public abstract class AbstractExperiment {
                 long sum = 0;
                 
                 try {
+                    runs:
                     for (int i = 0; i < runs; i++) {
                         Simulation simulation = createSimulation();
                         while (!simulation.isConsensus()) {
                             simulation.nextRound();
                             if (simulation.getRound() >= ExperimentScheduler.ROUNDS_LIMIT) {
-                                pw.print("stopped at ");
-                                break;
+                                fails++;
+                                pw.println(simulation.getRound() + " (fail)");
+                                continue runs;
                             }
                         }
                         sum += simulation.getRound();
@@ -88,11 +92,18 @@ public abstract class AbstractExperiment {
                 
                 String ended = getCurrentTime();
                 pw.println();
+                pw.println("== EXPERIMENT ==");
                 pw.println("Experiment name: " + name);
-                pw.println(getSimulationInformation());
                 pw.println("Started: " + started);
                 pw.println("Ended: " + ended);
-                pw.println("Average rounds: " + (sum / runs));
+                pw.println();
+                pw.println("== SIMULATION ==");
+                pw.println(getSimulationInformation());
+                pw.println();
+                pw.println("== RESULTS ==");
+                pw.println("Runs: " + runs);
+                pw.println("Fails: " + fails);
+                pw.println("Average rounds: " + (sum / (runs - fails)));
                 pw.close();
                 
                 scheduler.testFinished();

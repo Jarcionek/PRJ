@@ -22,7 +22,7 @@ public class ExperimentScheduler {
 
     /**
      * @param name name for this series of experiments - they will be called
-     * X001, X002 and so on unless specified differently
+     * X001, X002 and so on unless specified differently in an experiment
      * @param maxThreads maximum number of threads used to perform experiments
      */
     public ExperimentScheduler(String name, int maxThreads) {

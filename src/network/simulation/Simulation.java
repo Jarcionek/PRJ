@@ -264,7 +264,9 @@ public class Simulation {
 ////// PUBLIC METHODS //////////////////////////////////////////////////////////
     
     /**
-     * Returns the network (not a copy).
+     * Returns the network (not a copy). It is not used by the Simulation object
+     * after it has been created so any modifications made to the Network
+     * will not affect the Simulation.
      */
     public Network getNetwork() {
         return network;
