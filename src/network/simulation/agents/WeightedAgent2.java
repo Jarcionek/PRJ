@@ -9,9 +9,9 @@ import util.WeightedRandom;
  * 
  * @author Jaroslaw Pawlak
  */
-public class WeightedAgent extends AbstractAgent {
+public class WeightedAgent2 extends AbstractAgent {
 
-    public WeightedAgent(int maxFlags) {
+    public WeightedAgent2(int maxFlags) {
         super(maxFlags);
     }
     
@@ -21,6 +21,17 @@ public class WeightedAgent extends AbstractAgent {
             return new Random().nextInt(maxFlags);
         }
         
+        // if everything was fine last round, play the same flag
+        boolean isOk = true;
+        for (int i = 0; i < neighbours.length; i++) {
+            if (neighbours[i].getFlag() == this.getFlag()) {
+                isOk = false;
+            }
+        }
+        if (isOk) {
+            return this.getFlag();
+        }
+        
         int[] flagCount = new int[maxFlags];
         for (int i = 0; i < neighbours.length; i++) {
             flagCount[neighbours[i].getFlag()]++;
@@ -28,7 +39,8 @@ public class WeightedAgent extends AbstractAgent {
         
         WeightedRandom wr = new WeightedRandom();
         for (int i = 0; i < maxFlags; i++) {
-            wr.add(i, neighbours.length - flagCount[i]);
+            // there is always a little chance (+1) of raising any flag
+            wr.add(i, neighbours.length - flagCount[i] + 1);
         }
         
         return wr.getRandomValue();

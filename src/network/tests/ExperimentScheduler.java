@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ExperimentScheduler {
     
-    public static final int ROUNDS_LIMIT = 1000000;
+    public final int roundsLimit;
     
     private final List<AbstractExperiment> queue;
     private final String name;
@@ -25,10 +25,11 @@ public class ExperimentScheduler {
      * X001, X002 and so on unless specified differently in an experiment
      * @param maxThreads maximum number of threads used to perform experiments
      */
-    public ExperimentScheduler(String name, int maxThreads) {
+    public ExperimentScheduler(String name, int maxThreads, int roundsLimit) {
         this.queue = new LinkedList<AbstractExperiment>();
         this.name = name;
         this.maxThreads = maxThreads;
+        this.roundsLimit = roundsLimit;
     }
     
     public void addExperiment(AbstractExperiment experiment) {

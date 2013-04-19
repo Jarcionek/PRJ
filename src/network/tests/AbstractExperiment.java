@@ -72,7 +72,7 @@ public abstract class AbstractExperiment {
                         Simulation simulation = createSimulation();
                         while (!simulation.isConsensus()) {
                             simulation.nextRound();
-                            if (simulation.getRound() >= ExperimentScheduler.ROUNDS_LIMIT) {
+                            if (simulation.getRound() >= scheduler.roundsLimit) {
                                 fails++;
                                 pw.println(simulation.getRound() + " (fail)");
                                 continue runs;
@@ -87,7 +87,12 @@ public abstract class AbstractExperiment {
                     for (StackTraceElement ste : ex.getStackTrace()) {
                         pw.println(ste);
                     }
-                    pw.flush();
+                    pw.println();
+                    pw.println("Ended: " + getCurrentTime());
+                    pw.close();
+                    
+                    scheduler.testFinished();
+                    return;
                 }
                 
                 String ended = getCurrentTime();
@@ -103,7 +108,9 @@ public abstract class AbstractExperiment {
                 pw.println("== RESULTS ==");
                 pw.println("Runs: " + runs);
                 pw.println("Fails: " + fails);
-                pw.println("Average rounds: " + (sum / (runs - fails)));
+                if (runs != fails) {
+                    pw.println("Average rounds: " + (sum / (runs - fails)));
+                }
                 pw.close();
                 
                 scheduler.testFinished();

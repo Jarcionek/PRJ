@@ -11,10 +11,7 @@ import network.creator.Network;
 import network.creator.Node;
 import network.painter.GraphPainter;
 import network.simulation.Simulation;
-import network.simulation.agents.LCFAgentND;
-import network.simulation.agents.LeastCommonFlagAgent;
-import network.simulation.agents.RandomAgent;
-import network.simulation.agents.WeightedAgent;
+import network.simulation.agents.*;
 
 /**
  * @author Jaroslaw Pawlak
@@ -24,9 +21,10 @@ public class InitialisationWindow extends JFrame implements Constants {
     //TODO find all classes within a package or all subclasses of a class
     //     This is not possible in standard Java Reflections API
     private static final Class[] agentClasses = new Class[] {
-        WeightedAgent.class,
+        WeightedAgent2.class,
         LCFAgentND.class,
         LeastCommonFlagAgent.class,
+        ThirdAgent2F.class,
         RandomAgent.class,
     };
 

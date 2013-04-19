@@ -9,14 +9,14 @@ import network.simulation.Simulation;
  * 
  * @author Jaroslaw Pawlak
  */
-class NormalExperiment extends AbstractExperiment {
+public class NormalExperiment extends AbstractExperiment {
 
     private final Network network;
     private final File networkFilePath;
     private final Class agentClass;
     private final int maxFlags;
 
-    NormalExperiment(File network, Class agentClass, int maxFlags,
+    public NormalExperiment(File network, Class agentClass, int maxFlags,
                          ExperimentScheduler scheduler, int runs, String name) {
         super(scheduler, runs, name, network);
         this.network = Network.load(network);
