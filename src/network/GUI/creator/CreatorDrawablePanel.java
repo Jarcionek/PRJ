@@ -69,7 +69,7 @@ class CreatorDrawablePanel extends JPanel implements Constants {
         }
 
         // draw nodes and their labels
-        g2d.setFont(new Font("Arial", Font.BOLD, 13));
+        g2d.setFont(FONT);
         FontMetrics fm = this.getFontMetrics(g2d.getFont());
         for (Node n : window.network) {
             if (creator.isColoringEnabled()) {
@@ -83,7 +83,7 @@ class CreatorDrawablePanel extends JPanel implements Constants {
             g2d.setColor(Color.black);
             String id = "" + n.id();
             g2d.drawString(id, (int) (n.x() * w) - fm.stringWidth(id) / 2,
-                               (int) (n.y() * h) + g2d.getFont().getSize() / 2);
+                               (int) (n.y() * h) + g2d.getFont().getSize() / 2 - 1);
         }
 
         // highlight selection

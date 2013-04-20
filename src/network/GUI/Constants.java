@@ -1,6 +1,7 @@
 package network.GUI;
 
 import java.awt.Color;
+import java.awt.Font;
 
 /**
  * @author Jaroslaw Pawlak
@@ -10,7 +11,12 @@ public interface Constants {
     /**
      * Oval sizes (diameter) of nodes drawn in network.
      */
-    static final int D = 20;
+    static final int D = 20; // default 20
+    
+    /**
+     * Font to be used for drawing agents' ids.
+     */
+    static final Font FONT = new Font("Arial", Font.BOLD, 13); // default 13
     
     /**
      * Minimum number of flags available to choose when creating the simulation.
