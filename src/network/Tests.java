@@ -18,24 +18,25 @@ public class Tests {
     private static final File n = new File(DIR, ring_20);
     
     private static final int THREADS = 3;
-    private static final int ROUND_LIMIT = 1000;
-    private static final int RUNS = 100000;
-    private static final int FLAGS = 2;
+    private static final int ROUND_LIMIT = Integer.MAX_VALUE;
+    private static final int RUNS = 1000;
+    private static final int FLAGS = 4;
     
     private static final ExperimentScheduler SCHEDULER
             = new ExperimentScheduler("TEST", THREADS, ROUND_LIMIT);
     
     public static void main(String[] args) throws InterruptedException {
         
-        addExperiment(ThirdAgent2F.class);
-        addExperiment(ThirdAgent2Fc1.class);
-        addExperiment(ThirdAgent2Fc2.class);
-        addExperiment(ThirdAgent2Fc3.class);
-        addExperiment(ThirdAgent2Fc4.class);
-        addExperiment(ThirdAgent2Fc5.class);
-        addExperiment(LCFAgentND.class);
-        addExperiment(WeightedAgent.class);
-        addExperiment(WeightedAgent2.class);
+//        addExperiment(ThirdAgent2F.class);
+//        addExperiment(ThirdAgent2Fc1.class);
+//        addExperiment(ThirdAgent2Fc2.class);
+//        addExperiment(ThirdAgent2Fc3.class);
+//        addExperiment(ThirdAgent2Fc4.class);
+//        addExperiment(ThirdAgent2Fc5.class);
+//        addExperiment(LCFAgentND.class);
+//        addExperiment(WeightedAgent.class);
+//        addExperiment(WeightedAgent2.class);
+        addExperiment(RandomAgent.class);
         
         SCHEDULER.execute();
     }

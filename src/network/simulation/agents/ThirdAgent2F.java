@@ -4,9 +4,9 @@ import java.util.Random;
 import network.simulation.AbstractAgent;
 
 /**
- * Plays differentiation. Uses two flags only. Needs exactly two agents.
+ * Plays differentiation. Uses two flags only. Needs exactly two neighbours.
  * 
- * This is a replicated behaviours of ThirdAgent in circle simulation.
+ * This is a replicated behaviour of ThirdAgent in circle simulation.
  * 
  * @author Jaroslaw Pawlak
  */
@@ -37,11 +37,9 @@ public class ThirdAgent2F extends AbstractAgent {
         }
         
         if (result != getFlag()) {
-            chance -= 0.1d;
-            chance = Math.max(0.0d, chance);
+            chance = Math.max(0.0d, down(chance));
         } else {
-            chance += 0.1d;
-            chance = Math.min(1.0d, chance);
+            chance = Math.min(1.0d, up(chance));
         }
         
         if (new Random().nextInt(1000) > chance * 1000) {
@@ -54,6 +52,14 @@ public class ThirdAgent2F extends AbstractAgent {
         } else {
             return result;
         }
+    }
+    
+    protected double up(double chance) {
+        return chance + 0.1d;
+    }
+    
+    protected double down(double chance) {
+        return chance - 0.1d;
     }
 
 }

@@ -3,6 +3,7 @@ package network.tests;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -109,7 +110,9 @@ public abstract class AbstractExperiment {
                 pw.println("Runs: " + runs);
                 pw.println("Fails: " + fails);
                 if (runs != fails) {
-                    pw.println("Average rounds: " + (sum / (runs - fails)));
+                    DecimalFormat df = new DecimalFormat("#,###.0");
+                    double avg = 1.0d * sum / (runs - fails);
+                    pw.println("Average rounds: " + df.format(avg));
                 }
                 pw.close();
                 
