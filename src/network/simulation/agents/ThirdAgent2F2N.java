@@ -10,11 +10,11 @@ import network.simulation.AbstractAgent;
  * 
  * @author Jaroslaw Pawlak
  */
-public class ThirdAgent2F extends AbstractAgent {
+public class ThirdAgent2F2N extends AbstractAgent {
 
     private double chance = 1.0d;
 
-    public ThirdAgent2F(int maxFlags) {
+    public ThirdAgent2F2N(int maxFlags) {
         super(maxFlags);
     }
     

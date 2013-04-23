@@ -24,7 +24,7 @@ public class InitialisationWindow extends JFrame implements Constants {
         WeightedAgent2.class,
         LCFAgentND.class,
         LeastCommonFlagAgent.class,
-        ThirdAgent2F.class,
+        ThirdAgent2F2N.class,
         RandomAgent.class,
     };
 
