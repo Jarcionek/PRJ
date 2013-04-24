@@ -3,7 +3,7 @@ package network.simulation.agents;
 /**
  * Plays differentiation. Uses two flags only. Needs exactly two neighbours.
  * 
- * Compared to ThirdAgent2F, its chance changes in 50% steps.
+ * Compared to ThirdAgent2F, its chance changes in 33% steps.
  * 
  * @author Jaroslaw Pawlak
  */

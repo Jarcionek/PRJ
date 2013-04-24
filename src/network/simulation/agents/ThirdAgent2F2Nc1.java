@@ -15,12 +15,12 @@ public class ThirdAgent2F2Nc1 extends ThirdAgent2F2N {
 
     @Override
     protected double up(double chance) {
-        return chance + 0.2d;
+        return chance + 0.05d;
     }
 
     @Override
     protected double down(double chance) {
-        return chance - 0.2d;
+        return chance - 0.05d;
     }
     
 }
