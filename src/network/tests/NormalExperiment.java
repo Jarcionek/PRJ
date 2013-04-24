@@ -12,15 +12,24 @@ import network.simulation.Simulation;
 public class NormalExperiment extends AbstractExperiment {
 
     private final Network network;
-    private final File networkFilePath;
+    private final String networkName;
     private final Class agentClass;
     private final int maxFlags;
 
-    public NormalExperiment(File network, Class agentClass, int maxFlags,
-                         ExperimentScheduler scheduler, int runs, String name) {
-        super(scheduler, runs, name, network);
-        this.network = Network.load(network);
-        this.networkFilePath = network;
+    public NormalExperiment(File networkFilePath, Class agentClass, int maxFlags,
+            int runs, String name) {
+        super( runs, name);
+        this.network = Network.load(networkFilePath);
+        this.networkName = networkFilePath.getAbsolutePath();
+        this.agentClass = agentClass;
+        this.maxFlags = maxFlags;
+    }
+    
+    public NormalExperiment(Network network, String networkName, Class agentClass,
+            int maxFlags, int runs, String name) {
+        super(runs, name);
+        this.network = network;
+        this.networkName = networkName;
         this.agentClass = agentClass;
         this.maxFlags = maxFlags;
     }
@@ -33,7 +42,7 @@ public class NormalExperiment extends AbstractExperiment {
 
     @Override
     protected String getSimulationInformation() {
-        return "Network: " + networkFilePath + "\r\n"
+        return "Network: " + networkName + "\r\n"
                 + "Infections: NO\r\n"
                 + "Agent class: " + agentClass + "\r\n"
                 + "Flags: " + maxFlags;

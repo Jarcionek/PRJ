@@ -14,23 +14,22 @@ import network.simulation.Simulation;
  */
 public abstract class AbstractExperiment {
 
-    private final ExperimentScheduler scheduler;
+    
     private final int runs;
     private final String name;
+    
+    ExperimentScheduler scheduler;
     
     private int fails = 0;
 
     /**
-     * @param scheduler ExperimentSchduler to be notified on experiment finish
      * @param runs how many tests to perform of this simulation
      * @param name name of the output file
      */
-    public AbstractExperiment(ExperimentScheduler scheduler, int runs,
-                                            String name, File networkFilePath) {
+    public AbstractExperiment(int runs, String name) {
         if (runs <= 0) {
             throw new IllegalArgumentException("Runs must be positive");
         }
-        this.scheduler = scheduler;
         this.runs = runs;
         this.name = name;
     }
@@ -66,6 +65,8 @@ public abstract class AbstractExperiment {
                 pw.flush();
                 
                 long sum = 0;
+                int min = Integer.MAX_VALUE;
+                int max = Integer.MIN_VALUE;
                 
                 try {
                     runs:
@@ -80,6 +81,12 @@ public abstract class AbstractExperiment {
                             }
                         }
                         sum += simulation.getRound();
+                        if (simulation.getRound() < min) {
+                            min = simulation.getRound();
+                        }
+                        if (simulation.getRound() > max) {
+                            max = simulation.getRound();
+                        }
                         pw.println(simulation.getRound());
                         pw.flush();
                     }
@@ -109,6 +116,8 @@ public abstract class AbstractExperiment {
                 pw.println("== RESULTS ==");
                 pw.println("Runs: " + runs);
                 pw.println("Fails: " + fails);
+                pw.println("Max rounds: " + max);
+                pw.println("Min rounds: " + min);
                 if (runs != fails) {
                     DecimalFormat df = new DecimalFormat("#,###.0");
                     double avg = 1.0d * sum / (runs - fails);

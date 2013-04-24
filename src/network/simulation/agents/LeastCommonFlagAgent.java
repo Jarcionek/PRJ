@@ -70,7 +70,7 @@ public class LeastCommonFlagAgent extends AbstractAgent {
         // indices[i] = flag
         int[] indices = new int[count];
         int j = 0;
-        for (int i = 0 ; i < neighboursFlags.length; i++) {
+        for (int i = 0; i < neighboursFlags.length; i++) {
             if (neighboursFlags[i] == minFlag) {
                 indices[j++] = i;
             }

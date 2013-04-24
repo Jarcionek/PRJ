@@ -24,6 +24,8 @@ public class ExperimentScheduler {
      * @param name name for this series of experiments - they will be called
      * X001, X002 and so on unless specified differently in an experiment
      * @param maxThreads maximum number of threads used to perform experiments
+     * @param roundsLimit if consensus is not achieved within this number of
+     * rounds, the game is considered failed
      */
     public ExperimentScheduler(String name, int maxThreads, int roundsLimit) {
         this.queue = new LinkedList<AbstractExperiment>();
@@ -32,14 +34,19 @@ public class ExperimentScheduler {
         this.roundsLimit = roundsLimit;
     }
     
-    public void addExperiment(AbstractExperiment experiment) {
+    public final void addExperiment(AbstractExperiment experiment) {
+        if (experiment.scheduler != null && experiment.scheduler != this) {
+            throw new IllegalArgumentException("This experiment has been "
+                    + "already added to other scheduler");
+        }
+        experiment.scheduler = this;
         queue.add(experiment);
     }
     
     public void addNormalExperiment(File network, Class agentClass, int maxFlags,
                                                                      int runs) {
         NormalExperiment ne = new NormalExperiment(network, agentClass, maxFlags,
-                this, runs, name + intoThreeDigit(queue.size() + 1));
+                runs, name + intoThreeDigit(queue.size() + 1));
         addExperiment(ne);
     }
     
@@ -47,7 +54,7 @@ public class ExperimentScheduler {
      * Starts executing the experiments in order they were added to the scheduler.
      * This method blocks.
      */
-    public void execute() {
+    public final void execute() {
         thread = Thread.currentThread();
         while (!queue.isEmpty()) {
             if (currentThreads.get() < maxThreads) {
