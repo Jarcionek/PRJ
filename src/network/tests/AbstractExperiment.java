@@ -24,14 +24,14 @@ public abstract class AbstractExperiment {
 
     /**
      * @param runs how many tests to perform of this simulation
-     * @param name name of the output file
+     * @param experimentName name of the output file
      */
-    public AbstractExperiment(int runs, String name) {
+    public AbstractExperiment(int runs, String experimentName) {
         if (runs <= 0) {
             throw new IllegalArgumentException("Runs must be positive");
         }
         this.runs = runs;
-        this.name = name;
+        this.name = experimentName;
     }
     
     public final void start() {
@@ -77,6 +77,7 @@ public abstract class AbstractExperiment {
                             if (simulation.getRound() >= scheduler.roundsLimit) {
                                 fails++;
                                 pw.println(simulation.getRound() + " (fail)");
+                                pw.flush();
                                 continue runs;
                             }
                         }
@@ -116,8 +117,8 @@ public abstract class AbstractExperiment {
                 pw.println("== RESULTS ==");
                 pw.println("Runs: " + runs);
                 pw.println("Fails: " + fails);
-                pw.println("Max rounds: " + max);
-                pw.println("Min rounds: " + min);
+                pw.println("Max rounds: " + (runs == fails? "N/A" : max));
+                pw.println("Min rounds: " + (runs == fails? "N/A" : min));
                 if (runs != fails) {
                     DecimalFormat df = new DecimalFormat("#,###.0");
                     double avg = 1.0d * sum / (runs - fails);
@@ -148,7 +149,7 @@ public abstract class AbstractExperiment {
         String result = "";        
         Calendar c = Calendar.getInstance();
         
-        result += c.get(Calendar.YEAR) / 100;
+        result += c.get(Calendar.YEAR) % 100;
         result += "/";
         result += c.get(Calendar.MONTH) + 1 < 10? "0" : "";
         result += c.get(Calendar.MONTH) + 1;

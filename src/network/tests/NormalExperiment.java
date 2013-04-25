@@ -26,8 +26,8 @@ public class NormalExperiment extends AbstractExperiment {
     }
     
     public NormalExperiment(Network network, String networkName, Class agentClass,
-            int maxFlags, int runs, String name) {
-        super(runs, name);
+            int maxFlags, int runs, String experimentName) {
+        super(runs, experimentName);
         this.network = network;
         this.networkName = networkName;
         this.agentClass = agentClass;
