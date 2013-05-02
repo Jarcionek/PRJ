@@ -8,9 +8,13 @@ import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import network.GUI.simulation.InitialisationWindow;
+import network.GUI.simulation.SimulationWindow;
 import network.creator.Network;
 import network.creator.NetworkStats;
 import network.painter.GraphPainter;
+import network.simulation.Simulation;
+import network.simulation.agents.LeastCommonFlagAgent;
+import network.simulation.agents.SecondAgent;
 
 /**
  * @author Jaroslaw Pawlak
@@ -48,6 +52,11 @@ class CreatorMenuBar extends JMenuBar {
         private JMenuItem menuItemAdvancedMoving;
     private JMenu menuAbout;
         private JMenuItem menuItemHelp;
+        
+    private JMenu menuPresentation;
+        private JMenuItem menuItemPresentationSecondAgent;
+        private JMenuItem menuItemPresentationLCFAgentDstuck;
+        private JMenuItem menuItemPresentationLCFAgentDdone;
 
     /**
      * Constructor.
@@ -90,6 +99,11 @@ class CreatorMenuBar extends JMenuBar {
             menuItemAdvancedMoving = new JCheckBoxMenuItem("Advanced nodes moving");
         menuAbout = new JMenu("About");
             menuItemHelp = new JMenuItem("Help");
+            
+        menuPresentation = new JMenu("Presentation");
+            menuItemPresentationSecondAgent = new JMenuItem("SecondAgent");
+            menuItemPresentationLCFAgentDstuck = new JMenuItem("LeastCommonFlagAgent - stuck");
+            menuItemPresentationLCFAgentDdone = new JMenuItem("LeastCommonFlagAgent - done");
     }
     
     /**
@@ -123,6 +137,11 @@ class CreatorMenuBar extends JMenuBar {
             menuOptions.add(menuItemAdvancedMoving);
         this.add(menuAbout);
             menuAbout.add(menuItemHelp);
+        this.add(Box.createHorizontalGlue());
+        this.add(menuPresentation);
+            menuPresentation.add(menuItemPresentationSecondAgent);
+            menuPresentation.add(menuItemPresentationLCFAgentDstuck);
+            menuPresentation.add(menuItemPresentationLCFAgentDdone);
     }
     
     /**
@@ -662,6 +681,58 @@ class CreatorMenuBar extends JMenuBar {
             
                 JOptionPane.showMessageDialog(window, ta, "Help", JOptionPane.PLAIN_MESSAGE);
                 window.repaint();
+            }
+        });
+        
+        menuItemPresentationSecondAgent.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int[] init = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+                Simulation simulation = new Simulation(Network.generateRing(20),
+                        SecondAgent.class, 2, Simulation.DIFFERENTIATION,
+                        init, true);
+                new SimulationWindow(simulation, "Presentation - SecondAgent");
+            }
+        });
+        
+        final Network n = new Network();
+        n.addNode(0.3958333333333333, 0.16666666666666666);
+        n.addNode(0.5625, 0.16666666666666666);
+        n.addNode(0.4791666666666667, 0.3333333333333333);
+        n.addNode(0.22916666666666666, 0.5);
+        n.addNode(0.3958333333333333, 0.5);
+        n.addNode(0.5625, 0.5);
+        n.addNode(0.7291666666666666, 0.5);
+        n.addNode(0.3125, 0.6666666666666666);
+        n.addNode(0.6458333333333334, 0.6666666666666666);
+
+        n.connectNodes(0, 2);
+        n.connectNodes(1, 2);
+        n.connectNodes(2, 4);
+        n.connectNodes(2, 5);
+        n.connectNodes(3, 4);
+        n.connectNodes(4, 5);
+        n.connectNodes(4, 7);
+        n.connectNodes(5, 6);
+        n.connectNodes(5, 8);
+        
+        menuItemPresentationLCFAgentDstuck.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int[] init = {2, 2, 1, 2, 0, 1, 2, 2, 2};
+                Simulation sim = new Simulation(n, LeastCommonFlagAgent.class,
+                        3, Simulation.DIFFERENTIATION, init, true);
+                new SimulationWindow(sim, "Presentation - LeastCommonFlagAgent - stuck");
+            }
+        });
+        
+        menuItemPresentationLCFAgentDdone.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int[] init = {0, 0, 1, 1, 2, 0, 2, 1, 2};
+                Simulation sim = new Simulation(n, LeastCommonFlagAgent.class,
+                        3, Simulation.DIFFERENTIATION, init, true);
+                new SimulationWindow(sim, "Presentation - LeastCommonFlagAgent - done");
             }
         });
     }
